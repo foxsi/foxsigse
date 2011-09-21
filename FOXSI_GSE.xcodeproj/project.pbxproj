@@ -1,0 +1,420 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86739DD8138C708900D6C498 /* usbd2xx.cpp */; };
+		86739E8F138C79F500D6C498 /* libftd2xx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 86739E8E138C79F500D6C498 /* libftd2xx.dylib */; };
+		86E4A437138C2AEC0004DBB3 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86E4A436138C2AEC0004DBB3 /* OpenGL.framework */; };
+		86E4A43C138C2B720004DBB3 /* Application.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A43A138C2B720004DBB3 /* Application.cxx */; };
+		86E4A44B138C2B900004DBB3 /* Foxsidata.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A43D138C2B900004DBB3 /* Foxsidata.cxx */; };
+		86E4A44C138C2B900004DBB3 /* mainChart.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A43F138C2B900004DBB3 /* mainChart.cxx */; };
+		86E4A44D138C2B900004DBB3 /* mainHistogram.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A441138C2B900004DBB3 /* mainHistogram.cxx */; };
+		86E4A44E138C2B900004DBB3 /* mainImage.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A443138C2B900004DBB3 /* mainImage.cxx */; };
+		86E4A44F138C2B900004DBB3 /* mainLightcurve.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A445138C2B900004DBB3 /* mainLightcurve.cxx */; };
+		86E4A450138C2B900004DBB3 /* subImage.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A447138C2B900004DBB3 /* subImage.cxx */; };
+		86E4A451138C2B900004DBB3 /* UsefulFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A449138C2B900004DBB3 /* UsefulFunctions.cpp */; };
+		86E4A453138C2BA40004DBB3 /* gui.fl in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A452138C2BA40004DBB3 /* gui.fl */; };
+		86E4A499138C2DCC0004DBB3 /* icons.icns in Resources */ = {isa = PBXBuildFile; fileRef = 86E4A498138C2DCC0004DBB3 /* icons.icns */; };
+		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
+		C95960BE1274CD8A009C0594 /* fltk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C95960BD1274CD8A009C0594 /* fltk.framework */; };
+		C9601E9910B1FAED0018BADE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C9601E9810B1FAED0018BADE /* main.cpp */; };
+		C96291231274D238007D3CFE /* fltk_forms.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C96291221274D238007D3CFE /* fltk_forms.framework */; };
+		C96291251274D238007D3CFE /* fltk_gl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C96291241274D238007D3CFE /* fltk_gl.framework */; };
+		C96291271274D238007D3CFE /* fltk_images.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C96291261274D238007D3CFE /* fltk_images.framework */; };
+		C96291291274D238007D3CFE /* fltk_jpeg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C96291281274D238007D3CFE /* fltk_jpeg.framework */; };
+		C962912B1274D238007D3CFE /* fltk_png.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C962912A1274D238007D3CFE /* fltk_png.framework */; };
+		C962912D1274D238007D3CFE /* fltk_zlib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C962912C1274D238007D3CFE /* fltk_zlib.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildRule section */
+		C9601C4B10B1F9B60018BADE /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.fl";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"${INPUT_FILE_DIR}/${INPUT_FILE_BASE}.cxx",
+				"${INPUT_FILE_DIR}/${INPUT_FILE_BASE}.h",
+			);
+			script = "/Developer/Applications/Utilities/FLTK/Fluid.app/Contents/MacOS/Fluid -c ${INPUT_FILE_NAME}";
+		};
+/* End PBXBuildRule section */
+
+/* Begin PBXFileReference section */
+		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		86739DD8138C708900D6C498 /* usbd2xx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = usbd2xx.cpp; sourceTree = "<group>"; };
+		86739DD9138C708900D6C498 /* usbd2xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = usbd2xx.h; sourceTree = "<group>"; };
+		86739E8E138C79F500D6C498 /* libftd2xx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libftd2xx.dylib; path = /usr/local/lib/libftd2xx.dylib; sourceTree = "<absolute>"; };
+		86739E9F138C7AC000D6C498 /* ftd2xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ftd2xx.h; sourceTree = "<group>"; };
+		86739EAA138C7B0600D6C498 /* WinTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WinTypes.h; sourceTree = "<group>"; };
+		86E4A436138C2AEC0004DBB3 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		86E4A43A138C2B720004DBB3 /* Application.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cxx; sourceTree = "<group>"; };
+		86E4A43B138C2B720004DBB3 /* Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
+		86E4A43D138C2B900004DBB3 /* Foxsidata.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Foxsidata.cxx; sourceTree = "<group>"; };
+		86E4A43E138C2B900004DBB3 /* Foxsidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foxsidata.h; sourceTree = "<group>"; };
+		86E4A43F138C2B900004DBB3 /* mainChart.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainChart.cxx; sourceTree = "<group>"; };
+		86E4A440138C2B900004DBB3 /* mainChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mainChart.h; sourceTree = "<group>"; };
+		86E4A441138C2B900004DBB3 /* mainHistogram.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainHistogram.cxx; sourceTree = "<group>"; };
+		86E4A442138C2B900004DBB3 /* mainHistogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mainHistogram.h; sourceTree = "<group>"; };
+		86E4A443138C2B900004DBB3 /* mainImage.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainImage.cxx; sourceTree = "<group>"; };
+		86E4A444138C2B900004DBB3 /* mainImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mainImage.h; sourceTree = "<group>"; };
+		86E4A445138C2B900004DBB3 /* mainLightcurve.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainLightcurve.cxx; sourceTree = "<group>"; };
+		86E4A446138C2B900004DBB3 /* mainLightcurve.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mainLightcurve.h; sourceTree = "<group>"; };
+		86E4A447138C2B900004DBB3 /* subImage.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = subImage.cxx; sourceTree = "<group>"; };
+		86E4A448138C2B900004DBB3 /* subImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = subImage.h; sourceTree = "<group>"; };
+		86E4A449138C2B900004DBB3 /* UsefulFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UsefulFunctions.cpp; sourceTree = "<group>"; };
+		86E4A44A138C2B900004DBB3 /* UsefulFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UsefulFunctions.h; sourceTree = "<group>"; };
+		86E4A452138C2BA40004DBB3 /* gui.fl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fluid; path = gui.fl; sourceTree = "<group>"; };
+		86E4A498138C2DCC0004DBB3 /* icons.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = icons.icns; path = Resources/icons.icns; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* FOXSI_GSE-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "FOXSI_GSE-Info.plist"; sourceTree = "<group>"; };
+		8D1107320486CEB800E47090 /* FOXSI_GSE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FOXSI_GSE.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C95960BD1274CD8A009C0594 /* fltk.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk.framework; path = /Library/Frameworks/fltk.framework; sourceTree = "<absolute>"; };
+		C9601E9710B1FAED0018BADE /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		C9601E9810B1FAED0018BADE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		C96291221274D238007D3CFE /* fltk_forms.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk_forms.framework; path = /Library/Frameworks/fltk_forms.framework; sourceTree = "<absolute>"; };
+		C96291241274D238007D3CFE /* fltk_gl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk_gl.framework; path = /Library/Frameworks/fltk_gl.framework; sourceTree = "<absolute>"; };
+		C96291261274D238007D3CFE /* fltk_images.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk_images.framework; path = /Library/Frameworks/fltk_images.framework; sourceTree = "<absolute>"; };
+		C96291281274D238007D3CFE /* fltk_jpeg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk_jpeg.framework; path = /Library/Frameworks/fltk_jpeg.framework; sourceTree = "<absolute>"; };
+		C962912A1274D238007D3CFE /* fltk_png.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk_png.framework; path = /Library/Frameworks/fltk_png.framework; sourceTree = "<absolute>"; };
+		C962912C1274D238007D3CFE /* fltk_zlib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = fltk_zlib.framework; path = /Library/Frameworks/fltk_zlib.framework; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D11072E0486CEB800E47090 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C95960BE1274CD8A009C0594 /* fltk.framework in Frameworks */,
+				C96291231274D238007D3CFE /* fltk_forms.framework in Frameworks */,
+				C96291251274D238007D3CFE /* fltk_gl.framework in Frameworks */,
+				C96291271274D238007D3CFE /* fltk_images.framework in Frameworks */,
+				C96291291274D238007D3CFE /* fltk_jpeg.framework in Frameworks */,
+				C962912B1274D238007D3CFE /* fltk_png.framework in Frameworks */,
+				C962912D1274D238007D3CFE /* fltk_zlib.framework in Frameworks */,
+				86E4A437138C2AEC0004DBB3 /* OpenGL.framework in Frameworks */,
+				86739E8F138C79F500D6C498 /* libftd2xx.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1058C7A0FEA54F0111CA2CBB /* OS X Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				86E4A436138C2AEC0004DBB3 /* OpenGL.framework */,
+			);
+			name = "OS X Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107320486CEB800E47090 /* FOXSI_GSE.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* FOXSI_GSE */ = {
+			isa = PBXGroup;
+			children = (
+				C9601E9410B1FADC0018BADE /* Sources */,
+				C9601EED10B2024C0018BADE /* FLUID Sources */,
+				C9601EE910B2022E0018BADE /* Generated Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = FOXSI_GSE;
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107310486CEB800E47090 /* FOXSI_GSE-Info.plist */,
+				86E4A498138C2DCC0004DBB3 /* icons.icns */,
+				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				86739E9F138C7AC000D6C498 /* ftd2xx.h */,
+				86739E8E138C79F500D6C498 /* libftd2xx.dylib */,
+				C9EDD6C71274CC1D00ADB21C /* FLTK Frameworks */,
+				1058C7A0FEA54F0111CA2CBB /* OS X Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C9601E9410B1FADC0018BADE /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				86E4A43B138C2B720004DBB3 /* Application.h */,
+				86E4A43A138C2B720004DBB3 /* Application.cxx */,
+				86E4A43D138C2B900004DBB3 /* Foxsidata.cxx */,
+				86E4A43E138C2B900004DBB3 /* Foxsidata.h */,
+				86E4A43F138C2B900004DBB3 /* mainChart.cxx */,
+				86E4A440138C2B900004DBB3 /* mainChart.h */,
+				86E4A441138C2B900004DBB3 /* mainHistogram.cxx */,
+				86E4A442138C2B900004DBB3 /* mainHistogram.h */,
+				86E4A443138C2B900004DBB3 /* mainImage.cxx */,
+				86E4A444138C2B900004DBB3 /* mainImage.h */,
+				86E4A445138C2B900004DBB3 /* mainLightcurve.cxx */,
+				86E4A446138C2B900004DBB3 /* mainLightcurve.h */,
+				86739EAA138C7B0600D6C498 /* WinTypes.h */,
+				86E4A447138C2B900004DBB3 /* subImage.cxx */,
+				86E4A448138C2B900004DBB3 /* subImage.h */,
+				86E4A449138C2B900004DBB3 /* UsefulFunctions.cpp */,
+				86E4A44A138C2B900004DBB3 /* UsefulFunctions.h */,
+				86739DD8138C708900D6C498 /* usbd2xx.cpp */,
+				86739DD9138C708900D6C498 /* usbd2xx.h */,
+				C9601E9710B1FAED0018BADE /* main.h */,
+				C9601E9810B1FAED0018BADE /* main.cpp */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		C9601EE910B2022E0018BADE /* Generated Sources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Generated Sources";
+			sourceTree = "<group>";
+		};
+		C9601EED10B2024C0018BADE /* FLUID Sources */ = {
+			isa = PBXGroup;
+			children = (
+				86E4A452138C2BA40004DBB3 /* gui.fl */,
+			);
+			name = "FLUID Sources";
+			sourceTree = "<group>";
+		};
+		C9EDD6C71274CC1D00ADB21C /* FLTK Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C95960BD1274CD8A009C0594 /* fltk.framework */,
+				C96291221274D238007D3CFE /* fltk_forms.framework */,
+				C96291241274D238007D3CFE /* fltk_gl.framework */,
+				C96291261274D238007D3CFE /* fltk_images.framework */,
+				C96291281274D238007D3CFE /* fltk_jpeg.framework */,
+				C962912A1274D238007D3CFE /* fltk_png.framework */,
+				C962912C1274D238007D3CFE /* fltk_zlib.framework */,
+			);
+			name = "FLTK Frameworks";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D1107260486CEB800E47090 /* FOXSI_GSE */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "FOXSI_GSE" */;
+			buildPhases = (
+				8D1107290486CEB800E47090 /* Resources */,
+				8D11072C0486CEB800E47090 /* Sources */,
+				8D11072E0486CEB800E47090 /* Frameworks */,
+			);
+			buildRules = (
+				C9601C4B10B1F9B60018BADE /* PBXBuildRule */,
+			);
+			dependencies = (
+			);
+			name = FOXSI_GSE;
+			productInstallPath = "$(HOME)/Applications";
+			productName = FOXSI_GSE;
+			productReference = 8D1107320486CEB800E47090 /* FOXSI_GSE.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "FOXSI_GSE" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 29B97314FDCFA39411CA2CEA /* FOXSI_GSE */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D1107260486CEB800E47090 /* FOXSI_GSE */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D1107290486CEB800E47090 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
+				86E4A499138C2DCC0004DBB3 /* icons.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D11072C0486CEB800E47090 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9601E9910B1FAED0018BADE /* main.cpp in Sources */,
+				86E4A43C138C2B720004DBB3 /* Application.cxx in Sources */,
+				86E4A44B138C2B900004DBB3 /* Foxsidata.cxx in Sources */,
+				86E4A44C138C2B900004DBB3 /* mainChart.cxx in Sources */,
+				86E4A44D138C2B900004DBB3 /* mainHistogram.cxx in Sources */,
+				86E4A44E138C2B900004DBB3 /* mainImage.cxx in Sources */,
+				86E4A44F138C2B900004DBB3 /* mainLightcurve.cxx in Sources */,
+				86E4A450138C2B900004DBB3 /* subImage.cxx in Sources */,
+				86E4A451138C2B900004DBB3 /* UsefulFunctions.cpp in Sources */,
+				86E4A453138C2BA40004DBB3 /* gui.fl in Sources */,
+				86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C165DFE840E0CC02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C01FCF4B08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				HEADER_SEARCH_PATHS = (
+					/Library/Frameworks/fltk.framework/Headers/,
+					/Library/Framework/fltk.frameworks/Headers/FL/images,
+				);
+				INFOPLIST_FILE = "FOXSI_GSE-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = FOXSI_GSE;
+				SDKROOT = macosx10.5;
+				STRINGS_FILE_OUTPUT_ENCODING = "UTF-8";
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
+			};
+			name = Debug;
+		};
+		C01FCF4C08A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				HEADER_SEARCH_PATHS = (
+					/Library/Frameworks/fltk.framework/Headers/,
+					/Library/Framework/fltk.frameworks/Headers/FL/images,
+				);
+				INFOPLIST_FILE = "FOXSI_GSE-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = FOXSI_GSE;
+				SDKROOT = macosx10.5;
+				STRINGS_FILE_OUTPUT_ENCODING = "UTF-8";
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "";
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "FOXSI_GSE" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4B08A954540054247B /* Debug */,
+				C01FCF4C08A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "FOXSI_GSE" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}

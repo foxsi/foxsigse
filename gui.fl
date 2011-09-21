@@ -1,0 +1,942 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cxx}
+class Gui {open
+} {
+  Function {Gui()} {open
+  } {
+    Fl_Window mainWindow {
+      label {FOXSI GSE} open
+      xywh {190 44 1250 748} type Double color 19 resizable
+      code0 {\#include "Application.h"}
+      code1 {\#include <stdlib.h>}
+      code2 {\#include "Foxsidata.h"}
+      code3 {\#include "usbd2xx.h"} visible
+    } {
+      Fl_Menu_Bar menuBar {
+        label menuBar
+        xywh {-5 -1 1255 25} box BORDER_BOX color 29
+      } {
+        Submenu fileMenu {
+          label File open
+          xywh {0 0 100 20}
+        } {
+          MenuItem simulateData {
+            label {Simulate Data}
+            callback {app->simulateData()}
+            xywh {0 0 36 21}
+          }
+          MenuItem readFile {
+            label {Read Data file}
+            callback {app->readFile();}
+            xywh {0 0 100 20}
+          }
+          MenuItem readUSBStream {
+            label {Read USB Stream}
+            callback {app->readUSBStream()}
+            xywh {0 0 36 21}
+          }
+          MenuItem readTeleStream {
+            label {Read Tele Stream}
+            callback {app->readTeleStream()}
+            xywh {0 0 36 21}
+          }
+          MenuItem WritePicScreen {
+            label {Write Spec}
+            callback {app->WriteSpec();}
+            xywh {10 10 100 20}
+          }
+          MenuItem WriteLightcurve {
+            label {Write Lightcurve}
+            callback {app->WriteLightcurve();}
+            xywh {10 10 100 20}
+          }
+          MenuItem exitButton {
+            label Quit
+            callback {exit(1);}
+            xywh {0 0 36 21} shortcut 0x400071 labelcolor 1
+          }
+        }
+        Submenu menuProc {
+          label Menu open
+          xywh {0 0 100 20}
+        } {
+          MenuItem Sync {
+            label {Data Sync}
+            callback {app->dataSync();}
+            xywh {0 0 100 20}
+          }
+        }
+        Submenu Detector {
+          label Detector open
+          xywh {0 0 70 21}
+        } {
+          MenuItem setDetector0 {
+            label All
+            callback {app->setDetector(0)}
+            xywh {0 0 36 21} type Radio
+          }
+          MenuItem setDetector1 {
+            label {Detector 1}
+            callback {app->setDetector(1)}
+            xywh {10 10 36 21} type Radio
+          }
+          MenuItem setDetector2 {
+            label {Detector 2}
+            callback {app->setDetector(2)}
+            xywh {10 10 36 21} type Radio
+          }
+          MenuItem setDetector3 {
+            label {Detector 3}
+            callback {app->setDetector(3)}
+            xywh {20 20 36 21} type Radio
+          }
+          MenuItem setDetector4 {
+            label {Detector 4}
+            callback {app->setDetector(4)}
+            xywh {30 30 36 21} type Radio
+          }
+          MenuItem setDetector5 {
+            label {Detector 5}
+            callback {app->setDetector(5)}
+            xywh {40 40 36 21} type Radio
+          }
+          MenuItem setDetector6 {
+            label {Detector 6}
+            callback {app->setDetector(6)}
+            xywh {50 50 36 21} type Radio
+          }
+          MenuItem setDetector7 {
+            label {Detector 7}
+            callback {app->setDetector(7)}
+            xywh {60 60 36 21} type Radio
+          }
+        }
+      }
+      Fl_Box mainHistogramWindow {
+        label Histogram
+        xywh {625 460 265 240} box GTK_UP_BOX
+        code0 {\#include "mainHistogram.h"}
+        class mainHistogram
+      }
+      Fl_Box mainImageWindow {
+        label Image
+        xywh {3 313 402 397} box GTK_UP_BOX
+        code0 {\#include "mainImage.h"}
+        class mainImage
+      }
+      Fl_Box subImageWindow {
+        label {Image Zoom}
+        xywh {415 315 145 140} box GTK_UP_BOX
+        code0 {\#include "subImage.h"}
+        class subImage
+      }
+      Fl_Clock {} {
+        xywh {1160 35 80 75} box GTK_UP_BOX
+      }
+      Fl_Group TopOutput {open
+        xywh {325 35 695 520}
+      } {
+        Fl_Output rateOutput0 {
+          label {Rate [cts/s]}
+          xywh {375 115 80 25}
+        }
+        Fl_Output rateOutput1 {
+          xywh {460 115 45 25}
+        }
+        Fl_Output rateOutput2 {
+          xywh {510 115 45 25}
+        }
+        Fl_Output rateOutput3 {
+          xywh {560 115 45 25}
+        }
+        Fl_Output rateOutput4 {
+          xywh {610 115 45 25}
+        }
+        Fl_Output rateOutput5 {
+          xywh {660 115 45 25}
+        }
+        Fl_Output rateOutput6 {
+          xywh {710 115 45 25}
+        }
+        Fl_Output rateOutput7 {
+          xywh {760 115 45 25}
+        }
+        Fl_Output framenumOutput {
+          label {Frame \#}
+          xywh {510 35 45 25}
+        }
+        Fl_Output shutterstateOutput {
+          label {Shut state}
+          callback {app->getShutState()}
+          xywh {465 65 30 25}
+        }
+        Fl_Output TempOutput {
+          label Temp
+          xywh {375 145 30 25}
+        }
+        Fl_Output histEnergy {
+          label Energy
+          xywh {940 500 80 25}
+        }
+        Fl_Output histCounts {
+          label Counts
+          xywh {940 530 80 25}
+        }
+      }
+      Fl_Group dataPlayback {
+        xywh {545 35 498 106}
+      } {
+        Fl_Button nextFrameBut {
+          label {Next Frame}
+          callback {data->nextFrame()}
+          xywh {660 65 80 25}
+          code0 {\#include "Application.h"}
+          code1 {\#include "Foxsidata.h"}
+        }
+        Fl_Button prevFrameBut {
+          label {Previous Frame}
+          callback {data->previousFrame()}
+          xywh {545 65 110 25}
+          code0 {\#include "Application.h"}
+          code1 {\#include "Foxsidata.h"}
+        }
+        Fl_Light_Button syncLightBut {
+          label Sync
+          xywh {665 35 70 25}
+        }
+        Fl_Button flushBut {
+          label Flush
+          callback {app->FlushData()}
+          xywh {745 35 80 25}
+          code0 {\#include "Application.h"}
+        }
+        Fl_Button printFrame {
+          label {Print Frame}
+          callback {data->printFrame()}
+          xywh {745 65 80 25}
+          code0 {\#include "Application.h"}
+          code1 {\#include "Foxsidata.h"}
+        }
+        Fl_Value_Output frameTime {
+          label {frame time}
+          xywh {625 36 33 24}
+        }
+        Fl_Group {} {open
+          xywh {885 36 148 24}
+        } {
+          Fl_Value_Output chipbitValOut0 {
+            label {Chip bit}
+            xywh {885 36 33 24} deactivate
+          }
+          Fl_Value_Output chipbitValOut1 {
+            xywh {921 36 33 24} deactivate
+          }
+          Fl_Value_Output chipbitValOut2 {
+            xywh {960 36 33 24} deactivate
+          }
+          Fl_Value_Output chipbitValOut3 {
+            xywh {1000 36 33 24} deactivate
+          }
+        }
+        Fl_Group {} {open
+          xywh {885 63 148 24}
+        } {
+          Fl_Value_Output trigbitValOut0 {
+            label {Trig bit}
+            xywh {885 63 33 24} deactivate
+          }
+          Fl_Value_Output trigbitValOut1 {
+            xywh {921 63 33 24} deactivate
+          }
+          Fl_Value_Output trigbitValOut2 {
+            xywh {960 63 33 24} deactivate
+          }
+          Fl_Value_Output trigbitValOut3 {
+            xywh {1000 63 33 24} deactivate
+          }
+        }
+        Fl_Group {} {open
+          xywh {885 90 148 24}
+        } {
+          Fl_Value_Output seubitValOut0 {
+            label {SEU bit}
+            xywh {885 90 33 24} deactivate
+          }
+          Fl_Value_Output seubitValOut1 {
+            xywh {921 90 33 24} deactivate
+          }
+          Fl_Value_Output seubitValOut2 {
+            xywh {960 90 33 24} deactivate
+          }
+          Fl_Value_Output seubitValOut3 {
+            xywh {1000 90 33 24} deactivate
+          }
+        }
+        Fl_Group {} {open
+          xywh {886 117 148 24}
+        } {
+          Fl_Value_Output noiseValOut0 {
+            label Noise
+            xywh {886 117 33 24} deactivate
+          }
+          Fl_Value_Output noiseValOut1 {
+            xywh {922 117 33 24} deactivate
+          }
+          Fl_Value_Output noiseValOut2 {
+            xywh {961 117 33 24} deactivate
+          }
+          Fl_Value_Output noiseValOut3 {
+            xywh {1001 117 33 24} deactivate
+          }
+        }
+      }
+      Fl_Box mainChartWindow {
+        label 1
+        xywh {470 155 130 115} box GTK_UP_BOX labeltype NO_LABEL
+        code0 {\#include "mainChart.h"}
+        class mainChart
+      }
+      Fl_Output pixelNum {
+        label Pixel
+        xywh {445 495 80 25}
+      }
+      Fl_Output pixelCounts {
+        label Cts
+        xywh {445 465 80 25}
+      }
+      Fl_Light_Button subImageLockbut {
+        label {Unlock View}
+        xywh {420 525 105 25} selection_color 1
+      }
+      Fl_Text_Display {} {
+        label {detector 1}
+        xywh {529 295 15 15}
+      }
+      Fl_Light_Button mainHistogramLockbut {
+        label Unlock
+        xywh {900 465 65 25} selection_color 1
+      }
+      Fl_Box mainChartWindow1 {
+        label 1
+        xywh {615 155 130 115} box GTK_UP_BOX labeltype NO_LABEL
+        code0 {\#include "mainChart.h"}
+        class mainChart
+      }
+      Fl_Text_Display {} {
+        label {detector 2}
+        xywh {670 295 15 15}
+      }
+      Fl_Value_Output mainHistogramXlabelmid {
+        label {Energy:}
+        xywh {735 707 35 23} box THIN_UP_BOX
+      }
+      Fl_Value_Output mainHistogramXlabelmax {
+        xywh {865 707 35 23} box THIN_UP_BOX
+      }
+      Fl_Value_Output mainHistogramYlabelmax {
+        xywh {585 457 35 23} box THIN_UP_BOX
+      }
+      Fl_Value_Output mainHistogramYlabelmid {
+        xywh {585 577 35 23} box THIN_UP_BOX
+      }
+      Fl_Text_Display consoleBuf {
+        xywh {590 320 520 130}
+      }
+      Fl_Choice {} {
+        label {Detector:} open
+        xywh {90 65 95 25} down_box BORDER_BOX
+      } {
+        MenuItem {} {
+          label All
+          xywh {0 0 31 20}
+        }
+        MenuItem {} {
+          label {Detector 1}
+          xywh {0 0 31 20}
+        }
+        MenuItem {} {
+          label {Detector 2}
+          xywh {0 0 31 20}
+        }
+      }
+      Fl_Choice {} {
+        label {Data Source:} open
+        xywh {90 35 115 25} down_box BORDER_BOX
+      } {
+        MenuItem {} {
+          label {ACTEL USB}
+          xywh {0 0 31 20}
+        }
+      }
+      Fl_Light_Button initializeBut {
+        label Initialize
+        callback {app->initialize_data()}
+        xywh {209 35 80 25} box THIN_UP_BOX
+      }
+      Fl_Button readBut {
+        label Read
+        callback {app->start_thread();
+//app->read_data()}
+        xywh {390 35 60 25} deactivate
+      }
+      Fl_Light_Button closeBut {
+        label Close
+        callback {app->close_data()}
+        xywh {209 65 80 25}
+      }
+      Fl_Box mainLightcurveWindow {
+        label {Light curve}
+        xywh {760 155 300 125} box GTK_UP_BOX
+        code0 {\#include "mainLightcurve.h"}
+        class mainLightcurve
+      }
+      Fl_Light_Button glitchBut {
+        label Glitch
+        xywh {90 100 75 25}
+      }
+      Fl_Button sendParamsBut {
+        label {Send Params}
+        callback {app->openSendParamsWindow()}
+        xywh {190 95 100 25}
+      }
+      Fl_Button testBut {
+        label Test
+        callback {app->test();}
+        xywh {15 275 75 25}
+      }
+      Fl_Value_Input nEvents {
+        label events
+        xywh {345 35 40 24} value 1
+      }
+      Fl_Light_Button writeFileBut {
+        label {Write to file}
+        xywh {85 160 95 25}
+      }
+      Fl_Input filenameInput {
+        label {filename:}
+        xywh {85 193 320 23}
+      }
+      Fl_Value_Input nEventsDone {
+        label counter
+        xywh {345 66 40 24} value 1
+      }
+      Fl_Button {} {
+        label BREAK
+        callback {app->break_acq(193);}
+        xywh {215 245 63 20}
+      }
+      Fl_Button {} {
+        label CLEAR
+        callback {app->break_acq(192);}
+        xywh {215 270 63 20}
+      }
+      Fl_Button testStopBut {
+        label {Test stop}
+        callback {app->teststop();} selected
+        xywh {100 275 75 25}
+      }
+    }
+    code {app=new Application();} {}
+    code {data=new Foxsidata();} {}
+    code {usb=new USB_d2xx();} {}
+    code {buff=new Fl_Text_Buffer();
+consoleBuf->buffer(buff);} {}
+    Fl_Window sendParamsWindow {
+      label {Send Parameters} open
+      xywh {383 44 780 531} type Double hide
+    } {
+      Fl_Button sendParamsWindow_sendBut {
+        label Send
+        callback {app->save_settings();
+app->send_params();
+//sendParamsWindow->hide();}
+        xywh {415 425 70 25} value 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[0]} {
+        label {Vfss_neg:}
+        xywh {135 11 40 24} step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[1]} {
+        label {Tp_longb:}
+        xywh {135 38 40 24} maximum 7 step 1
+      }
+      Fl_Button {} {
+        label Close
+        callback {sendParamsWindow->hide();}
+        xywh {415 460 70 25}
+      }
+      Fl_Value_Input {sendParamsWindow_value[2]} {
+        label {Sbi_hp1:}
+        xywh {135 65 40 23} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[3]} {
+        label {Sbi_hp2b:}
+        xywh {135 92 40 23} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[4]} {
+        label {Iramp_fb:}
+        xywh {135 118 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[5]} {
+        label {Iramp_f2:}
+        xywh {135 146 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[6]} {
+        label {CM_thr_dis:}
+        xywh {135 173 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[7]} {
+        label {RO_all:}
+        xywh {135 201 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[8]} {
+        label {Ck_en:}
+        xywh {135 228 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[9]} {
+        label {Prebi_hp:}
+        xywh {135 256 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[10]} {
+        label {Cal_gen_on:}
+        xywh {135 284 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[11]} {
+        label {Slew_on_b:}
+        xywh {135 311 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[12]} {
+        label {Nside:}
+        xywh {135 338 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[13]} {
+        label {CC_on:}
+        xywh {135 365 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[14]} {
+        label {Test_on:}
+        xywh {135 392 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[15]} {
+        label {Low_gain:}
+        xywh {135 420 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[16]} {
+        label {negQ:}
+        xywh {290 13 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[17]} {
+        label Reserved
+        xywh {290 40 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[18]} {
+        label {ADC_on_b:}
+        xywh {290 67 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[19]} {
+        label {VA_RO:}
+        xywh {290 95 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[20]} {
+        label {Vrc_negQ:}
+        xywh {290 120 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[21]} {
+        label {Ileak_offset:}
+        xywh {290 147 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[22]} {
+        label {ADC_test1:}
+        xywh {290 174 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[23]} {
+        label {ADC_test2:}
+        xywh {290 201 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[24]} {
+        label {Delay, dummy:}
+        xywh {290 229 40 24} maximum 63 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[25]} {
+        label {Digital threshold:}
+        xywh {290 257 40 24} maximum 255 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[26]} {
+        label {Shabi_lg:}
+        xywh {290 284 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[27]} {
+        label {Pos_Il_1:}
+        xywh {290 311 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[28]} {
+        label {Pos_Il_2:}
+        xywh {290 338 40 24} maximum 7 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[29]} {
+        label {Bias DAC, vthr:}
+        xywh {290 366 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[30]} {
+        label {Bias DAC, ifp:}
+        xywh {290 394 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[31]} {
+        label {Bias DAC, Iramp:}
+        xywh {290 421 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[32]} {
+        label {Bias DAC, ck_bi:}
+        xywh {480 14 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[33]} {
+        label {Bias DAC, cal_bi:}
+        xywh {480 41 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[34]} {
+        label {Bias DAC, twbi:}
+        xywh {480 68 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[35]} {
+        label {Bias DAC, sha_bias:}
+        xywh {480 96 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[36]} {
+        label {Bias DAC, ifss:}
+        xywh {480 123 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[37]} {
+        label {Bias DAC, ifsf:}
+        xywh {480 150 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[38]} {
+        label {Bias DAC, vrc:}
+        xywh {480 177 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[39]} {
+        label {Bias DAC, sbi:}
+        xywh {480 205 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[40]} {
+        label {Bias DAC, pre_bias:}
+        xywh {480 232 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[41]} {
+        label {Bias DAC, ibuf:}
+        xywh {480 260 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[42]} {
+        label {Bias DAC, obi:}
+        xywh {480 287 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[43]} {
+        label {Bias DAC, Ioffset:}
+        xywh {480 314 40 24} maximum 31 step 1
+      }
+      Fl_Value_Input {sendParamsWindow_value[44]} {
+        label {Bias DAC, disc3_bi:}
+        xywh {480 341 40 24} maximum 31 step 1
+      }
+      Fl_Light_Button {sendParamsWindow_chan[0]} {
+        label 0
+        xywh {555 35 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[1]} {
+        label 1
+        xywh {555 55 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[2]} {
+        label 2
+        xywh {555 75 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[3]} {
+        label 3
+        xywh {555 95 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[4]} {
+        label 4
+        xywh {555 115 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[5]} {
+        label 5
+        xywh {555 135 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[6]} {
+        label 6
+        xywh {555 155 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[7]} {
+        label 7
+        xywh {555 175 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[8]} {
+        label 8
+        xywh {555 195 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[9]} {
+        label 9
+        xywh {555 215 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[10]} {
+        label 10
+        xywh {555 235 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[11]} {
+        label 11
+        xywh {555 255 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[12]} {
+        label 12
+        xywh {555 275 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[13]} {
+        label 13
+        xywh {555 295 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[14]} {
+        label 14
+        xywh {555 315 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[15]} {
+        label 15
+        xywh {555 335 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[16]} {
+        label 16
+        xywh {555 355 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[17]} {
+        label 17
+        xywh {555 375 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[18]} {
+        label 18
+        xywh {555 395 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[19]} {
+        label 19
+        xywh {555 415 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[20]} {
+        label 20
+        xywh {555 435 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[21]} {
+        label 21
+        xywh {620 35 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[22]} {
+        label 22
+        xywh {620 55 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[23]} {
+        label 23
+        xywh {620 75 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[24]} {
+        label 24
+        xywh {620 95 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[25]} {
+        label 25
+        xywh {620 115 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[26]} {
+        label 26
+        xywh {620 135 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[27]} {
+        label 27
+        xywh {620 155 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[28]} {
+        label 28
+        xywh {620 175 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[29]} {
+        label 29
+        xywh {620 195 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[30]} {
+        label 30
+        xywh {620 215 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[31]} {
+        label 31
+        xywh {620 235 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[32]} {
+        label 32
+        xywh {620 255 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[33]} {
+        label 33
+        xywh {620 275 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[34]} {
+        label 34
+        xywh {620 295 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[35]} {
+        label 35
+        xywh {620 315 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[36]} {
+        label 36
+        xywh {620 335 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[37]} {
+        label 37
+        xywh {620 355 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[38]} {
+        label 38
+        xywh {620 375 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[39]} {
+        label 39
+        xywh {620 395 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[40]} {
+        label 40
+        xywh {620 415 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[41]} {
+        label 41
+        xywh {620 435 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[42]} {
+        label 42
+        xywh {685 35 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[43]} {
+        label 43
+        xywh {685 55 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[44]} {
+        label 44
+        xywh {685 75 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[45]} {
+        label 45
+        xywh {685 95 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[46]} {
+        label 46
+        xywh {685 115 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[47]} {
+        label 47
+        xywh {685 135 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[48]} {
+        label 48
+        xywh {685 155 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[49]} {
+        label 49
+        xywh {685 175 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[50]} {
+        label 50
+        xywh {685 195 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[51]} {
+        label 51
+        xywh {685 215 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[52]} {
+        label 52
+        xywh {685 235 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[53]} {
+        label 53
+        xywh {685 255 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[54]} {
+        label 54
+        xywh {685 275 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[55]} {
+        label 55
+        xywh {685 295 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[56]} {
+        label 56
+        xywh {685 315 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[57]} {
+        label 57
+        xywh {685 335 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[58]} {
+        label 58
+        xywh {685 355 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[59]} {
+        label 59
+        xywh {685 375 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[60]} {
+        label 60
+        xywh {685 395 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[61]} {
+        label 61
+        xywh {685 415 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[62]} {
+        label 62
+        xywh {685 435 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_chan[63]} {
+        label 63
+        xywh {685 455 67 20}
+      }
+      Fl_Value_Input sendParamsWindow_asic {
+        label ASIC
+        callback {app->restore_settings();}
+        xywh {460 386 15 24} maximum 3 step 1
+      }
+      Fl_Value_Input sendParamsWindow_holdTime {
+        label {Hold time setting (all ASICs)::}
+        xywh {205 491 35 24}
+      }
+      Fl_Button {} {
+        label Set
+        callback {app->send_global_params();}
+        xywh {249 492 63 20}
+      }
+      Fl_Button {} {
+        label {set all}
+        callback {for(int i=0; i<64; i++) 
+  sendParamsWindow_chan[i]->set();}
+        xywh {555 455 63 20}
+      }
+      Fl_Button {} {
+        label {clear all}
+        callback {for(int i=0; i<64; i++) 
+  sendParamsWindow_chan[i]->clear();}
+        xywh {619 455 63 20}
+      }
+    }
+  }
+  Function {show()} {open
+  } {
+    code {mainWindow->show();
+mainHistogramWindow->show();
+mainImageWindow->show();
+mainLightcurveWindow->show();
+subImageWindow->show();} {}
+  }
+  decl {Application *app;} {public local
+  }
+  decl {Foxsidata *data;} {public local
+  }
+  decl {USB_d2xx *usb;} {public local
+  }
+  decl {Fl_Text_Buffer *buff;} {public local
+  }
+} 
