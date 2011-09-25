@@ -43,7 +43,6 @@ public:
 	
 	void initialize_data(void);		// Initialize a connection to a data stream
 	void close_data(void);			// Close a connection to a data stream
-	void start_thread(void);	// start thread to control read functions.
 	void openSendParamsWindow(void);		// Open the send params window
 	
 	//END Menu Item Actions -----------------------------------------------------------
@@ -62,11 +61,12 @@ public:
 	void save_settings(void);
 	void restore_settings(void);
 	void test(void);
-	void teststop(void);
+	void stop_reading_data(void);
+	void start_reading_data(void);	// start thread to control read functions.
+
 	
 private:
 	char filename[40];
-	static void *do_some_work(void *variable);
 	static void *read_data(void *variable);		// Begin reading data from a data stream
 
 	
