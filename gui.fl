@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {190 44 1250 748} type Double color 19 resizable
+      xywh {208 44 1250 748} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -19,7 +19,7 @@ class Gui {open
         xywh {-5 -1 1255 25} box BORDER_BOX color 29
       } {
         Submenu fileMenu {
-          label File open
+          label File open selected
           xywh {0 0 100 20}
         } {
           MenuItem simulateData {
@@ -132,9 +132,6 @@ class Gui {open
         code0 {\#include "subImage.h"}
         class subImage
       }
-      Fl_Clock {} {
-        xywh {1160 35 80 75} box GTK_UP_BOX
-      }
       Fl_Group TopOutput {open
         xywh {325 35 695 520}
       } {
@@ -165,7 +162,7 @@ class Gui {open
         }
         Fl_Output framenumOutput {
           label {Frame \#}
-          xywh {510 35 45 25}
+          xywh {605 35 45 25}
         }
         Fl_Output shutterstateOutput {
           label {Shut state}
@@ -186,109 +183,109 @@ class Gui {open
         }
       }
       Fl_Group dataPlayback {
-        xywh {545 35 498 106}
+        xywh {560 35 599 106}
       } {
         Fl_Button nextFrameBut {
           label {Next Frame}
           callback {data->nextFrame()}
-          xywh {660 65 80 25}
+          xywh {675 65 80 25}
           code0 {\#include "Application.h"}
           code1 {\#include "Foxsidata.h"}
         }
         Fl_Button prevFrameBut {
           label {Previous Frame}
           callback {data->previousFrame()}
-          xywh {545 65 110 25}
+          xywh {560 65 110 25}
           code0 {\#include "Application.h"}
           code1 {\#include "Foxsidata.h"}
         }
         Fl_Light_Button syncLightBut {
           label Sync
-          xywh {665 35 70 25}
+          xywh {765 35 70 25}
         }
         Fl_Button flushBut {
           label Flush
           callback {app->FlushData()}
-          xywh {745 35 80 25}
+          xywh {840 35 80 25}
           code0 {\#include "Application.h"}
         }
         Fl_Button printFrame {
           label {Print Frame}
           callback {data->printFrame()}
-          xywh {745 65 80 25}
+          xywh {760 65 80 25}
           code0 {\#include "Application.h"}
           code1 {\#include "Foxsidata.h"}
         }
         Fl_Value_Output frameTime {
           label {frame time}
-          xywh {625 36 33 24}
+          xywh {725 36 33 24}
         }
         Fl_Group {} {open
-          xywh {885 36 148 24}
+          xywh {1010 36 148 24}
         } {
           Fl_Value_Output chipbitValOut0 {
             label {Chip bit}
-            xywh {885 36 33 24} deactivate
+            xywh {1010 36 33 24} deactivate
           }
           Fl_Value_Output chipbitValOut1 {
-            xywh {921 36 33 24} deactivate
+            xywh {1046 36 33 24} deactivate
           }
           Fl_Value_Output chipbitValOut2 {
-            xywh {960 36 33 24} deactivate
+            xywh {1085 36 33 24} deactivate
           }
           Fl_Value_Output chipbitValOut3 {
-            xywh {1000 36 33 24} deactivate
+            xywh {1125 36 33 24} deactivate
           }
         }
         Fl_Group {} {open
-          xywh {885 63 148 24}
+          xywh {1010 63 148 24}
         } {
           Fl_Value_Output trigbitValOut0 {
             label {Trig bit}
-            xywh {885 63 33 24} deactivate
+            xywh {1010 63 33 24} deactivate
           }
           Fl_Value_Output trigbitValOut1 {
-            xywh {921 63 33 24} deactivate
+            xywh {1046 63 33 24} deactivate
           }
           Fl_Value_Output trigbitValOut2 {
-            xywh {960 63 33 24} deactivate
+            xywh {1085 63 33 24} deactivate
           }
           Fl_Value_Output trigbitValOut3 {
-            xywh {1000 63 33 24} deactivate
+            xywh {1125 63 33 24} deactivate
           }
         }
         Fl_Group {} {open
-          xywh {885 90 148 24}
+          xywh {1010 90 148 24}
         } {
           Fl_Value_Output seubitValOut0 {
             label {SEU bit}
-            xywh {885 90 33 24} deactivate
+            xywh {1010 90 33 24} deactivate
           }
           Fl_Value_Output seubitValOut1 {
-            xywh {921 90 33 24} deactivate
+            xywh {1046 90 33 24} deactivate
           }
           Fl_Value_Output seubitValOut2 {
-            xywh {960 90 33 24} deactivate
+            xywh {1085 90 33 24} deactivate
           }
           Fl_Value_Output seubitValOut3 {
-            xywh {1000 90 33 24} deactivate
+            xywh {1125 90 33 24} deactivate
           }
         }
         Fl_Group {} {open
-          xywh {886 117 148 24}
+          xywh {1011 117 148 24}
         } {
           Fl_Value_Output noiseValOut0 {
             label Noise
-            xywh {886 117 33 24} deactivate
+            xywh {1011 117 33 24} deactivate
           }
           Fl_Value_Output noiseValOut1 {
-            xywh {922 117 33 24} deactivate
+            xywh {1047 117 33 24} deactivate
           }
           Fl_Value_Output noiseValOut2 {
-            xywh {961 117 33 24} deactivate
+            xywh {1086 117 33 24} deactivate
           }
           Fl_Value_Output noiseValOut3 {
-            xywh {1001 117 33 24} deactivate
+            xywh {1126 117 33 24} deactivate
           }
         }
       }
@@ -375,10 +372,9 @@ class Gui {open
         callback {app->initialize_data()}
         xywh {209 35 80 25} box THIN_UP_BOX
       }
-      Fl_Button readBut {
+      Fl_Button startReadingDataButton {
         label Read
-        callback {app->start_thread();
-//app->read_data()}
+        callback {app->start_reading_data();}
         xywh {390 35 60 25} deactivate
       }
       Fl_Light_Button closeBut {
@@ -432,10 +428,10 @@ class Gui {open
         callback {app->break_acq(192);}
         xywh {215 270 63 20}
       }
-      Fl_Button testStopBut {
-        label {Test stop}
-        callback {app->teststop();} selected
-        xywh {100 275 75 25}
+      Fl_Button stopReadingDataButton {
+        label Stop
+        callback {app->stop_reading_data();}
+        xywh {455 35 75 25} labelcolor 1 deactivate
       }
     }
     code {app=new Application();} {}

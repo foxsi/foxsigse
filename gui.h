@@ -12,7 +12,6 @@
 #include "mainHistogram.h"
 #include "mainImage.h"
 #include "subImage.h"
-#include <FL/Fl_Clock.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Button.H>
@@ -192,10 +191,10 @@ private:
   void cb_initializeBut_i(Fl_Light_Button*, void*);
   static void cb_initializeBut(Fl_Light_Button*, void*);
 public:
-  Fl_Button *readBut;
+  Fl_Button *startReadingDataButton;
 private:
-  void cb_readBut_i(Fl_Button*, void*);
-  static void cb_readBut(Fl_Button*, void*);
+  void cb_startReadingDataButton_i(Fl_Button*, void*);
+  static void cb_startReadingDataButton(Fl_Button*, void*);
 public:
   Fl_Light_Button *closeBut;
 private:
@@ -224,10 +223,10 @@ private:
   void cb_CLEAR_i(Fl_Button*, void*);
   static void cb_CLEAR(Fl_Button*, void*);
 public:
-  Fl_Button *testStopBut;
+  Fl_Button *stopReadingDataButton;
 private:
-  void cb_testStopBut_i(Fl_Button*, void*);
-  static void cb_testStopBut(Fl_Button*, void*);
+  void cb_stopReadingDataButton_i(Fl_Button*, void*);
+  static void cb_stopReadingDataButton(Fl_Button*, void*);
 public:
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;

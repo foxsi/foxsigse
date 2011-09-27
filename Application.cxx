@@ -216,7 +216,7 @@ void Application::initialize_data(void)
 	gui->noiseValOut2->activate();
 	gui->noiseValOut3->activate();
 	
-	gui->readBut->activate();
+	gui->startReadingDataButton->activate();
 	gui->sendParamsWindow_sendBut->activate();
 	FlushData();
 }
@@ -227,10 +227,10 @@ void Application::close_data(void)
 	gui->usb->close();
 	gui->initializeBut->value(0);
 	gui->closeBut->value(1);
-	gui->readBut->deactivate();
+	gui->startReadingDataButton->deactivate();
 }
 
-void Application::start_thread(void)
+void Application::start_reading_data(void)
 {
 	pthread_t thread;
     struct sched_param param;
@@ -264,6 +264,8 @@ void* Application::read_data(void* variable)
 	int badRead = 0;
 	int status = 0;
 	
+	gui->stopReadingDataButton->activate();
+	
 	if (gui->writeFileBut->value() == 1){
 		// Open data file
 		dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
@@ -283,7 +285,7 @@ void* Application::read_data(void* variable)
 
 	for (int i = 0; i<gui->nEvents->value(); i++) {
 		usleep(10000);		// adjust this to achieve desired reading speed
-		
+				
 		status = gui->usb->findSync();
 		if(status<1){
 			badSync++;
@@ -304,7 +306,26 @@ void* Application::read_data(void* variable)
 		
 		Fl::lock();
 		gui->nEventsDone->value(i);
-		Fl::unlock();	
+		Fl::unlock();
+		
+		if (stop_message == 1){
+			// clean up code goes here then exit
+			if (gui->writeFileBut->value() == 1){
+				fclose(dataFile);
+				Fl::lock();
+				sprintf(buffer, "Read Stopped.\n");
+				gui->consoleBuf->insert(buffer);
+				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
+				gui->consoleBuf->insert(buffer);
+				gui->stopReadingDataButton->deactivate();
+				Fl::unlock();	
+				
+			}
+			
+            pthread_exit(NULL);
+			
+		}
+		
 	}
 	
 	Fl::lock();
@@ -317,7 +338,8 @@ void* Application::read_data(void* variable)
 	if (gui->writeFileBut->value() == 1){
 		fclose(dataFile);
 	}
-	
+	gui->stopReadingDataButton->deactivate();
+
 	return 0;
 }
 
@@ -359,52 +381,11 @@ void Application::restore_settings(void)
 
 void Application::test(void)
 {
-	pthread_t thread;
-    struct sched_param param;
-    pthread_attr_t tattr;
-	
-	int *variable;
-	int ret;
-	
-	stop_message = 0;
-	
-	variable = (int *) malloc(sizeof(int));
-	*variable = 6;
-	
-	// define the custom priority for one of the threads
-    int newprio = -10;
-	param.sched_priority = newprio;
-	ret = pthread_attr_init(&tattr);
-	ret = pthread_attr_setschedparam (&tattr, &param);
-	
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	
-	ret = pthread_create(&thread, &tattr, do_some_work, (void *) variable);
-	
+
 }
 
-void Application::teststop(void)
+void Application::stop_reading_data(void)
 {
 	// send the thread the message to stop itself
 	stop_message = 1;	
-}
-
-void *Application::do_some_work(void *variable)
-{
-	for(int i = 0; i < 1000; i++)
-    {
-		
-        //another way to check whether thread should cancel
-        if(stop_message == 1)
-        {
-            printf("I feel like I should really stop working!\n");
-            // clean up code goes here then exit
-            pthread_exit(NULL);
-        }
-        // do some work
-		printf("Doing some work...");
-        sleep(1);
-    }      
-	
-	return NULL;
 }

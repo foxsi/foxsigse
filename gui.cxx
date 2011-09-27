@@ -213,12 +213,11 @@ void Gui::cb_initializeBut(Fl_Light_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_initializeBut_i(o,v);
 }
 
-void Gui::cb_readBut_i(Fl_Button*, void*) {
-  app->start_thread();
-//app->read_data();
+void Gui::cb_startReadingDataButton_i(Fl_Button*, void*) {
+  app->start_reading_data();
 }
-void Gui::cb_readBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_readBut_i(o,v);
+void Gui::cb_startReadingDataButton(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_startReadingDataButton_i(o,v);
 }
 
 void Gui::cb_closeBut_i(Fl_Light_Button*, void*) {
@@ -256,11 +255,11 @@ void Gui::cb_CLEAR(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_CLEAR_i(o,v);
 }
 
-void Gui::cb_testStopBut_i(Fl_Button*, void*) {
-  app->teststop();
+void Gui::cb_stopReadingDataButton_i(Fl_Button*, void*) {
+  app->stop_reading_data();
 }
-void Gui::cb_testStopBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_testStopBut_i(o,v);
+void Gui::cb_stopReadingDataButton(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_stopReadingDataButton_i(o,v);
 }
 
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
@@ -351,9 +350,6 @@ Gui::Gui() {
       subImageWindow->align(Fl_Align(FL_ALIGN_CENTER));
       subImageWindow->when(FL_WHEN_RELEASE);
     } // subImage* subImageWindow
-    { Fl_Clock* o = new Fl_Clock(1160, 35, 80, 75);
-      o->box(FL_GTK_UP_BOX);
-    } // Fl_Clock* o
     { TopOutput = new Fl_Group(325, 35, 695, 520);
       { rateOutput0 = new Fl_Output(375, 115, 80, 25, "Rate [cts/s]");
       } // Fl_Output* rateOutput0
@@ -371,7 +367,7 @@ Gui::Gui() {
       } // Fl_Output* rateOutput6
       { rateOutput7 = new Fl_Output(760, 115, 45, 25);
       } // Fl_Output* rateOutput7
-      { framenumOutput = new Fl_Output(510, 35, 45, 25, "Frame #");
+      { framenumOutput = new Fl_Output(605, 35, 45, 25, "Frame #");
       } // Fl_Output* framenumOutput
       { shutterstateOutput = new Fl_Output(465, 65, 30, 25, "Shut state");
         shutterstateOutput->callback((Fl_Callback*)cb_shutterstateOutput);
@@ -384,79 +380,79 @@ Gui::Gui() {
       } // Fl_Output* histCounts
       TopOutput->end();
     } // Fl_Group* TopOutput
-    { dataPlayback = new Fl_Group(545, 35, 498, 106);
-      { nextFrameBut = new Fl_Button(660, 65, 80, 25, "Next Frame");
+    { dataPlayback = new Fl_Group(560, 35, 599, 106);
+      { nextFrameBut = new Fl_Button(675, 65, 80, 25, "Next Frame");
         nextFrameBut->callback((Fl_Callback*)cb_nextFrameBut);
       } // Fl_Button* nextFrameBut
-      { prevFrameBut = new Fl_Button(545, 65, 110, 25, "Previous Frame");
+      { prevFrameBut = new Fl_Button(560, 65, 110, 25, "Previous Frame");
         prevFrameBut->callback((Fl_Callback*)cb_prevFrameBut);
       } // Fl_Button* prevFrameBut
-      { syncLightBut = new Fl_Light_Button(665, 35, 70, 25, "Sync");
+      { syncLightBut = new Fl_Light_Button(765, 35, 70, 25, "Sync");
       } // Fl_Light_Button* syncLightBut
-      { flushBut = new Fl_Button(745, 35, 80, 25, "Flush");
+      { flushBut = new Fl_Button(840, 35, 80, 25, "Flush");
         flushBut->callback((Fl_Callback*)cb_flushBut);
       } // Fl_Button* flushBut
-      { printFrame = new Fl_Button(745, 65, 80, 25, "Print Frame");
+      { printFrame = new Fl_Button(760, 65, 80, 25, "Print Frame");
         printFrame->callback((Fl_Callback*)cb_printFrame);
       } // Fl_Button* printFrame
-      { frameTime = new Fl_Value_Output(625, 36, 33, 24, "frame time");
+      { frameTime = new Fl_Value_Output(725, 36, 33, 24, "frame time");
       } // Fl_Value_Output* frameTime
-      { Fl_Group* o = new Fl_Group(885, 36, 148, 24);
-        { chipbitValOut0 = new Fl_Value_Output(885, 36, 33, 24, "Chip bit");
+      { Fl_Group* o = new Fl_Group(1010, 36, 148, 24);
+        { chipbitValOut0 = new Fl_Value_Output(1010, 36, 33, 24, "Chip bit");
           chipbitValOut0->deactivate();
         } // Fl_Value_Output* chipbitValOut0
-        { chipbitValOut1 = new Fl_Value_Output(921, 36, 33, 24);
+        { chipbitValOut1 = new Fl_Value_Output(1046, 36, 33, 24);
           chipbitValOut1->deactivate();
         } // Fl_Value_Output* chipbitValOut1
-        { chipbitValOut2 = new Fl_Value_Output(960, 36, 33, 24);
+        { chipbitValOut2 = new Fl_Value_Output(1085, 36, 33, 24);
           chipbitValOut2->deactivate();
         } // Fl_Value_Output* chipbitValOut2
-        { chipbitValOut3 = new Fl_Value_Output(1000, 36, 33, 24);
+        { chipbitValOut3 = new Fl_Value_Output(1125, 36, 33, 24);
           chipbitValOut3->deactivate();
         } // Fl_Value_Output* chipbitValOut3
         o->end();
       } // Fl_Group* o
-      { Fl_Group* o = new Fl_Group(885, 63, 148, 24);
-        { trigbitValOut0 = new Fl_Value_Output(885, 63, 33, 24, "Trig bit");
+      { Fl_Group* o = new Fl_Group(1010, 63, 148, 24);
+        { trigbitValOut0 = new Fl_Value_Output(1010, 63, 33, 24, "Trig bit");
           trigbitValOut0->deactivate();
         } // Fl_Value_Output* trigbitValOut0
-        { trigbitValOut1 = new Fl_Value_Output(921, 63, 33, 24);
+        { trigbitValOut1 = new Fl_Value_Output(1046, 63, 33, 24);
           trigbitValOut1->deactivate();
         } // Fl_Value_Output* trigbitValOut1
-        { trigbitValOut2 = new Fl_Value_Output(960, 63, 33, 24);
+        { trigbitValOut2 = new Fl_Value_Output(1085, 63, 33, 24);
           trigbitValOut2->deactivate();
         } // Fl_Value_Output* trigbitValOut2
-        { trigbitValOut3 = new Fl_Value_Output(1000, 63, 33, 24);
+        { trigbitValOut3 = new Fl_Value_Output(1125, 63, 33, 24);
           trigbitValOut3->deactivate();
         } // Fl_Value_Output* trigbitValOut3
         o->end();
       } // Fl_Group* o
-      { Fl_Group* o = new Fl_Group(885, 90, 148, 24);
-        { seubitValOut0 = new Fl_Value_Output(885, 90, 33, 24, "SEU bit");
+      { Fl_Group* o = new Fl_Group(1010, 90, 148, 24);
+        { seubitValOut0 = new Fl_Value_Output(1010, 90, 33, 24, "SEU bit");
           seubitValOut0->deactivate();
         } // Fl_Value_Output* seubitValOut0
-        { seubitValOut1 = new Fl_Value_Output(921, 90, 33, 24);
+        { seubitValOut1 = new Fl_Value_Output(1046, 90, 33, 24);
           seubitValOut1->deactivate();
         } // Fl_Value_Output* seubitValOut1
-        { seubitValOut2 = new Fl_Value_Output(960, 90, 33, 24);
+        { seubitValOut2 = new Fl_Value_Output(1085, 90, 33, 24);
           seubitValOut2->deactivate();
         } // Fl_Value_Output* seubitValOut2
-        { seubitValOut3 = new Fl_Value_Output(1000, 90, 33, 24);
+        { seubitValOut3 = new Fl_Value_Output(1125, 90, 33, 24);
           seubitValOut3->deactivate();
         } // Fl_Value_Output* seubitValOut3
         o->end();
       } // Fl_Group* o
-      { Fl_Group* o = new Fl_Group(886, 117, 148, 24);
-        { noiseValOut0 = new Fl_Value_Output(886, 117, 33, 24, "Noise");
+      { Fl_Group* o = new Fl_Group(1011, 117, 148, 24);
+        { noiseValOut0 = new Fl_Value_Output(1011, 117, 33, 24, "Noise");
           noiseValOut0->deactivate();
         } // Fl_Value_Output* noiseValOut0
-        { noiseValOut1 = new Fl_Value_Output(922, 117, 33, 24);
+        { noiseValOut1 = new Fl_Value_Output(1047, 117, 33, 24);
           noiseValOut1->deactivate();
         } // Fl_Value_Output* noiseValOut1
-        { noiseValOut2 = new Fl_Value_Output(961, 117, 33, 24);
+        { noiseValOut2 = new Fl_Value_Output(1086, 117, 33, 24);
           noiseValOut2->deactivate();
         } // Fl_Value_Output* noiseValOut2
-        { noiseValOut3 = new Fl_Value_Output(1001, 117, 33, 24);
+        { noiseValOut3 = new Fl_Value_Output(1126, 117, 33, 24);
           noiseValOut3->deactivate();
         } // Fl_Value_Output* noiseValOut3
         o->end();
@@ -525,10 +521,10 @@ Gui::Gui() {
       initializeBut->box(FL_THIN_UP_BOX);
       initializeBut->callback((Fl_Callback*)cb_initializeBut);
     } // Fl_Light_Button* initializeBut
-    { readBut = new Fl_Button(390, 35, 60, 25, "Read");
-      readBut->callback((Fl_Callback*)cb_readBut);
-      readBut->deactivate();
-    } // Fl_Button* readBut
+    { startReadingDataButton = new Fl_Button(390, 35, 60, 25, "Read");
+      startReadingDataButton->callback((Fl_Callback*)cb_startReadingDataButton);
+      startReadingDataButton->deactivate();
+    } // Fl_Button* startReadingDataButton
     { closeBut = new Fl_Light_Button(209, 65, 80, 25, "Close");
       closeBut->callback((Fl_Callback*)cb_closeBut);
     } // Fl_Light_Button* closeBut
@@ -567,9 +563,11 @@ Gui::Gui() {
     { Fl_Button* o = new Fl_Button(215, 270, 63, 20, "CLEAR");
       o->callback((Fl_Callback*)cb_CLEAR);
     } // Fl_Button* o
-    { testStopBut = new Fl_Button(100, 275, 75, 25, "Test stop");
-      testStopBut->callback((Fl_Callback*)cb_testStopBut);
-    } // Fl_Button* testStopBut
+    { stopReadingDataButton = new Fl_Button(455, 35, 75, 25, "Stop");
+      stopReadingDataButton->labelcolor((Fl_Color)1);
+      stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
+      stopReadingDataButton->deactivate();
+    } // Fl_Button* stopReadingDataButton
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow
