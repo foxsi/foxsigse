@@ -298,16 +298,16 @@ void* Application::read_data(void* variable)
 			continue;
 		}
 		
+		Fl::lock();
 		// print frame to XCode console (unless nEvents is large, then skip it to save time).
 		if(gui->nEvents->value() < 5)  gui->usb->printFrame();
-
 		// write to file if the write button is enabled
 		if (gui->writeFileBut->value() == 1)  gui->usb->writeFrame(dataFile);
-		
-		Fl::lock();
 		gui->nEventsDone->value(i);
 		Fl::unlock();
 		
+		// check to see if the Stop button was pushed, if so then clean up 
+		// and stop this thread
 		if (stop_message == 1){
 			// clean up code goes here then exit
 			if (gui->writeFileBut->value() == 1){
@@ -321,24 +321,20 @@ void* Application::read_data(void* variable)
 				Fl::unlock();	
 				
 			}
-			
             pthread_exit(NULL);
-			
 		}
-		
 	}
 	
 	Fl::lock();
 	sprintf(buffer, "Read finished.\n");
 	gui->consoleBuf->insert(buffer);
 	sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-	gui->consoleBuf->insert(buffer);
-	Fl::unlock();	
-		
+	gui->consoleBuf->insert(buffer);		
 	if (gui->writeFileBut->value() == 1){
 		fclose(dataFile);
 	}
 	gui->stopReadingDataButton->deactivate();
+	Fl::unlock();	
 
 	return 0;
 }
