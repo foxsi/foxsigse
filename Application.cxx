@@ -286,6 +286,24 @@ void* Application::read_data(void* variable)
 	for (int i = 0; i<gui->nEvents->value(); i++) {
 		usleep(10000);		// adjust this to achieve desired reading speed
 				
+		// check to see if the Stop button was pushed, if so then clean up 
+		// and stop this thread
+		if (stop_message == 1){
+			// clean up code goes here then exit
+			if (gui->writeFileBut->value() == 1){
+				fclose(dataFile);
+				Fl::lock();
+				sprintf(buffer, "Read Stopped.\n");
+				gui->consoleBuf->insert(buffer);
+				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
+				gui->consoleBuf->insert(buffer);
+				gui->stopReadingDataButton->deactivate();
+				Fl::unlock();	
+				
+			}
+            pthread_exit(NULL);
+		}
+
 		status = gui->usb->findSync();
 		if(status<1){
 			badSync++;
@@ -306,23 +324,6 @@ void* Application::read_data(void* variable)
 		gui->nEventsDone->value(i);
 		Fl::unlock();
 		
-		// check to see if the Stop button was pushed, if so then clean up 
-		// and stop this thread
-		if (stop_message == 1){
-			// clean up code goes here then exit
-			if (gui->writeFileBut->value() == 1){
-				fclose(dataFile);
-				Fl::lock();
-				sprintf(buffer, "Read Stopped.\n");
-				gui->consoleBuf->insert(buffer);
-				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-				gui->consoleBuf->insert(buffer);
-				gui->stopReadingDataButton->deactivate();
-				Fl::unlock();	
-				
-			}
-            pthread_exit(NULL);
-		}
 	}
 	
 	Fl::lock();
