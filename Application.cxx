@@ -8,10 +8,16 @@
 #include <pthread.h>
 #include <sched.h>
 
+#include <sys/time.h>
+#include <time.h>
+
+
 #define XSTRIPS 128
 #define YSTRIPS 128
 
 #define CHANNELS 1024
+
+#define MAXPATH 128
 
 extern Gui *gui;
 
@@ -19,6 +25,13 @@ extern int HistogramFunction[CHANNELS];
 extern double detImage[XSTRIPS][YSTRIPS];
 
 int stop_message;
+FILE *dataFile;
+
+struct tm *times;
+time_t ltime;
+
+// filename is set automatically with local time
+char dataFilename[MAXPATH];
 
 // these are declared in transFunc.cpp
 //extern HistogramFunction histFunc[4];
@@ -50,7 +63,39 @@ void Application::FlushData(void)
 	gui->data->FlushHistogram();
 	gui->data->FlushImage();
 }
-	
+
+// open the data file for saving data
+void Application::start_file()
+{
+	char buffer[50];
+	if (gui->writeFileBut->value() == 1) {
+		
+		// Open a file to write the data to
+		// Name of file is automatically set with current date
+		char stringtemp[80];
+		time(&ltime);
+		times = localtime(&ltime);
+		strftime(stringtemp,24,"data_%Y%m%d_%H%M%S.dat",times);
+		strncpy(dataFilename,stringtemp,MAXPATH - 1);
+		dataFilename[MAXPATH - 1] = '\0';
+		{
+			dataFile = fopen(dataFilename, "w");
+			if (dataFile == NULL)
+			{
+				sprintf(buffer, "Cannot open file.\n");
+				gui->consoleBuf->insert(buffer);
+			} else {
+				sprintf(buffer, "Opened file %s.\n", dataFilename);
+				gui->consoleBuf->insert(buffer);
+			}
+		}
+	} else {
+		sprintf(buffer, "Closing file %s.\n", dataFilename);
+		gui->consoleBuf->insert(buffer);
+		fclose(dataFile);
+	}
+
+}
 
 // the method that gets executed when the readFile callback is called
 void Application::readFile()
@@ -258,7 +303,6 @@ void Application::start_reading_data(void)
 
 void* Application::read_data(void* variable)
 {
-	FILE *	dataFile;
 	char buffer[50];
 	int badSync = 0;
 	int badRead = 0;
@@ -268,7 +312,7 @@ void* Application::read_data(void* variable)
 	
 	if (gui->writeFileBut->value() == 1){
 		// Open data file
-		dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
+		//dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
 		if(dataFile == NULL){
 			Fl::lock();
 			sprintf(buffer, "Invalid filename.\n");

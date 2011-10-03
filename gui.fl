@@ -408,11 +408,8 @@ class Gui {open
       }
       Fl_Light_Button writeFileBut {
         label {Write to file}
+        callback {app->start_file()} selected
         xywh {85 160 95 25}
-      }
-      Fl_Input filenameInput {
-        label {filename:}
-        xywh {85 193 320 23}
       }
       Fl_Value_Input nEventsDone {
         label counter
