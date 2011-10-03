@@ -70,7 +70,7 @@
 		86E4A448138C2B900004DBB3 /* subImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = subImage.h; sourceTree = "<group>"; };
 		86E4A449138C2B900004DBB3 /* UsefulFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UsefulFunctions.cpp; sourceTree = "<group>"; };
 		86E4A44A138C2B900004DBB3 /* UsefulFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UsefulFunctions.h; sourceTree = "<group>"; };
-		86E4A452138C2BA40004DBB3 /* gui.fl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gui.fl; sourceTree = "<group>"; };
+		86E4A452138C2BA40004DBB3 /* gui.fl */ = {isa = PBXFileReference; explicitFileType = sourcecode.fluid; fileEncoding = 4; path = gui.fl; sourceTree = "<group>"; };
 		86E4A498138C2DCC0004DBB3 /* icons.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = icons.icns; path = Resources/icons.icns; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* FOXSI_GSE-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "FOXSI_GSE-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* FOXSI_GSE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FOXSI_GSE.app; sourceTree = BUILT_PRODUCTS_DIR; };

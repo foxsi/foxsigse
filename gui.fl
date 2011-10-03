@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {208 44 1250 748} type Double color 19 resizable
+      xywh {30 44 1250 692} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -19,7 +19,7 @@ class Gui {open
         xywh {-5 -1 1255 25} box BORDER_BOX color 29
       } {
         Submenu fileMenu {
-          label File open selected
+          label File open
           xywh {0 0 100 20}
         } {
           MenuItem simulateData {
@@ -441,7 +441,7 @@ class Gui {open
 consoleBuf->buffer(buff);} {}
     Fl_Window sendParamsWindow {
       label {Send Parameters} open
-      xywh {383 44 780 531} type Double hide
+      xywh {383 44 780 531} type Double visible
     } {
       Fl_Button sendParamsWindow_sendBut {
         label Send
@@ -916,6 +916,25 @@ app->send_params();
         callback {for(int i=0; i<64; i++) 
   sendParamsWindow_chan[i]->clear();}
         xywh {619 455 63 20}
+      }
+    }
+    Fl_Window setHoldTimeWindow {
+      label {Set hold time and take data} open
+      xywh {617 168 312 165} type Double visible
+    } {
+      Fl_Value_Input setHoldTimeWindow_holdTime {
+        label {Hold time setting (all ASICs)::}
+        xywh {235 15 25 25}
+      }
+      Fl_Button {} {
+        label Set
+        callback {app->send_global_params();}
+        xywh {120 60 80 25}
+      }
+      Fl_Button {} {
+        label Autorun
+        callback {app->run_auto_sequence();} selected
+        xywh {120 105 80 25}
       }
     }
   }
