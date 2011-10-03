@@ -22,7 +22,6 @@
 #include <FL/Fl_Choice.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
-#include <FL/Fl_Input.H>
 
 class Gui {
 public:
@@ -215,7 +214,10 @@ private:
 public:
   Fl_Value_Input *nEvents;
   Fl_Light_Button *writeFileBut;
-  Fl_Input *filenameInput;
+private:
+  void cb_writeFileBut_i(Fl_Light_Button*, void*);
+  static void cb_writeFileBut(Fl_Light_Button*, void*);
+public:
   Fl_Value_Input *nEventsDone;
 private:
   void cb_BREAK_i(Fl_Button*, void*);

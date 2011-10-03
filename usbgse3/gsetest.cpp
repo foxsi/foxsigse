@@ -1,6 +1,7 @@
 //------------------------------------------------------------------------
 // gsetest.cpp
 //
+// Written by Stephen McBride
 //
 // 
 //------------------------------------------------------------------------
@@ -41,8 +42,7 @@ okCFrontPanel *dev;
 //  set up phase lock loop
 //  load FPGA code
 
-okCFrontPanel *
-initializeFPGA()
+okCFrontPanel *initializeFPGA()
 {
 	bool bresult;
 	// Open the first XEM - try all board types.
@@ -62,15 +62,15 @@ initializeFPGA()
 			delete dev;
 			return(NULL);
 	}
-
-
+	
+	
 	// Configure the PLL appropriately
 	okCPLL22150 *pll = new okCPLL22150 ;
  	pll->SetReference(48.0f, false);
  	bresult = pll->SetVCOParameters(574, 105); // output 32 x 8.2 MHz - close to 8.192 MHz
 	//cout << "Settin VCO Parameters " << bresult << endl;
  	pll->SetDiv1(okCPLL22150::DivSrc_VCO, 8);
-// 32.8 approcimately 16 x 2.048 MHz
+	// 32.8 approcimately 16 x 2.048 MHz
  	pll->SetDiv2(okCPLL22150::DivSrc_VCO, 127);
  	pll->SetOutputSource(0, okCPLL22150::ClkSrc_Div2By2); // Xilinx pin A8 = SYS_CLK1 (clk1)
  	pll->SetOutputEnable(0, true);
@@ -89,23 +89,23 @@ initializeFPGA()
 	printf("                                        Device firmware version: %d.%d\n", dev->GetDeviceMajorVersion(), dev->GetDeviceMinorVersion());
 	printf("                                        Device serial number: %s\n", dev->GetSerialNumber().c_str());
 	printf("                                        Device ID string: %s\n", dev->GetDeviceID().c_str());
-
+	
 	// Download the configuration file.
 	if (okCFrontPanel::NoError != dev->ConfigureFPGA(CONFIGURATION_FILE)) {
 		printf("FPGA configuration failed.\n");
 		delete dev;
 		return(NULL);
 	}
-
+	
 	// Check for FrontPanel support in the FPGA configuration.
 	if (false == dev->IsFrontPanelEnabled()) {
 		printf("                              FrontPanel support is not enabled.\n");
 		delete dev;
 		return(NULL);
 	}
-
+	
 	printf("                                        FrontPanel support is enabled.\n");
-
+	
 	return(dev);
 }
 
@@ -149,104 +149,114 @@ pthread_mutex_t mymutex;
 int fout;
 int newdisplay;
 
-void
-*readgse(void *threadid)
+void *readgse(void *threadid)
 {
-unsigned int i;
-long len;
-ssize_t wlen;
-unsigned short int status;
-
-        for(i=0;;i++)
-        {
-       
-			
-       len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer0);
-	if(fout >0)
+	unsigned int i;
+	long len;
+	ssize_t wlen;
+	unsigned short int status;
+	
+	//??? never ending loop?
+	for(i=0;;i++)
 	{
-		if( (wlen = write(fout,(const void *) buffer0,2048) ) != 2048){};
-     }
-	if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
-	{
-		if(newdisplay == 0)
+		//??? in the following code looks like it reads two frames of data
+		//    first time it writes it to a file then places it in memory
+		//    second time, it does it in the opposite order. why?
+		//
+		// alternate between reading data into buffer0 and buffer1
+		// copy it into buffer with memcopy
+		
+		len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer0);
+		
+		if(fout >0)
 		{
-			memcpy((void *) buffer,(void *) buffer0,2048);
-			newdisplay = 1;
+			if( (wlen = write(fout,(const void *) buffer0,2048) ) != 2048){};
 		}
-		pthread_mutex_unlock(&mymutex);
 		
-	}
-       len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer1);
-	if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
-	{
-		memcpy((void *) buffer,(void *) buffer1,2048);
-		pthread_mutex_unlock(&mymutex);
-		
-	}
- 			if(fout >0)
+		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
+		{
+			if(newdisplay == 0)
 			{
-				if( (wlen = write(fout,(const void *) buffer1,2048) ) != 2048){};
-		    }
-        }
+				memcpy((void *) buffer,(void *) buffer0,2048);
+				newdisplay = 1;
+			}
+			pthread_mutex_unlock(&mymutex);
+			
+		}
+		
+		len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer1);
+		
+		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
+		{
+			memcpy((void *) buffer,(void *) buffer1,2048);
+			pthread_mutex_unlock(&mymutex);
+		}
+		
+		if(fout >0)
+		{
+			if( (wlen = write(fout,(const void *) buffer1,2048) ) != 2048){};
+		}
+	}
 }
 
 
 void Startfile()
 {
+	// Open a file to write the data to
+	// file pointer is set to fout
 	char stringtemp[80];
 	time(&ltime);
 	times = localtime(&ltime);
-	 strftime(stringtemp,23,"data_%y%m%d_%H%M.dat",times);
+	strftime(stringtemp,23,"data_%y%m%d_%H%M.dat",times);
 	strncpy(obsfilespec,stringtemp,MAXPATH - 1);
 	obsfilespec[MAXPATH - 1] = '\0';
 	printf("%s \r",obsfilespec);
 	{
 		if((fout = open(obsfilespec,O_RDWR|O_CREAT,0600)) < 0)
-		printf("Cannot open file\n");
-    }    
-	
+			printf("Cannot open file\n");
+    }    	
 }
 
 int displayonce,displaycont;
 char inbuffer[80];
 
-void
-*charcommand(void *threadid)
+void *charcommand(void *threadid)
 {
-int mychar;
-if(setvbuf(stdin,(char *) NULL,_IONBF,0) != 0) printf("Didn't set buffer\n");
-for(;;)
-{
-	mychar = getchar();
-	if( (mychar == 'c') || (mychar == 'C') )
+	// ??? not sure what the purpose of this function.
+	int mychar;
+	if(setvbuf(stdin,(char *) NULL,_IONBF,0) != 0) printf("Didn't set buffer\n");
+	// infinite loop
+	for(;;)
 	{
-		if( displaycont != 0) displaycont = 0;
-		else displaycont = 1;
-	}
-	if((mychar == 'd') || (mychar == 'D'))
-	{
-		displayonce = 1;
-	}
-	if((mychar == 'f') || (mychar == 'F'))
-	{
-		if(fout <= 0)
+		mychar = getchar();
+		if( (mychar == 'c') || (mychar == 'C') )
 		{
-			printf(" Opening ");
-			Startfile();
+			if( displaycont != 0) displaycont = 0;
+			else displaycont = 1;
 		}
-		else
+		if((mychar == 'd') || (mychar == 'D'))
 		{
-			printf(" Closing %s \r",obsfilespec);
-			close(fout);
-			fout = 0;
+			displayonce = 1;
 		}
-	}
-	if(mychar == 0xa) printf("\033[1A");
-}	
+		if((mychar == 'f') || (mychar == 'F'))
+		{
+			if(fout <= 0)
+			{
+				printf(" Opening ");
+				Startfile();
+			}
+			else
+			{
+				printf(" Closing %s \r",obsfilespec);
+				close(fout);
+				fout = 0;
+			}
+		}
+		if(mychar == 0xa) printf("\033[1A");
+	}	
 }
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	
 	char dll_date[32], dll_time[32];
@@ -256,7 +266,7 @@ main(int argc, char *argv[])
     pthread_t threads[NUM_THREADS];
     struct sched_param param;
     pthread_attr_t tattr;
-
+	
     int *taskids[NUM_THREADS];
     int ret, t;
 	
@@ -270,7 +280,7 @@ main(int argc, char *argv[])
     
     param.sched_priority = newprio;
     ret = pthread_attr_init(&tattr);
-
+	
     // set the new scheduling param
     ret = pthread_attr_setschedparam (&tattr, &param);
 	
@@ -282,8 +292,9 @@ main(int argc, char *argv[])
 	}
 	okFrontPanelDLL_GetVersion(dll_date, dll_time);
 	printf("                              FrontPanel DLL loaded.Built: %s %s\n", dll_date, dll_time);
-
-
+	
+	// parse argument list passed on execution
+	// only arg is can accept is "-n" which means do not write to file
 	while (argc > 1) 
 	{
 		++argv;
@@ -294,7 +305,7 @@ main(int argc, char *argv[])
 		}
 		argc--;
 	}
-
+	
 	// Initialize the FPGA with our configuration bitfile.
 	okCFrontPanel *devi = initializeFPGA();
 	if (NULL == devi) 
@@ -310,31 +321,33 @@ main(int argc, char *argv[])
 		printf(" Opening ");
 		Startfile();
 	}
-
-        if (NULL != devi)
-        {
 	
-           ret = pthread_create(&threads[0], &tattr, readgse, (void *) taskids[0]);
-			pthread_mutex_init(&mymutex,NULL);
-			ret = pthread_create(&threads[0], NULL, charcommand, (void *) taskids[1]);
-			
-        }
-		for(;;)
+	if (NULL != devi)
+	{
+		
+		ret = pthread_create(&threads[0], &tattr, readgse, (void *) taskids[0]);
+		pthread_mutex_init(&mymutex,NULL);
+		ret = pthread_create(&threads[0], NULL, charcommand, (void *) taskids[1]);
+		
+	}
+	
+	// infinite loop which checks buffer and prints it to the screen if needed.
+	for(;;)
+	{
+		if( newdisplay == 1)
 		{
-			if( newdisplay == 1)
+			pthread_mutex_lock( &mymutex); /* wait on readgse */
+			if((displayonce != 0) || (displaycont != 0))
 			{
-				pthread_mutex_lock( &mymutex); /* wait on readgse */
-				if((displayonce != 0) ||(displaycont != 0))
-				{
-					displayonce = 0;
-			    	printframe(buffer);
-					newdisplay = 0;
-					fflush(stdout);
-				}
-				pthread_mutex_unlock(&mymutex);
+				displayonce = 0;
+				printframe(buffer);
+				newdisplay = 0;
+				fflush(stdout);
 			}
-
+			pthread_mutex_unlock(&mymutex);
 		}
-
+		
+	}
+	
 	return(0);
 }

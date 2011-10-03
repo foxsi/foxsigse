@@ -241,6 +241,13 @@ void Gui::cb_testBut(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_testBut_i(o,v);
 }
 
+void Gui::cb_writeFileBut_i(Fl_Light_Button*, void*) {
+  app->start_file();
+}
+void Gui::cb_writeFileBut(Fl_Light_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_writeFileBut_i(o,v);
+}
+
 void Gui::cb_BREAK_i(Fl_Button*, void*) {
   app->break_acq(193);
 }
@@ -309,7 +316,7 @@ void Gui::cb_clear(Fl_Button* o, void* v) {
 }
 
 Gui::Gui() {
-  { mainWindow = new Fl_Double_Window(1250, 748, "FOXSI GSE");
+  { mainWindow = new Fl_Double_Window(1250, 724, "FOXSI GSE");
     mainWindow->color((Fl_Color)19);
     mainWindow->user_data((void*)(this));
     { menuBar = new Fl_Menu_Bar(-5, -1, 1255, 25, "menuBar");
@@ -551,9 +558,8 @@ Gui::Gui() {
       nEvents->value(1);
     } // Fl_Value_Input* nEvents
     { writeFileBut = new Fl_Light_Button(85, 160, 95, 25, "Write to file");
+      writeFileBut->callback((Fl_Callback*)cb_writeFileBut);
     } // Fl_Light_Button* writeFileBut
-    { filenameInput = new Fl_Input(85, 193, 320, 23, "filename:");
-    } // Fl_Input* filenameInput
     { nEventsDone = new Fl_Value_Input(345, 66, 40, 24, "counter");
       nEventsDone->value(1);
     } // Fl_Value_Input* nEventsDone

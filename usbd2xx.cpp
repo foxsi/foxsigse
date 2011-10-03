@@ -144,7 +144,7 @@ int USB_d2xx::open(void)
 	//device is now open and ready!
 
 	// default data directory, display in "Filename" buffer.
-	if(gui->filenameInput->size()==0)	gui->filenameInput->insert("/Users/foxsi/GSE/testdata/");
+	//if(gui->filenameInput->size()==0)	gui->filenameInput->insert("/Users/foxsi/GSE/testdata/");
 	
 	return 0;
 	

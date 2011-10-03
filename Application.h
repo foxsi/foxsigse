@@ -63,7 +63,11 @@ public:
 	void test(void);
 	void stop_reading_data(void);
 	void start_reading_data(void);	// start thread to control read functions.
-
+	
+	// open the data file for saving data
+	// executed when someone clicks on "Write to File" Button
+	void start_file(void);			
+	
 	
 private:
 	char filename[40];
