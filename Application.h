@@ -44,6 +44,7 @@ public:
 	void initialize_data(void);		// Initialize a connection to a data stream
 	void close_data(void);			// Close a connection to a data stream
 	void openSendParamsWindow(void);		// Open the send params window
+	void openSetHoldTimeWindow(void);		// Open the set hold time window
 	
 	//END Menu Item Actions -----------------------------------------------------------
 	
@@ -56,13 +57,16 @@ public:
 	
 	// Callbacks for the send params window
 	void send_params(void);
-	void send_global_params(void);
 	void break_acq(int data);
 	void save_settings(void);
 	void restore_settings(void);
 	void test(void);
 	void stop_reading_data(void);
 	void start_reading_data(void);	// start thread to control read functions.
+
+	// Callbacks for the set hold time window
+	void send_global_params(void);	// set hold time
+	void start_auto_run(void);	// auto-run sequence of acquisitions with varying hold times
 	
 	// open the data file for saving data
 	// executed when someone clicks on "Write to File" Button
@@ -72,6 +76,7 @@ public:
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
+	static void *auto_run_sequence(void *variable);	// auto-run sequence of acquisitions with varying hold times
 
 	
 	

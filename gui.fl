@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {30 44 1250 692} type Double color 19 resizable
+      xywh {30 44 1250 683} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -132,7 +132,7 @@ class Gui {open
         code0 {\#include "subImage.h"}
         class subImage
       }
-      Fl_Group TopOutput {open
+      Fl_Group TopOutput {
         xywh {325 35 695 520}
       } {
         Fl_Output rateOutput0 {
@@ -395,7 +395,7 @@ class Gui {open
       Fl_Button sendParamsBut {
         label {Send Params}
         callback {app->openSendParamsWindow()}
-        xywh {190 95 100 25}
+        xywh {83 140 100 25}
       }
       Fl_Button testBut {
         label Test
@@ -408,8 +408,8 @@ class Gui {open
       }
       Fl_Light_Button writeFileBut {
         label {Write to file}
-        callback {app->start_file()} selected
-        xywh {85 160 95 25}
+        callback {app->start_file()}
+        xywh {85 210 95 25}
       }
       Fl_Value_Input nEventsDone {
         label counter
@@ -429,6 +429,11 @@ class Gui {open
         label Stop
         callback {app->stop_reading_data();}
         xywh {455 35 75 25} labelcolor 1 deactivate
+      }
+      Fl_Button setHoldBut {
+        label {Set Hold Time}
+        callback {app->openSetHoldTimeWindow()}
+        xywh {85 175 100 25}
       }
     }
     code {app=new Application();} {}
@@ -917,21 +922,21 @@ app->send_params();
     }
     Fl_Window setHoldTimeWindow {
       label {Set hold time and take data} open
-      xywh {617 168 312 165} type Double visible
+      xywh {869 528 312 165} type Double visible
     } {
       Fl_Value_Input setHoldTimeWindow_holdTime {
         label {Hold time setting (all ASICs)::}
         xywh {235 15 25 25}
       }
-      Fl_Button {} {
+      Fl_Button setHoldTimeWindow_setBut {
         label Set
         callback {app->send_global_params();}
-        xywh {120 60 80 25}
+        xywh {120 60 80 25} deactivate
       }
-      Fl_Button {} {
+      Fl_Button setHoldTimeWindow_autorunBut {
         label Autorun
-        callback {app->run_auto_sequence();} selected
-        xywh {120 105 80 25}
+        callback {app->start_auto_run();} selected
+        xywh {120 105 80 25} deactivate
       }
     }
   }

@@ -230,6 +230,11 @@ private:
   void cb_stopReadingDataButton_i(Fl_Button*, void*);
   static void cb_stopReadingDataButton(Fl_Button*, void*);
 public:
+  Fl_Button *setHoldBut;
+private:
+  void cb_setHoldBut_i(Fl_Button*, void*);
+  static void cb_setHoldBut(Fl_Button*, void*);
+public:
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:
@@ -253,6 +258,18 @@ private:
   static void cb_set(Fl_Button*, void*);
   void cb_clear_i(Fl_Button*, void*);
   static void cb_clear(Fl_Button*, void*);
+public:
+  Fl_Double_Window *setHoldTimeWindow;
+  Fl_Value_Input *setHoldTimeWindow_holdTime;
+  Fl_Button *setHoldTimeWindow_setBut;
+private:
+  void cb_setHoldTimeWindow_setBut_i(Fl_Button*, void*);
+  static void cb_setHoldTimeWindow_setBut(Fl_Button*, void*);
+public:
+  Fl_Button *setHoldTimeWindow_autorunBut;
+private:
+  void cb_setHoldTimeWindow_autorunBut_i(Fl_Button*, void*);
+  static void cb_setHoldTimeWindow_autorunBut(Fl_Button*, void*);
 public:
   void show();
   Application *app; 
