@@ -27,11 +27,9 @@ extern double detImage[XSTRIPS][YSTRIPS];
 int stop_message;
 FILE *dataFile;
 
-struct tm *times;
-time_t ltime;
-
 // filename is set automatically with local time
 char dataFilename[MAXPATH];
+char dataFileDir[MAXPATH];
 
 // these are declared in transFunc.cpp
 //extern HistogramFunction histFunc[4];
@@ -53,7 +51,7 @@ Application::Application()
   //nchan = -1;	//value not set yet, i.e. image not read
   //imgx = 0;
   //imgy = 0;
-  filename[0]='\0';
+  //filename[0]='\0';
 }
 
 //zero all analyzed data
@@ -66,7 +64,11 @@ void Application::FlushData(void)
 // open the data file for saving data
 void Application::start_file()
 {
-	char buffer[50];
+	struct tm *times;
+	time_t ltime;
+	
+	char file[200];
+
 	if (gui->writeFileBut->value() == 1) {
 		
 		// Open a file to write the data to
@@ -76,25 +78,34 @@ void Application::start_file()
 		times = localtime(&ltime);
 		strftime(stringtemp,24,"data_%Y%m%d_%H%M%S.dat",times);
 		strncpy(dataFilename,stringtemp,MAXPATH - 1);
-		dataFilename[MAXPATH - 1] = '\0';
+		strcpy(file, dataFileDir);
+		strcat(file, dataFilename);
+		//if (dataFileDir != "./"){ strcat(dataFilename, dataFileDir); }
+		//dataFilename[MAXPATH - 1] = '\0';
 		{
-			dataFile = fopen(dataFilename, "w");
+			dataFile = fopen(file, "w");
 			if (dataFile == NULL)
-			{
-				sprintf(buffer, "Cannot open file.\n");
-				gui->consoleBuf->insert(buffer);
-			} else {
-				sprintf(buffer, "Opened file %s.\n", dataFilename);
-				gui->consoleBuf->insert(buffer);
-			}
+				{ print_to_console("Cannot open file %s.\n", file); } 
+			else 
+			{ print_to_console("Opened file %s.\n", file); }
 		}
 	} else {
-		sprintf(buffer, "Closing file %s.\n", dataFilename);
-		gui->consoleBuf->insert(buffer);
+		print_to_console( "Closing file %s.\n", dataFilename);
 		fclose(dataFile);
 	}
 
 }
+
+void Application::set_datafile_dir(void)
+{
+	char *temp = fl_dir_chooser("Pick a directory:", "", 0);
+	strcpy(dataFileDir, temp);
+	if(dataFileDir == NULL)
+		return;
+	print_to_console("Output directory set to %s.\n", dataFileDir);
+	printf("%s", dataFilename);
+}
+
 
 // the method that gets executed when the readFile callback is called
 void Application::readFile()
@@ -300,6 +311,13 @@ void Application::start_reading_data(void)
 	
 }
 
+void Application::print_to_console(const char *text, char *string1)
+{
+	char buffer[200];
+	sprintf(buffer, text, string1);
+	gui->consoleBuf->insert(buffer);
+}
+								   
 void* Application::read_data(void* variable)
 {
 	char buffer[50];
