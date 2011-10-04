@@ -344,7 +344,7 @@ void Gui::cb_setHoldTimeWindow_autorunBut(Fl_Button* o, void* v) {
 }
 
 Gui::Gui() {
-  { mainWindow = new Fl_Double_Window(1250, 683, "FOXSI GSE");
+  { mainWindow = new Fl_Double_Window(1252, 739, "FOXSI GSE");
     mainWindow->color((Fl_Color)19);
     mainWindow->user_data((void*)(this));
     { menuBar = new Fl_Menu_Bar(-5, -1, 1255, 25, "menuBar");

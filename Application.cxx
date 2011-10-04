@@ -347,7 +347,7 @@ void* Application::read_data(void* variable)
 	Fl::unlock();	
 
 	for (int i = 0; i<gui->nEvents->value(); i++) {
-		usleep(50000);		// adjust this to achieve desired reading speed
+		usleep(20000);		// adjust this to achieve desired reading speed
 				
 		// check to see if the Stop button was pushed, if so then clean up 
 		// and stop this thread
@@ -361,6 +361,7 @@ void* Application::read_data(void* variable)
 				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
 				gui->consoleBuf->insert(buffer);
 				gui->stopReadingDataButton->deactivate();
+				gui->writeFileBut->activate();
 				Fl::unlock();	
 				
 			}
@@ -396,6 +397,7 @@ void* Application::read_data(void* variable)
 	gui->consoleBuf->insert(buffer);		
 	if (gui->writeFileBut->value() == 1){
 		fclose(dataFile);
+		gui->writeFileBut->value(0);
 	}
 	gui->stopReadingDataButton->deactivate();
 	Fl::unlock();	
@@ -460,11 +462,25 @@ void* Application::auto_run_sequence(void* variable)
 {
 	for(int i=1; i<32; i++){
 		Fl::lock();
+		gui->nEventsDone->value(0);
 		gui->setHoldTimeWindow_holdTime->value(i);
 		Fl::unlock();
 		gui->app->send_global_params();
+		gui->app->send_global_params();
+		gui->writeFileBut->value(1);
+		gui->app->start_file();
 		gui->app->start_reading_data();
-		sleep(1);
+		
+		while(1){
+
+			Fl::lock();
+			int nCtr  = gui->nEventsDone->value();
+			int nEvts = gui->nEvents->value();
+			Fl::unlock();
+
+			if(nCtr == (nEvts-1) ) break;
+			sleep(1);			
+		}
 		
 	}	
 	return 0;
