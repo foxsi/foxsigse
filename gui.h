@@ -30,10 +30,10 @@ public:
   Fl_Menu_Bar *menuBar;
   static Fl_Menu_Item menu_menuBar[];
   static Fl_Menu_Item *fileMenu;
-  static Fl_Menu_Item *simulateData;
+  static Fl_Menu_Item *outputDirChooser;
 private:
-  void cb_simulateData_i(Fl_Menu_*, void*);
-  static void cb_simulateData(Fl_Menu_*, void*);
+  void cb_outputDirChooser_i(Fl_Menu_*, void*);
+  static void cb_outputDirChooser(Fl_Menu_*, void*);
 public:
   static Fl_Menu_Item *readFile;
 private:

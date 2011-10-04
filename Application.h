@@ -71,10 +71,16 @@ public:
 	// open the data file for saving data
 	// executed when someone clicks on "Write to File" Button
 	void start_file(void);	
+	void set_datafile_dir(void);
 	
 	// clear the existing text displayed in the console
 	// executed when someone clicks the "Clear" Button next to the console
 	void clear_console(void);
+	
+	// convienience function to print text to the console
+	// not yet implemented
+	void print_to_console(const char *string1, char *string2 = "");
+
 	
 private:
 	char filename[40];

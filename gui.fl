@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {30 44 1250 683} type Double color 19 resizable
+      xywh {26 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -22,9 +22,9 @@ class Gui {open
           label File open
           xywh {0 0 100 20}
         } {
-          MenuItem simulateData {
-            label {Simulate Data}
-            callback {app->simulateData()}
+          MenuItem outputDirChooser {
+            label {Choose Output Dir}
+            callback {app->set_datafile_dir()} selected
             xywh {0 0 36 21}
           }
           MenuItem readFile {
@@ -132,7 +132,7 @@ class Gui {open
         code0 {\#include "subImage.h"}
         class subImage
       }
-      Fl_Group TopOutput {
+      Fl_Group TopOutput {open
         xywh {325 35 695 520}
       } {
         Fl_Output rateOutput0 {
@@ -383,7 +383,7 @@ class Gui {open
         xywh {209 65 80 25}
       }
       Fl_Box mainLightcurveWindow {
-        label {Light curve} selected
+        label {Light curve}
         xywh {760 155 300 125} box GTK_UP_BOX
         code0 {\#include "mainLightcurve.h"}
         class mainLightcurve

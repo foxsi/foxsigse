@@ -2,11 +2,11 @@
 
 #include "gui.h"
 
-void Gui::cb_simulateData_i(Fl_Menu_*, void*) {
-  app->simulateData();
+void Gui::cb_outputDirChooser_i(Fl_Menu_*, void*) {
+  app->set_datafile_dir();
 }
-void Gui::cb_simulateData(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_simulateData_i(o,v);
+void Gui::cb_outputDirChooser(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_outputDirChooser_i(o,v);
 }
 
 void Gui::cb_readFile_i(Fl_Menu_*, void*) {
@@ -116,7 +116,7 @@ void Gui::cb_setDetector7(Fl_Menu_* o, void* v) {
 
 Fl_Menu_Item Gui::menu_menuBar[] = {
  {"File", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
- {"Simulate Data", 0,  (Fl_Callback*)Gui::cb_simulateData, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Choose Output Dir", 0,  (Fl_Callback*)Gui::cb_outputDirChooser, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Read Data file", 0,  (Fl_Callback*)Gui::cb_readFile, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Read USB Stream", 0,  (Fl_Callback*)Gui::cb_readUSBStream, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Read Tele Stream", 0,  (Fl_Callback*)Gui::cb_readTeleStream, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -140,7 +140,7 @@ Fl_Menu_Item Gui::menu_menuBar[] = {
  {0,0,0,0,0,0,0,0,0}
 };
 Fl_Menu_Item* Gui::fileMenu = Gui::menu_menuBar + 0;
-Fl_Menu_Item* Gui::simulateData = Gui::menu_menuBar + 1;
+Fl_Menu_Item* Gui::outputDirChooser = Gui::menu_menuBar + 1;
 Fl_Menu_Item* Gui::readFile = Gui::menu_menuBar + 2;
 Fl_Menu_Item* Gui::readUSBStream = Gui::menu_menuBar + 3;
 Fl_Menu_Item* Gui::readTeleStream = Gui::menu_menuBar + 4;
