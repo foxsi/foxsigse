@@ -276,6 +276,13 @@ void Gui::cb_setHoldBut(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_setHoldBut_i(o,v);
 }
 
+void Gui::cb_Clear_i(Fl_Button*, void*) {
+  app->clear_console();
+}
+void Gui::cb_Clear(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Clear_i(o,v);
+}
+
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
   app->save_settings();
 app->send_params();
@@ -598,6 +605,10 @@ Gui::Gui() {
     { setHoldBut = new Fl_Button(85, 175, 100, 25, "Set Hold Time");
       setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
     } // Fl_Button* setHoldBut
+    { Fl_Button* o = new Fl_Button(1115, 320, 63, 20, "Clear");
+      o->labelcolor((Fl_Color)1);
+      o->callback((Fl_Callback*)cb_Clear);
+    } // Fl_Button* o
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow

@@ -229,6 +229,8 @@ public:
 private:
   void cb_stopReadingDataButton_i(Fl_Button*, void*);
   static void cb_stopReadingDataButton(Fl_Button*, void*);
+  void cb_Clear_i(Fl_Button*, void*);
+  static void cb_Clear(Fl_Button*, void*);
 public:
   Fl_Button *setHoldBut;
 private:

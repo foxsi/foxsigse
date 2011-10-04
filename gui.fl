@@ -383,7 +383,7 @@ class Gui {open
         xywh {209 65 80 25}
       }
       Fl_Box mainLightcurveWindow {
-        label {Light curve}
+        label {Light curve} selected
         xywh {760 155 300 125} box GTK_UP_BOX
         code0 {\#include "mainLightcurve.h"}
         class mainLightcurve
@@ -434,6 +434,11 @@ class Gui {open
         label {Set Hold Time}
         callback {app->openSetHoldTimeWindow()}
         xywh {85 175 100 25}
+      }
+      Fl_Button {} {
+        label Clear
+        callback {app->clear_console();}
+        xywh {1115 320 63 20} labelcolor 1
       }
     }
     code {app=new Application();} {}

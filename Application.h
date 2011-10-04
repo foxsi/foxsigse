@@ -70,8 +70,11 @@ public:
 	
 	// open the data file for saving data
 	// executed when someone clicks on "Write to File" Button
-	void start_file(void);			
+	void start_file(void);	
 	
+	// clear the existing text displayed in the console
+	// executed when someone clicks the "Clear" Button next to the console
+	void clear_console(void);
 	
 private:
 	char filename[40];
