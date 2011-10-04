@@ -229,13 +229,13 @@ public:
 private:
   void cb_stopReadingDataButton_i(Fl_Button*, void*);
   static void cb_stopReadingDataButton(Fl_Button*, void*);
-  void cb_Clear_i(Fl_Button*, void*);
-  static void cb_Clear(Fl_Button*, void*);
 public:
   Fl_Button *setHoldBut;
 private:
   void cb_setHoldBut_i(Fl_Button*, void*);
   static void cb_setHoldBut(Fl_Button*, void*);
+  void cb_Clear_i(Fl_Button*, void*);
+  static void cb_Clear(Fl_Button*, void*);
 public:
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
