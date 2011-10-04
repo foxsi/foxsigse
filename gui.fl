@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {208 44 1250 724} type Double color 19 resizable
+      xywh {27 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -383,7 +383,7 @@ class Gui {open
         xywh {209 65 80 25}
       }
       Fl_Box mainLightcurveWindow {
-        label {Light curve}
+        label {Light curve} selected
         xywh {760 155 300 125} box GTK_UP_BOX
         code0 {\#include "mainLightcurve.h"}
         class mainLightcurve
@@ -408,7 +408,7 @@ class Gui {open
       }
       Fl_Light_Button writeFileBut {
         label {Write to file}
-        callback {app->start_file()} selected
+        callback {app->start_file()}
         xywh {85 160 95 25}
       }
       Fl_Value_Input nEventsDone {
@@ -429,6 +429,11 @@ class Gui {open
         label Stop
         callback {app->stop_reading_data();}
         xywh {455 35 75 25} labelcolor 1 deactivate
+      }
+      Fl_Button {} {
+        label Clear
+        callback {app->clear_console();}
+        xywh {1115 320 63 20} labelcolor 1
       }
     }
     code {app=new Application();} {}

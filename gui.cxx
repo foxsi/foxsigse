@@ -269,6 +269,13 @@ void Gui::cb_stopReadingDataButton(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_stopReadingDataButton_i(o,v);
 }
 
+void Gui::cb_Clear_i(Fl_Button*, void*) {
+  app->clear_console();
+}
+void Gui::cb_Clear(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Clear_i(o,v);
+}
+
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
   app->save_settings();
 app->send_params();
@@ -316,7 +323,7 @@ void Gui::cb_clear(Fl_Button* o, void* v) {
 }
 
 Gui::Gui() {
-  { mainWindow = new Fl_Double_Window(1250, 724, "FOXSI GSE");
+  { mainWindow = new Fl_Double_Window(1252, 739, "FOXSI GSE");
     mainWindow->color((Fl_Color)19);
     mainWindow->user_data((void*)(this));
     { menuBar = new Fl_Menu_Bar(-5, -1, 1255, 25, "menuBar");
@@ -574,6 +581,10 @@ Gui::Gui() {
       stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
       stopReadingDataButton->deactivate();
     } // Fl_Button* stopReadingDataButton
+    { Fl_Button* o = new Fl_Button(1115, 320, 63, 20, "Clear");
+      o->labelcolor((Fl_Color)1);
+      o->callback((Fl_Callback*)cb_Clear);
+    } // Fl_Button* o
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow

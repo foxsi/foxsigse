@@ -49,7 +49,6 @@ char dataFilename[MAXPATH];
 // the constructor method for the Application class
 Application::Application()
 {
-  
   // add initialization here:
   //nchan = -1;	//value not set yet, i.e. image not read
   //imgx = 0;
@@ -420,6 +419,13 @@ void Application::restore_settings(void)
 	gui->usb->restoreSettings();
 }
 
+void Application::clear_console(void)
+{
+	// clear the text in the console
+	gui->buff->select(0, gui->buff->length());
+	gui->buff->remove_selection();
+}
+	
 void Application::test(void)
 {
 
