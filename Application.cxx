@@ -273,6 +273,8 @@ void Application::initialize_data(void)
 	
 	gui->startReadingDataButton->activate();
 	gui->sendParamsWindow_sendBut->activate();
+	gui->setHoldTimeWindow_setBut->activate();
+	gui->setHoldTimeWindow_autorunBut->activate();
 	FlushData();
 }
 
@@ -345,7 +347,7 @@ void* Application::read_data(void* variable)
 	Fl::unlock();	
 
 	for (int i = 0; i<gui->nEvents->value(); i++) {
-		usleep(10000);		// adjust this to achieve desired reading speed
+		usleep(20000);		// adjust this to achieve desired reading speed
 				
 		// check to see if the Stop button was pushed, if so then clean up 
 		// and stop this thread
@@ -359,6 +361,7 @@ void* Application::read_data(void* variable)
 				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
 				gui->consoleBuf->insert(buffer);
 				gui->stopReadingDataButton->deactivate();
+				gui->writeFileBut->activate();
 				Fl::unlock();	
 				
 			}
@@ -394,6 +397,7 @@ void* Application::read_data(void* variable)
 	gui->consoleBuf->insert(buffer);		
 	if (gui->writeFileBut->value() == 1){
 		fclose(dataFile);
+		gui->writeFileBut->value(0);
 	}
 	gui->stopReadingDataButton->deactivate();
 	Fl::unlock();	
@@ -409,6 +413,13 @@ void Application::openSendParamsWindow(void)
 	}
 }
 
+void Application::openSetHoldTimeWindow(void)
+{
+	gui->setHoldTimeWindow->show();
+	if (gui->initializeBut->value() == 0) {
+	}
+}
+
 void Application::send_params(void)
 {	
 	gui->usb->setConfig();	
@@ -420,6 +431,61 @@ void Application::send_global_params(void)
 	gui->usb->setGlobalConfig();
 	gui->consoleBuf->insert("Sending global Params to controller.\n");
 }
+
+void Application::start_auto_run(void)
+{
+	pthread_t thread;
+    struct sched_param param;
+    pthread_attr_t tattr;
+	
+	int *variable;
+	int ret;
+	
+	stop_message = 0;
+	
+	variable = (int *) malloc(sizeof(int));
+	*variable = 6;
+	
+	// define the custom priority for one of the threads
+    int newprio = -10;
+	param.sched_priority = newprio;
+	ret = pthread_attr_init(&tattr);
+	ret = pthread_attr_setschedparam (&tattr, &param);
+	
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	
+	ret = pthread_create(&thread, &tattr, auto_run_sequence, (void *) variable);
+	
+}
+
+void* Application::auto_run_sequence(void* variable)
+{
+	for(int i=1; i<32; i++){
+		Fl::lock();
+		gui->nEventsDone->value(0);
+		gui->setHoldTimeWindow_holdTime->value(i);
+		Fl::unlock();
+		gui->app->send_global_params();
+		gui->app->send_global_params();
+		gui->writeFileBut->value(1);
+		gui->app->start_file();
+		gui->app->start_reading_data();
+		
+		while(1){
+
+			Fl::lock();
+			int nCtr  = gui->nEventsDone->value();
+			int nEvts = gui->nEvents->value();
+			Fl::unlock();
+
+			if(nCtr == (nEvts-1) ) break;
+			sleep(1);			
+		}
+		
+	}	
+	return 0;
+}
+
 
 void Application::break_acq(int data)
 {

@@ -269,6 +269,13 @@ void Gui::cb_stopReadingDataButton(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_stopReadingDataButton_i(o,v);
 }
 
+void Gui::cb_setHoldBut_i(Fl_Button*, void*) {
+  app->openSetHoldTimeWindow();
+}
+void Gui::cb_setHoldBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setHoldBut_i(o,v);
+}
+
 void Gui::cb_Clear_i(Fl_Button*, void*) {
   app->clear_console();
 }
@@ -320,6 +327,20 @@ void Gui::cb_clear_i(Fl_Button*, void*) {
 }
 void Gui::cb_clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_clear_i(o,v);
+}
+
+void Gui::cb_setHoldTimeWindow_setBut_i(Fl_Button*, void*) {
+  app->send_global_params();
+}
+void Gui::cb_setHoldTimeWindow_setBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setHoldTimeWindow_setBut_i(o,v);
+}
+
+void Gui::cb_setHoldTimeWindow_autorunBut_i(Fl_Button*, void*) {
+  app->start_auto_run();
+}
+void Gui::cb_setHoldTimeWindow_autorunBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setHoldTimeWindow_autorunBut_i(o,v);
 }
 
 Gui::Gui() {
@@ -555,7 +576,7 @@ Gui::Gui() {
     } // mainLightcurve* mainLightcurveWindow
     { glitchBut = new Fl_Light_Button(90, 100, 75, 25, "Glitch");
     } // Fl_Light_Button* glitchBut
-    { sendParamsBut = new Fl_Button(190, 95, 100, 25, "Send Params");
+    { sendParamsBut = new Fl_Button(83, 140, 100, 25, "Send Params");
       sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
     } // Fl_Button* sendParamsBut
     { testBut = new Fl_Button(15, 275, 75, 25, "Test");
@@ -564,7 +585,7 @@ Gui::Gui() {
     { nEvents = new Fl_Value_Input(345, 35, 40, 24, "events");
       nEvents->value(1);
     } // Fl_Value_Input* nEvents
-    { writeFileBut = new Fl_Light_Button(85, 160, 95, 25, "Write to file");
+    { writeFileBut = new Fl_Light_Button(85, 210, 95, 25, "Write to file");
       writeFileBut->callback((Fl_Callback*)cb_writeFileBut);
     } // Fl_Light_Button* writeFileBut
     { nEventsDone = new Fl_Value_Input(345, 66, 40, 24, "counter");
@@ -581,6 +602,9 @@ Gui::Gui() {
       stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
       stopReadingDataButton->deactivate();
     } // Fl_Button* stopReadingDataButton
+    { setHoldBut = new Fl_Button(85, 175, 100, 25, "Set Hold Time");
+      setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
+    } // Fl_Button* setHoldBut
     { Fl_Button* o = new Fl_Button(1115, 320, 63, 20, "Clear");
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Clear);
@@ -927,6 +951,20 @@ Gui::Gui() {
     } // Fl_Button* o
     sendParamsWindow->end();
   } // Fl_Double_Window* sendParamsWindow
+  { setHoldTimeWindow = new Fl_Double_Window(312, 165, "Set hold time and take data");
+    setHoldTimeWindow->user_data((void*)(this));
+    { setHoldTimeWindow_holdTime = new Fl_Value_Input(235, 15, 25, 25, "Hold time setting (all ASICs)::");
+    } // Fl_Value_Input* setHoldTimeWindow_holdTime
+    { setHoldTimeWindow_setBut = new Fl_Button(120, 60, 80, 25, "Set");
+      setHoldTimeWindow_setBut->callback((Fl_Callback*)cb_setHoldTimeWindow_setBut);
+      setHoldTimeWindow_setBut->deactivate();
+    } // Fl_Button* setHoldTimeWindow_setBut
+    { setHoldTimeWindow_autorunBut = new Fl_Button(120, 105, 80, 25, "Autorun");
+      setHoldTimeWindow_autorunBut->callback((Fl_Callback*)cb_setHoldTimeWindow_autorunBut);
+      setHoldTimeWindow_autorunBut->deactivate();
+    } // Fl_Button* setHoldTimeWindow_autorunBut
+    setHoldTimeWindow->end();
+  } // Fl_Double_Window* setHoldTimeWindow
 }
 
 void Gui::show() {
