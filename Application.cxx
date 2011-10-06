@@ -76,7 +76,7 @@ void Application::start_file()
 		char stringtemp[80];
 		time(&ltime);
 		times = localtime(&ltime);
-		strftime(stringtemp,24,"data_%Y%m%d_%H%M%S.dat",times);
+		strftime(stringtemp,25,"data_%Y%m%d_%H%M%S.dat\0",times);
 		strncpy(dataFilename,stringtemp,MAXPATH - 1);
 		strcpy(file, dataFileDir);
 		strcat(file, dataFilename);
