@@ -276,6 +276,12 @@ void Gui::cb_Clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Clear_i(o,v);
 }
 
+Fl_Menu_Item Gui::menu_fileTypeChoice[] = {
+ {"Text", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Binary", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0}
+};
+
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
   app->save_settings();
 app->send_params();
@@ -564,7 +570,7 @@ Gui::Gui() {
     { nEvents = new Fl_Value_Input(345, 35, 40, 24, "events");
       nEvents->value(1);
     } // Fl_Value_Input* nEvents
-    { writeFileBut = new Fl_Light_Button(85, 160, 95, 25, "Write to file");
+    { writeFileBut = new Fl_Light_Button(15, 160, 95, 25, "Write to file");
       writeFileBut->callback((Fl_Callback*)cb_writeFileBut);
     } // Fl_Light_Button* writeFileBut
     { nEventsDone = new Fl_Value_Input(345, 66, 40, 24, "counter");
@@ -585,6 +591,10 @@ Gui::Gui() {
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Clear);
     } // Fl_Button* o
+    { fileTypeChoice = new Fl_Choice(176, 160, 75, 25, "File type:");
+      fileTypeChoice->down_box(FL_BORDER_BOX);
+      fileTypeChoice->menu(menu_fileTypeChoice);
+    } // Fl_Choice* fileTypeChoice
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow

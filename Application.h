@@ -16,9 +16,9 @@ public:
 	
 	// Menu Item Actions
 	
-	// File Menu
-	// Start simulating data (NOT IMPLEMENTED)
-	void simulateData();	
+	// --------------------- File Menu -------------------------------
+	// Set the directory that the data file will be written to
+	void set_datafile_dir(void);
 	// Read data from file 
 	void readFile();
 	// Quite and close the program
@@ -67,7 +67,6 @@ public:
 	// open the data file for saving data
 	// executed when someone clicks on "Write to File" Button
 	void start_file(void);	
-	void set_datafile_dir(void);
 	
 	// clear the existing text displayed in the console
 	// executed when someone clicks the "Clear" Button next to the console
@@ -75,12 +74,13 @@ public:
 	
 	// convienience function to print text to the console
 	// not yet implemented
-	void print_to_console(const char *string1, char *string2 = "");
+	static void printf_to_console(const char *string1, char *string2);
+	static void print_to_console(const char *text);
 
-	
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
+	static void* new_read_data();
 
 	
 	

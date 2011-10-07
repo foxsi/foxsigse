@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {26 44 1252 739} type Double color 19 resizable
+      xywh {438 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -24,7 +24,7 @@ class Gui {open
         } {
           MenuItem outputDirChooser {
             label {Choose Output Dir}
-            callback {app->set_datafile_dir()} selected
+            callback {app->set_datafile_dir()}
             xywh {0 0 36 21}
           }
           MenuItem readFile {
@@ -409,7 +409,7 @@ class Gui {open
       Fl_Light_Button writeFileBut {
         label {Write to file}
         callback {app->start_file()}
-        xywh {85 160 95 25}
+        xywh {15 160 95 25}
       }
       Fl_Value_Input nEventsDone {
         label counter
@@ -434,6 +434,19 @@ class Gui {open
         label Clear
         callback {app->clear_console();}
         xywh {1115 320 63 20} labelcolor 1
+      }
+      Fl_Choice fileTypeChoice {
+        label {File type:} open selected
+        xywh {176 160 75 25} down_box BORDER_BOX
+      } {
+        MenuItem {} {
+          label Text
+          xywh {0 0 31 20}
+        }
+        MenuItem {} {
+          label Binary
+          xywh {0 0 31 20}
+        }
       }
     }
     code {app=new Application();} {}

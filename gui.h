@@ -232,6 +232,8 @@ private:
   void cb_Clear_i(Fl_Button*, void*);
   static void cb_Clear(Fl_Button*, void*);
 public:
+  Fl_Choice *fileTypeChoice;
+  static Fl_Menu_Item menu_fileTypeChoice[];
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:

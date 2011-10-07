@@ -24,6 +24,11 @@ extern Gui *gui;
 extern int HistogramFunction[CHANNELS];
 extern double detImage[XSTRIPS][YSTRIPS];
 
+unsigned short int buffer;
+unsigned short int buffer0;
+pthread_mutex_t mymutex;
+int fout;
+
 int stop_message;
 FILE *dataFile;
 
@@ -44,33 +49,39 @@ char dataFileDir[MAXPATH];
 //GLubyte *imgpix;	//pixel buffer for image
 
 
-// the constructor method for the Application class
 Application::Application()
 {
-  // add initialization here:
-  //nchan = -1;	//value not set yet, i.e. image not read
-  //imgx = 0;
-  //imgy = 0;
-  //filename[0]='\0';
+	// Constructor method for the Application class
+	// Add initialization here:
+  
+	//nchan = -1;	//value not set yet, i.e. image not read
+	//imgx = 0;
+	//imgy = 0;
+	//filename[0]='\0';
+	
 }
 
-//zero all analyzed data
 void Application::FlushData(void)
 {	
+	// Zeros all the data displays
+	//
 	gui->data->FlushHistogram();
 	gui->data->FlushImage();
 }
 
-// open the data file for saving data
 void Application::start_file()
 {
+	// Opens the data file for saving data
+	//
 	struct tm *times;
 	time_t ltime;
 	
+	// the following variables holds the fully qualified filename (dir + filename)
+	// if directory NOT set then will create file inside of current working directory
+	// which is likely <foxsi gse dir>/build/Debug/
 	char file[200];
 
 	if (gui->writeFileBut->value() == 1) {
-		
 		// Open a file to write the data to
 		// Name of file is automatically set with current date
 		char stringtemp[80];
@@ -82,16 +93,28 @@ void Application::start_file()
 		strcat(file, dataFilename);
 		//if (dataFileDir != "./"){ strcat(dataFilename, dataFileDir); }
 		//dataFilename[MAXPATH - 1] = '\0';
-		{
+		if (gui->fileTypeChoice->value() == 0) {
 			dataFile = fopen(file, "w");
+			
 			if (dataFile == NULL)
-				{ print_to_console("Cannot open file %s.\n", file); } 
+				printf_to_console("Cannot open file %s.\n", file); 
 			else 
-			{ print_to_console("Opened file %s.\n", file); }
+				printf_to_console("Opened file %s.\n", file);
+			
 		}
+		if (gui->fileTypeChoice->value() == 1) {
+			if((fout = open(file,O_RDWR|O_CREAT,0600)) < 0){
+				printf_to_console("Cannot open file %s.\n", file);}
+			else {
+				printf_to_console("Opened file %s.\n", file);
+			}
+
+		}
+		
 	} else {
-		print_to_console( "Closing file %s.\n", dataFilename);
+		printf_to_console( "Closing file %s.\n", dataFilename);
 		fclose(dataFile);
+		fout = 0;
 	}
 
 }
@@ -102,7 +125,7 @@ void Application::set_datafile_dir(void)
 	strcpy(dataFileDir, temp);
 	if(dataFileDir == NULL)
 		return;
-	print_to_console("Output directory set to %s.\n", dataFileDir);
+	printf_to_console("Output directory set to %s.\n", dataFileDir);
 	printf("%s", dataFilename);
 }
 
@@ -130,10 +153,6 @@ void Application::readFile()
 void Application::Exit()
 {
 	exit(0);
-}
-
-void Application::simulateData(void)
-{
 }
 
 void Application::readUSBStream(void)
@@ -293,7 +312,8 @@ void Application::start_reading_data(void)
 	
 	int *variable;
 	int ret;
-	
+	gui->stopReadingDataButton->activate();
+
 	stop_message = 0;
 	
 	variable = (int *) malloc(sizeof(int));
@@ -305,45 +325,93 @@ void Application::start_reading_data(void)
 	ret = pthread_attr_init(&tattr);
 	ret = pthread_attr_setschedparam (&tattr, &param);
 	
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	
 	ret = pthread_create(&thread, &tattr, read_data, (void *) variable);
 	
 }
 
-void Application::print_to_console(const char *text, char *string1)
+void Application::printf_to_console(const char *text, char *string1)
 {
 	char buffer[200];
 	sprintf(buffer, text, string1);
 	gui->consoleBuf->insert(buffer);
 }
-								   
+
+void Application::print_to_console(const char *text)
+{
+	gui->consoleBuf->insert(text);
+}
+
+void* Application::new_read_data()
+{
+//	unsigned int i;
+//	long len;
+//	ssize_t wlen;
+//	unsigned short int status;
+//	unsigned short int buffer0[1024],buffer1[1024];
+//
+//	while (1) 
+//	{
+//		// alternate between reading data into buffer0 and buffer1
+//		// copy it into buffer with memcopy
+//		
+//		len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer0);
+//		
+//		if(fout > 0)
+//		{
+//			if( (wlen = write(fout,(const void *) buffer0,2048) ) != 2048){};
+//		}
+//		
+//		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
+//		{
+//			if(newdisplay == 0)
+//			{
+//				memcpy((void *) buffer,(void *) buffer0,2048);
+//				newdisplay = 1;
+//			}
+//			pthread_mutex_unlock(&mymutex);
+//			
+//		}
+//		
+//		len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer1);
+//		
+//		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
+//		{
+//			memcpy((void *) buffer,(void *) buffer1,2048);
+//			pthread_mutex_unlock(&mymutex);
+//		}
+//		
+//		if(fout >0)
+//		{
+//			if( (wlen = write(fout,(const void *) buffer1,2048) ) != 2048){};
+//		}
+//	}
+	return 0;
+}
+
 void* Application::read_data(void* variable)
 {
 	char buffer[50];
 	int badSync = 0;
 	int badRead = 0;
 	int status = 0;
-	
-	gui->stopReadingDataButton->activate();
-	
-	if (gui->writeFileBut->value() == 1){
+	char *tmp[1];
+	// data file should be open as long as the "Write to file" has been clicked
+	//if (gui->writeFileBut->value() == 1){
 		// Open data file
 		//dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
-		if(dataFile == NULL){
-			Fl::lock();
-			sprintf(buffer, "Invalid filename.\n");
-			gui->consoleBuf->insert(buffer);
-			Fl::unlock();
-			return NULL;
-		}
-	}
+	//	if(dataFile == NULL){
+	//		Fl::lock();
+	//		sprintf(buffer, "Invalid filename.\n");
+	//		gui->consoleBuf->insert(buffer);
+	//		Fl::unlock();
+	//		return NULL;
+	//	}
+	//}
 
-	sprintf(buffer, "Reading...\n");
 	Fl::lock();
-	gui->consoleBuf->insert(buffer);
-	Fl::unlock();	
-
+	print_to_console("Reading...\n");
+	Fl::unlock();
+	
 	for (int i = 0; i<gui->nEvents->value(); i++) {
 		usleep(10000);		// adjust this to achieve desired reading speed
 				
@@ -353,9 +421,9 @@ void* Application::read_data(void* variable)
 			// clean up code goes here then exit
 			if (gui->writeFileBut->value() == 1){
 				fclose(dataFile);
+				
 				Fl::lock();
-				sprintf(buffer, "Read Stopped.\n");
-				gui->consoleBuf->insert(buffer);
+				print_to_console("Read force stopped!\n");
 				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
 				gui->consoleBuf->insert(buffer);
 				gui->stopReadingDataButton->deactivate();
