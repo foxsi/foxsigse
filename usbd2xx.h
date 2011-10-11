@@ -35,7 +35,7 @@ public:
 	void close();		// Close and cleanup the device and data file.
 	void printFrame();	// Print out the last frame that was read
 	void setConfig();	// Write configuration register to FPGA.
-	void setGlobalConfig();	// Write config settings that are global, not just one ASIC.
+	void setGlobalConfig(int option);	// Write config settings that are global, not just one ASIC.
 	void breakAcq(int data);	// Break ACQ loop.
 	void saveSettings();	// Save current control settings for one ASIC.
 	void restoreSettings();	// Restore last control settings for one ASIC.

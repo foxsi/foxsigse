@@ -262,13 +262,6 @@ void Gui::cb_CLEAR(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_CLEAR_i(o,v);
 }
 
-void Gui::cb_stopReadingDataButton_i(Fl_Button*, void*) {
-  app->stop_reading_data();
-}
-void Gui::cb_stopReadingDataButton(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_stopReadingDataButton_i(o,v);
-}
-
 void Gui::cb_setHoldBut_i(Fl_Button*, void*) {
   app->openSetHoldTimeWindow();
 }
@@ -281,6 +274,20 @@ void Gui::cb_Clear_i(Fl_Button*, void*) {
 }
 void Gui::cb_Clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Clear_i(o,v);
+}
+
+void Gui::cb_setTrigBut_i(Fl_Button*, void*) {
+  app->openSetTrigWindow();
+}
+void Gui::cb_setTrigBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigBut_i(o,v);
+}
+
+void Gui::cb_stopReadingDataButton_i(Fl_Light_Button*, void*) {
+  app->stop_reading_data();
+}
+void Gui::cb_stopReadingDataButton(Fl_Light_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_stopReadingDataButton_i(o,v);
 }
 
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
@@ -306,13 +313,6 @@ void Gui::cb_sendParamsWindow_asic(Fl_Value_Input* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_sendParamsWindow_asic_i(o,v);
 }
 
-void Gui::cb_Set_i(Fl_Button*, void*) {
-  app->send_global_params();
-}
-void Gui::cb_Set(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Set_i(o,v);
-}
-
 void Gui::cb_set_i(Fl_Button*, void*) {
   for(int i=0; i<64; i++) 
   sendParamsWindow_chan[i]->set();
@@ -330,7 +330,7 @@ void Gui::cb_clear(Fl_Button* o, void* v) {
 }
 
 void Gui::cb_setHoldTimeWindow_setBut_i(Fl_Button*, void*) {
-  app->send_global_params();
+  app->send_global_params(0);
 }
 void Gui::cb_setHoldTimeWindow_setBut(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_setHoldTimeWindow_setBut_i(o,v);
@@ -343,8 +343,56 @@ void Gui::cb_setHoldTimeWindow_autorunBut(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_setHoldTimeWindow_autorunBut_i(o,v);
 }
 
+void Gui::cb_Close1_i(Fl_Button*, void*) {
+  setHoldTimeWindow->hide();
+}
+void Gui::cb_Close1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Close1_i(o,v);
+}
+
+void Gui::cb_Close2_i(Fl_Button*, void*) {
+  setTrigWindow->hide();
+}
+void Gui::cb_Close2(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Close2_i(o,v);
+}
+
+void Gui::cb_setTrigWindow_setDelay_i(Fl_Button*, void*) {
+  app->send_global_params(3);
+}
+void Gui::cb_setTrigWindow_setDelay(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigWindow_setDelay_i(o,v);
+}
+
+void Gui::cb_setTrigWindow_setTimeout_i(Fl_Button*, void*) {
+  app->send_global_params(1);
+}
+void Gui::cb_setTrigWindow_setTimeout(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigWindow_setTimeout_i(o,v);
+}
+
+void Gui::cb_setTrigWindow_useTimeout_i(Fl_Value_Input*, void*) {
+  if(setTrigWindow_useTimeout->value()){
+setTrigWindow_setTimeout->activate();
+setTrigWindow_timeoutTime->activate();
+} else{
+setTrigWindow_setTimeout->deactivate();
+setTrigWindow_timeoutTime->deactivate();
+};
+}
+void Gui::cb_setTrigWindow_useTimeout(Fl_Value_Input* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigWindow_useTimeout_i(o,v);
+}
+
+void Gui::cb_setTrigWindow_setTrigMode_i(Fl_Button*, void*) {
+  app->send_global_params(2);
+}
+void Gui::cb_setTrigWindow_setTrigMode(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigWindow_setTrigMode_i(o,v);
+}
+
 Gui::Gui() {
-  { mainWindow = new Fl_Double_Window(1252, 739, "FOXSI GSE");
+  { mainWindow = new Fl_Double_Window(1252, 688, "FOXSI GSE");
     mainWindow->color((Fl_Color)19);
     mainWindow->user_data((void*)(this));
     { menuBar = new Fl_Menu_Bar(-5, -1, 1255, 25, "menuBar");
@@ -593,15 +641,12 @@ Gui::Gui() {
     } // Fl_Value_Input* nEventsDone
     { Fl_Button* o = new Fl_Button(215, 245, 63, 20, "BREAK");
       o->callback((Fl_Callback*)cb_BREAK);
+      o->deactivate();
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(215, 270, 63, 20, "CLEAR");
       o->callback((Fl_Callback*)cb_CLEAR);
+      o->deactivate();
     } // Fl_Button* o
-    { stopReadingDataButton = new Fl_Button(455, 35, 75, 25, "Stop");
-      stopReadingDataButton->labelcolor((Fl_Color)1);
-      stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
-      stopReadingDataButton->deactivate();
-    } // Fl_Button* stopReadingDataButton
     { setHoldBut = new Fl_Button(85, 175, 100, 25, "Set Hold Time");
       setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
     } // Fl_Button* setHoldBut
@@ -609,6 +654,14 @@ Gui::Gui() {
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Clear);
     } // Fl_Button* o
+    { setTrigBut = new Fl_Button(198, 175, 125, 25, "Set Trigger Options");
+      setTrigBut->callback((Fl_Callback*)cb_setTrigBut);
+    } // Fl_Button* setTrigBut
+    { stopReadingDataButton = new Fl_Light_Button(455, 35, 75, 25, "Stop");
+      stopReadingDataButton->labelcolor((Fl_Color)1);
+      stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
+      stopReadingDataButton->deactivate();
+    } // Fl_Light_Button* stopReadingDataButton
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow
@@ -938,11 +991,6 @@ Gui::Gui() {
       sendParamsWindow_asic->step(1);
       sendParamsWindow_asic->callback((Fl_Callback*)cb_sendParamsWindow_asic);
     } // Fl_Value_Input* sendParamsWindow_asic
-    { sendParamsWindow_holdTime = new Fl_Value_Input(205, 491, 35, 24, "Hold time setting (all ASICs)::");
-    } // Fl_Value_Input* sendParamsWindow_holdTime
-    { Fl_Button* o = new Fl_Button(249, 492, 63, 20, "Set");
-      o->callback((Fl_Callback*)cb_Set);
-    } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(555, 455, 63, 20, "set all");
       o->callback((Fl_Callback*)cb_set);
     } // Fl_Button* o
@@ -955,16 +1003,49 @@ Gui::Gui() {
     setHoldTimeWindow->user_data((void*)(this));
     { setHoldTimeWindow_holdTime = new Fl_Value_Input(235, 15, 25, 25, "Hold time setting (all ASICs)::");
     } // Fl_Value_Input* setHoldTimeWindow_holdTime
-    { setHoldTimeWindow_setBut = new Fl_Button(120, 60, 80, 25, "Set");
+    { setHoldTimeWindow_setBut = new Fl_Button(70, 65, 80, 25, "Set");
       setHoldTimeWindow_setBut->callback((Fl_Callback*)cb_setHoldTimeWindow_setBut);
       setHoldTimeWindow_setBut->deactivate();
     } // Fl_Button* setHoldTimeWindow_setBut
-    { setHoldTimeWindow_autorunBut = new Fl_Button(120, 105, 80, 25, "Autorun");
+    { setHoldTimeWindow_autorunBut = new Fl_Button(175, 65, 80, 25, "Autorun");
       setHoldTimeWindow_autorunBut->callback((Fl_Callback*)cb_setHoldTimeWindow_autorunBut);
       setHoldTimeWindow_autorunBut->deactivate();
     } // Fl_Button* setHoldTimeWindow_autorunBut
+    { Fl_Button* o = new Fl_Button(125, 115, 80, 25, "Close");
+      o->callback((Fl_Callback*)cb_Close1);
+      o->deactivate();
+    } // Fl_Button* o
     setHoldTimeWindow->end();
   } // Fl_Double_Window* setHoldTimeWindow
+  { setTrigWindow = new Fl_Double_Window(357, 203, "Trigger Options");
+    setTrigWindow->user_data((void*)(this));
+    { setTrigWindow_delayTime = new Fl_Value_Input(210, 16, 25, 24, "Trigger delay (units of 3.2 us)");
+      setTrigWindow_delayTime->value(3);
+    } // Fl_Value_Input* setTrigWindow_delayTime
+    { setTrigWindow_timeoutTime = new Fl_Value_Input(211, 106, 25, 24, "Trigger timeout (units of 3.2 us)");
+      setTrigWindow_timeoutTime->value(31);
+      setTrigWindow_timeoutTime->deactivate();
+    } // Fl_Value_Input* setTrigWindow_timeoutTime
+    { Fl_Button* o = new Fl_Button(125, 155, 80, 25, "Close");
+      o->callback((Fl_Callback*)cb_Close2);
+      o->deactivate();
+    } // Fl_Button* o
+    { setTrigWindow_setDelay = new Fl_Button(255, 15, 80, 25, "Set");
+      setTrigWindow_setDelay->callback((Fl_Callback*)cb_setTrigWindow_setDelay);
+    } // Fl_Button* setTrigWindow_setDelay
+    { setTrigWindow_setTimeout = new Fl_Button(255, 105, 80, 25, "Set");
+      setTrigWindow_setTimeout->callback((Fl_Callback*)cb_setTrigWindow_setTimeout);
+      setTrigWindow_setTimeout->deactivate();
+    } // Fl_Button* setTrigWindow_setTimeout
+    { setTrigWindow_useTimeout = new Fl_Value_Input(211, 63, 25, 21, "Use timeout");
+      setTrigWindow_useTimeout->value(1);
+      setTrigWindow_useTimeout->callback((Fl_Callback*)cb_setTrigWindow_useTimeout);
+    } // Fl_Value_Input* setTrigWindow_useTimeout
+    { setTrigWindow_setTrigMode = new Fl_Button(255, 60, 80, 25, "Set");
+      setTrigWindow_setTrigMode->callback((Fl_Callback*)cb_setTrigWindow_setTrigMode);
+    } // Fl_Button* setTrigWindow_setTrigMode
+    setTrigWindow->end();
+  } // Fl_Double_Window* setTrigWindow
 }
 
 void Gui::show() {

@@ -45,6 +45,7 @@ public:
 	void close_data(void);			// Close a connection to a data stream
 	void openSendParamsWindow(void);		// Open the send params window
 	void openSetHoldTimeWindow(void);		// Open the set hold time window
+	void openSetTrigWindow(void);			// Open the trigger options window
 	
 	//END Menu Item Actions -----------------------------------------------------------
 	
@@ -65,7 +66,7 @@ public:
 	void start_reading_data(void);	// start thread to control read functions.
 
 	// Callbacks for the set hold time window
-	void send_global_params(void);	// set hold time
+	void send_global_params(int option);	// set trigger options
 	void start_auto_run(void);	// auto-run sequence of acquisitions with varying hold times
 	
 	// open the data file for saving data

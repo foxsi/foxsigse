@@ -225,17 +225,22 @@ private:
   void cb_CLEAR_i(Fl_Button*, void*);
   static void cb_CLEAR(Fl_Button*, void*);
 public:
-  Fl_Button *stopReadingDataButton;
-private:
-  void cb_stopReadingDataButton_i(Fl_Button*, void*);
-  static void cb_stopReadingDataButton(Fl_Button*, void*);
-public:
   Fl_Button *setHoldBut;
 private:
   void cb_setHoldBut_i(Fl_Button*, void*);
   static void cb_setHoldBut(Fl_Button*, void*);
   void cb_Clear_i(Fl_Button*, void*);
   static void cb_Clear(Fl_Button*, void*);
+public:
+  Fl_Button *setTrigBut;
+private:
+  void cb_setTrigBut_i(Fl_Button*, void*);
+  static void cb_setTrigBut(Fl_Button*, void*);
+public:
+  Fl_Light_Button *stopReadingDataButton;
+private:
+  void cb_stopReadingDataButton_i(Fl_Light_Button*, void*);
+  static void cb_stopReadingDataButton(Fl_Light_Button*, void*);
 public:
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
@@ -251,11 +256,6 @@ public:
 private:
   void cb_sendParamsWindow_asic_i(Fl_Value_Input*, void*);
   static void cb_sendParamsWindow_asic(Fl_Value_Input*, void*);
-public:
-  Fl_Value_Input *sendParamsWindow_holdTime;
-private:
-  void cb_Set_i(Fl_Button*, void*);
-  static void cb_Set(Fl_Button*, void*);
   void cb_set_i(Fl_Button*, void*);
   static void cb_set(Fl_Button*, void*);
   void cb_clear_i(Fl_Button*, void*);
@@ -272,6 +272,35 @@ public:
 private:
   void cb_setHoldTimeWindow_autorunBut_i(Fl_Button*, void*);
   static void cb_setHoldTimeWindow_autorunBut(Fl_Button*, void*);
+  void cb_Close1_i(Fl_Button*, void*);
+  static void cb_Close1(Fl_Button*, void*);
+public:
+  Fl_Double_Window *setTrigWindow;
+  Fl_Value_Input *setTrigWindow_delayTime;
+  Fl_Value_Input *setTrigWindow_timeoutTime;
+private:
+  void cb_Close2_i(Fl_Button*, void*);
+  static void cb_Close2(Fl_Button*, void*);
+public:
+  Fl_Button *setTrigWindow_setDelay;
+private:
+  void cb_setTrigWindow_setDelay_i(Fl_Button*, void*);
+  static void cb_setTrigWindow_setDelay(Fl_Button*, void*);
+public:
+  Fl_Button *setTrigWindow_setTimeout;
+private:
+  void cb_setTrigWindow_setTimeout_i(Fl_Button*, void*);
+  static void cb_setTrigWindow_setTimeout(Fl_Button*, void*);
+public:
+  Fl_Value_Input *setTrigWindow_useTimeout;
+private:
+  void cb_setTrigWindow_useTimeout_i(Fl_Value_Input*, void*);
+  static void cb_setTrigWindow_useTimeout(Fl_Value_Input*, void*);
+public:
+  Fl_Button *setTrigWindow_setTrigMode;
+private:
+  void cb_setTrigWindow_setTrigMode_i(Fl_Button*, void*);
+  static void cb_setTrigWindow_setTrigMode(Fl_Button*, void*);
 public:
   void show();
   Application *app; 
