@@ -327,7 +327,11 @@ void* Application::read_data(void* variable)
 	int badRead = 0;
 	int status = 0;
 	
+	Fl::lock();
 	gui->stopReadingDataButton->activate();
+//	gui->stopReadingDataButton->value(0);
+	gui->startReadingDataButton->deactivate();
+	Fl::unlock();
 	
 	if (gui->writeFileBut->value() == 1){
 		// Open data file
@@ -346,25 +350,29 @@ void* Application::read_data(void* variable)
 	gui->consoleBuf->insert(buffer);
 	Fl::unlock();	
 
-	for (int i = 0; i<gui->nEvents->value(); i++) {
+	int i = 0;
+	while ( i<gui->nEvents->value() ){
+//	for (int i = 0; i<gui->nEvents->value(); i++) {
 		usleep(20000);		// adjust this to achieve desired reading speed
 				
 		// check to see if the Stop button was pushed, if so then clean up 
 		// and stop this thread
-		if (stop_message == 1){
+		if (stop_message){
 			// clean up code goes here then exit
+			Fl::lock();
+			sprintf(buffer, "Read Stopped.\n");
+			gui->consoleBuf->insert(buffer);
+			sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
+			gui->consoleBuf->insert(buffer);
+			gui->stopReadingDataButton->deactivate();
+//			gui->stopReadingDataButton->value(0);
+			gui->startReadingDataButton->activate();
 			if (gui->writeFileBut->value() == 1){
 				fclose(dataFile);
-				Fl::lock();
-				sprintf(buffer, "Read Stopped.\n");
-				gui->consoleBuf->insert(buffer);
-				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-				gui->consoleBuf->insert(buffer);
-				gui->stopReadingDataButton->deactivate();
 				gui->writeFileBut->activate();
-				Fl::unlock();	
 				
 			}
+			Fl::unlock();	
             pthread_exit(NULL);
 		}
 
@@ -388,6 +396,7 @@ void* Application::read_data(void* variable)
 		gui->nEventsDone->value(i);
 		Fl::unlock();
 		
+		i++;
 	}
 	
 	Fl::lock();
@@ -400,6 +409,8 @@ void* Application::read_data(void* variable)
 		gui->writeFileBut->value(0);
 	}
 	gui->stopReadingDataButton->deactivate();
+//	gui->stopReadingDataButton->value(0);
+	gui->startReadingDataButton->activate();
 	Fl::unlock();	
 
 	return 0;
@@ -408,16 +419,16 @@ void* Application::read_data(void* variable)
 void Application::openSendParamsWindow(void)
 {
 	gui->sendParamsWindow->show();
-	if (gui->initializeBut->value() == 0) {
-//		gui->sendParamsWindow_sendBut->deactivate();
-	}
 }
 
 void Application::openSetHoldTimeWindow(void)
 {
 	gui->setHoldTimeWindow->show();
-	if (gui->initializeBut->value() == 0) {
-	}
+}
+
+void Application::openSetTrigWindow(void)
+{
+	gui->setTrigWindow->show();
 }
 
 void Application::send_params(void)
@@ -426,9 +437,9 @@ void Application::send_params(void)
 	gui->consoleBuf->insert("Sending Params to controller.\n");
 }
 
-void Application::send_global_params(void)
+void Application::send_global_params(int option)
 {
-	gui->usb->setGlobalConfig();
+	gui->usb->setGlobalConfig(option);
 	gui->consoleBuf->insert("Sending global Params to controller.\n");
 }
 
@@ -465,8 +476,8 @@ void* Application::auto_run_sequence(void* variable)
 		gui->nEventsDone->value(0);
 		gui->setHoldTimeWindow_holdTime->value(i);
 		Fl::unlock();
-		gui->app->send_global_params();
-		gui->app->send_global_params();
+		gui->app->send_global_params(0);
+		gui->app->send_global_params(0);
 		gui->writeFileBut->value(1);
 		gui->app->start_file();
 		gui->app->start_reading_data();

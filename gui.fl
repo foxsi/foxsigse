@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {26 44 1252 739} type Double color 19 resizable
+      xywh {26 44 1252 688} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -24,7 +24,7 @@ class Gui {open
         } {
           MenuItem outputDirChooser {
             label {Choose Output Dir}
-            callback {app->set_datafile_dir()} selected
+            callback {app->set_datafile_dir()}
             xywh {0 0 36 21}
           }
           MenuItem readFile {
@@ -418,17 +418,12 @@ class Gui {open
       Fl_Button {} {
         label BREAK
         callback {app->break_acq(193);}
-        xywh {215 245 63 20}
+        xywh {215 245 63 20} deactivate
       }
       Fl_Button {} {
         label CLEAR
         callback {app->break_acq(192);}
-        xywh {215 270 63 20}
-      }
-      Fl_Button stopReadingDataButton {
-        label Stop
-        callback {app->stop_reading_data();}
-        xywh {455 35 75 25} labelcolor 1 deactivate
+        xywh {215 270 63 20} deactivate
       }
       Fl_Button setHoldBut {
         label {Set Hold Time}
@@ -440,6 +435,16 @@ class Gui {open
         callback {app->clear_console();}
         xywh {1115 320 63 20} labelcolor 1
       }
+      Fl_Button setTrigBut {
+        label {Set Trigger Options}
+        callback {app->openSetTrigWindow()}
+        xywh {198 175 125 25}
+      }
+      Fl_Light_Button stopReadingDataButton {
+        label Stop
+        callback {app->stop_reading_data();}
+        xywh {455 35 75 25} labelcolor 1 deactivate
+      }
     }
     code {app=new Application();} {}
     code {data=new Foxsidata();} {}
@@ -447,8 +452,8 @@ class Gui {open
     code {buff=new Fl_Text_Buffer();
 consoleBuf->buffer(buff);} {}
     Fl_Window sendParamsWindow {
-      label {Send Parameters} open
-      xywh {383 44 780 531} type Double visible
+      label {Send Parameters}
+      xywh {383 44 780 531} type Double hide
     } {
       Fl_Button sendParamsWindow_sendBut {
         label Send
@@ -903,15 +908,6 @@ app->send_params();
         callback {app->restore_settings();}
         xywh {460 386 15 24} maximum 3 step 1
       }
-      Fl_Value_Input sendParamsWindow_holdTime {
-        label {Hold time setting (all ASICs)::}
-        xywh {205 491 35 24}
-      }
-      Fl_Button {} {
-        label Set
-        callback {app->send_global_params();}
-        xywh {249 492 63 20}
-      }
       Fl_Button {} {
         label {set all}
         callback {for(int i=0; i<64; i++) 
@@ -927,7 +923,7 @@ app->send_params();
     }
     Fl_Window setHoldTimeWindow {
       label {Set hold time and take data} open
-      xywh {869 528 312 165} type Double visible
+      xywh {869 528 312 165} type Double hide
     } {
       Fl_Value_Input setHoldTimeWindow_holdTime {
         label {Hold time setting (all ASICs)::}
@@ -935,13 +931,62 @@ app->send_params();
       }
       Fl_Button setHoldTimeWindow_setBut {
         label Set
-        callback {app->send_global_params();}
-        xywh {120 60 80 25} deactivate
+        callback {app->send_global_params(0);}
+        xywh {70 65 80 25} deactivate
       }
       Fl_Button setHoldTimeWindow_autorunBut {
         label Autorun
-        callback {app->start_auto_run();} selected
-        xywh {120 105 80 25} deactivate
+        callback {app->start_auto_run();}
+        xywh {175 65 80 25} deactivate
+      }
+      Fl_Button {} {
+        label Close
+        callback {setHoldTimeWindow->hide();}
+        xywh {125 115 80 25} deactivate
+      }
+    }
+    Fl_Window setTrigWindow {
+      label {Trigger Options} open
+      xywh {502 184 357 203} type Double visible
+    } {
+      Fl_Value_Input setTrigWindow_delayTime {
+        label {Trigger delay (units of 3.2 us)}
+        xywh {210 16 25 24} value 3
+      }
+      Fl_Value_Input setTrigWindow_timeoutTime {
+        label {Trigger timeout (units of 3.2 us)} selected
+        xywh {211 106 25 24} value 31 deactivate
+      }
+      Fl_Button {} {
+        label Close
+        callback {setTrigWindow->hide();}
+        xywh {125 155 80 25} deactivate
+      }
+      Fl_Button setTrigWindow_setDelay {
+        label Set
+        callback {app->send_global_params(3);}
+        xywh {255 15 80 25}
+      }
+      Fl_Button setTrigWindow_setTimeout {
+        label Set
+        callback {app->send_global_params(1);}
+        xywh {255 105 80 25} deactivate
+      }
+      Fl_Value_Input setTrigWindow_useTimeout {
+        label {Use timeout}
+        callback {if(setTrigWindow_useTimeout->value()){
+setTrigWindow_setTimeout->activate();
+setTrigWindow_timeoutTime->activate();
+} else{
+setTrigWindow_setTimeout->deactivate();
+setTrigWindow_timeoutTime->deactivate();
+}}
+        xywh {211 63 25 21} value 1
+      }
+      Fl_Button setTrigWindow_setTrigMode {
+        label Set
+        callback {app->send_global_params(2);}
+        xywh {255 60 80 25}
       }
     }
   }

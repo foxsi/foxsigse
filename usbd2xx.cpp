@@ -164,26 +164,28 @@ int USB_d2xx::findSync(void)
 	ftStatus = FT_GetQueueStatus(ftHandle, &nBytesRead);
 	ftStatus = FT_SetTimeouts(ftHandle, 500, 500);
 
-	if( nBytesRead < nBytesToRead )	return -1;
+//	if( nBytesRead < nBytesToRead )	return -1;
 	
 	while (1) {
-		if (i == iMax){
+		// reimplement this code if you want the system to timeout if it doesn't find the sync word.
+		if (i == iMax){	
 			return -1;
 		}			
 		i++;
-		ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
+		
+		ftStatus = FT_GetQueueStatus(ftHandle, &nBytesRead);
 		//cout << "Attempt " << i << " value " << dataWord << " nBytesRead " << nBytesRead << endl;
-		if (ftStatus != FT_OK) {
+		if (nBytesRead == 0 or ftStatus != FT_OK) {
 			cout << "Error FT_Read(" << ftStatus << ")" << endl;
 			return -1;
 		}
+		ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
 		// if the sync word is found, read again to see if the sync word is repeated.
 		if (dataWord == 0xEB90){
 			ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
 			if (dataWord == 0xEB90) break;
 		}
 	}
-		
 		return 1;
 }
 
@@ -586,19 +588,40 @@ void USB_d2xx::setConfig(void)
 }
 
 // Added July 2011
-// Set global configuration (for now, just hold time adjustment)
-void USB_d2xx::setGlobalConfig(void)
+// Set global configuration
+void USB_d2xx::setGlobalConfig(int option)
 {
 	const int n = 1;	// number bytes to send
+	int value = 0;	
 	char cBufWrite[n];	// write array
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
 
 	// initialize write buffer.
 	for(int i=0; i<n; i++) cBufWrite[i] = 0;
 
-	cBufWrite[0] = gui->sendParamsWindow_holdTime->value();		// get hold time value from user input
-	cBufWrite[0] = cBufWrite[0] + 128;							// put '1' in MSB as flag that this is a global setting.
+	switch (option) {
+		case 0:
+			value = gui->setHoldTimeWindow_holdTime->value();
+			break;
+		case 1:
+			value = gui->setTrigWindow_timeoutTime->value();
+			break;
+		case 2:
+			value = gui->setTrigWindow_useTimeout->value();
+			break;
+		case 3:
+			value = gui->setTrigWindow_delayTime->value();
+			break;
+		default:
+			value = 0;
+			break;
+	}
 
+//	cBufWrite[0] = gui->sendParamsWindow_holdTime->value();		// get hold time value from user input
+	value = value + 128;							// put '1' in MSB as flag that this is a global setting.
+	value = value + option*32;						// put indicator in bits [6:5] to tell FPGA which kind of setting it is.
+	cBufWrite[0] = value;
+	
 	/* Write */
 	dwBytesWritten = 0;
 	if((ftStatus = FT_Write(ftHandle, cBufWrite, 1, &dwBytesWritten)) != FT_OK) {
@@ -606,7 +629,7 @@ void USB_d2xx::setGlobalConfig(void)
 		return;
 	}
 	
-	cout << "Wrote " << dwBytesWritten << " bytes, value: " << dec << cBufWrite[0] << endl << endl;	
+	cout << "Wrote " << dwBytesWritten << " bytes, value: " << dec << cBufWrite[0] << " value is " << value << endl << endl;	
 	printf("Wrote %d bytes, value %d\n\n", dwBytesWritten, cBufWrite[0]);
 }
 
@@ -755,3 +778,4 @@ void USB_d2xx::loadDefaultSettings()
 		disable3[i] = 0;
 	}
 }
+
