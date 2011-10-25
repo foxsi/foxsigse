@@ -58,62 +58,6 @@ void Gui::cb_Sync(Fl_Menu_* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Sync_i(o,v);
 }
 
-void Gui::cb_setDetector0_i(Fl_Menu_*, void*) {
-  app->setDetector(0);
-}
-void Gui::cb_setDetector0(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setDetector0_i(o,v);
-}
-
-void Gui::cb_setDetector1_i(Fl_Menu_*, void*) {
-  app->setDetector(1);
-}
-void Gui::cb_setDetector1(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setDetector1_i(o,v);
-}
-
-void Gui::cb_setDetector2_i(Fl_Menu_*, void*) {
-  app->setDetector(2);
-}
-void Gui::cb_setDetector2(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setDetector2_i(o,v);
-}
-
-void Gui::cb_setDetector3_i(Fl_Menu_*, void*) {
-  app->setDetector(3);
-}
-void Gui::cb_setDetector3(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setDetector3_i(o,v);
-}
-
-void Gui::cb_setDetector4_i(Fl_Menu_*, void*) {
-  app->setDetector(4);
-}
-void Gui::cb_setDetector4(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setDetector4_i(o,v);
-}
-
-void Gui::cb_setDetector5_i(Fl_Menu_*, void*) {
-  app->setDetector(5);
-}
-void Gui::cb_setDetector5(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setDetector5_i(o,v);
-}
-
-void Gui::cb_setDetector6_i(Fl_Menu_*, void*) {
-  app->setDetector(6);
-}
-void Gui::cb_setDetector6(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setDetector6_i(o,v);
-}
-
-void Gui::cb_setDetector7_i(Fl_Menu_*, void*) {
-  app->setDetector(7);
-}
-void Gui::cb_setDetector7(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setDetector7_i(o,v);
-}
-
 Fl_Menu_Item Gui::menu_menuBar[] = {
  {"File", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Choose Output Dir", 0,  (Fl_Callback*)Gui::cb_outputDirChooser, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -127,16 +71,6 @@ Fl_Menu_Item Gui::menu_menuBar[] = {
  {"Menu", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Data Sync", 0,  (Fl_Callback*)Gui::cb_Sync, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
- {"Detector", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
- {"All", 0,  (Fl_Callback*)Gui::cb_setDetector0, 0, 8, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 1", 0,  (Fl_Callback*)Gui::cb_setDetector1, 0, 8, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 2", 0,  (Fl_Callback*)Gui::cb_setDetector2, 0, 8, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 3", 0,  (Fl_Callback*)Gui::cb_setDetector3, 0, 8, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 4", 0,  (Fl_Callback*)Gui::cb_setDetector4, 0, 8, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 5", 0,  (Fl_Callback*)Gui::cb_setDetector5, 0, 8, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 6", 0,  (Fl_Callback*)Gui::cb_setDetector6, 0, 8, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 7", 0,  (Fl_Callback*)Gui::cb_setDetector7, 0, 8, FL_NORMAL_LABEL, 0, 14, 0},
- {0,0,0,0,0,0,0,0,0},
  {0,0,0,0,0,0,0,0,0}
 };
 Fl_Menu_Item* Gui::fileMenu = Gui::menu_menuBar + 0;
@@ -149,15 +83,6 @@ Fl_Menu_Item* Gui::WriteLightcurve = Gui::menu_menuBar + 6;
 Fl_Menu_Item* Gui::exitButton = Gui::menu_menuBar + 7;
 Fl_Menu_Item* Gui::menuProc = Gui::menu_menuBar + 9;
 Fl_Menu_Item* Gui::Sync = Gui::menu_menuBar + 10;
-Fl_Menu_Item* Gui::Detector = Gui::menu_menuBar + 12;
-Fl_Menu_Item* Gui::setDetector0 = Gui::menu_menuBar + 13;
-Fl_Menu_Item* Gui::setDetector1 = Gui::menu_menuBar + 14;
-Fl_Menu_Item* Gui::setDetector2 = Gui::menu_menuBar + 15;
-Fl_Menu_Item* Gui::setDetector3 = Gui::menu_menuBar + 16;
-Fl_Menu_Item* Gui::setDetector4 = Gui::menu_menuBar + 17;
-Fl_Menu_Item* Gui::setDetector5 = Gui::menu_menuBar + 18;
-Fl_Menu_Item* Gui::setDetector6 = Gui::menu_menuBar + 19;
-Fl_Menu_Item* Gui::setDetector7 = Gui::menu_menuBar + 20;
 
 void Gui::cb_shutterstateOutput_i(Fl_Output*, void*) {
   app->getShutState();
@@ -326,6 +251,20 @@ void Gui::cb_clear_i(Fl_Button*, void*) {
 }
 void Gui::cb_clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_clear_i(o,v);
+}
+
+void Gui::cb_sendCommandsWindow_sendBut_i(Fl_Button*, void*) {
+  sendCommandsWindow->hide();
+}
+void Gui::cb_sendCommandsWindow_sendBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_sendCommandsWindow_sendBut_i(o,v);
+}
+
+void Gui::cb_Close1_i(Fl_Button*, void*) {
+  sendCommandsWindow->hide();
+}
+void Gui::cb_Close1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Close1_i(o,v);
 }
 
 Gui::Gui() {
@@ -564,7 +503,7 @@ Gui::Gui() {
     { sendParamsBut = new Fl_Button(190, 95, 100, 25, "Send Params");
       sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
     } // Fl_Button* sendParamsBut
-    { testBut = new Fl_Button(15, 275, 75, 25, "Test");
+    { testBut = new Fl_Button(15, 276, 75, 25, "Test");
       testBut->callback((Fl_Callback*)cb_testBut);
     } // Fl_Button* testBut
     { nEvents = new Fl_Value_Input(345, 35, 40, 24, "events");
@@ -576,10 +515,10 @@ Gui::Gui() {
     { nEventsDone = new Fl_Value_Input(345, 66, 40, 24, "counter");
       nEventsDone->value(1);
     } // Fl_Value_Input* nEventsDone
-    { Fl_Button* o = new Fl_Button(215, 245, 63, 20, "BREAK");
+    { Fl_Button* o = new Fl_Button(320, 245, 63, 20, "BREAK");
       o->callback((Fl_Callback*)cb_BREAK);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(215, 270, 63, 20, "CLEAR");
+    { Fl_Button* o = new Fl_Button(320, 270, 63, 20, "CLEAR");
       o->callback((Fl_Callback*)cb_CLEAR);
     } // Fl_Button* o
     { stopReadingDataButton = new Fl_Button(455, 35, 75, 25, "Stop");
@@ -595,6 +534,8 @@ Gui::Gui() {
       fileTypeChoice->down_box(FL_BORDER_BOX);
       fileTypeChoice->menu(menu_fileTypeChoice);
     } // Fl_Choice* fileTypeChoice
+    { testOutput = new Fl_Value_Output(135, 276, 77, 24, "value:");
+    } // Fl_Value_Output* testOutput
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow
@@ -937,6 +878,38 @@ Gui::Gui() {
     } // Fl_Button* o
     sendParamsWindow->end();
   } // Fl_Double_Window* sendParamsWindow
+  { sendCommandsWindow = new Fl_Double_Window(351, 320, "Send Commands");
+    sendCommandsWindow->user_data((void*)(this));
+    { sendCommandsWindow_sendBut = new Fl_Button(265, 10, 70, 25, "Send");
+      sendCommandsWindow_sendBut->value(1);
+      sendCommandsWindow_sendBut->labelcolor((Fl_Color)1);
+      sendCommandsWindow_sendBut->callback((Fl_Callback*)cb_sendCommandsWindow_sendBut);
+    } // Fl_Button* sendCommandsWindow_sendBut
+    { Fl_Button* o = new Fl_Button(265, 40, 70, 25, "Close");
+      o->callback((Fl_Callback*)cb_Close1);
+    } // Fl_Button* o
+    { new Fl_Input(175, 11, 75, 24, "HV Set (0-4095):");
+    } // Fl_Input* o
+    { new Fl_Input(175, 41, 75, 24, "Clock Set Low Byte:");
+    } // Fl_Input* o
+    { new Fl_Input(175, 71, 75, 24, "Clock Set Low Middle:");
+    } // Fl_Input* o
+    { new Fl_Input(175, 101, 75, 24, "Clock Set High Middle:");
+    } // Fl_Input* o
+    { new Fl_Input(175, 131, 75, 24, "Clock Set High:");
+    } // Fl_Input* o
+    { new Fl_Input(175, 161, 75, 24, "HIghclock Set Low Byte:");
+    } // Fl_Input* o
+    { new Fl_Input(175, 191, 75, 24, "Highclock Set High Byte:");
+    } // Fl_Input* o
+    { new Fl_Input(175, 221, 75, 24, "Load Clock From Latch:");
+    } // Fl_Input* o
+    { new Fl_Input(175, 251, 75, 24, "Strobe Attenuator 0:");
+    } // Fl_Input* o
+    { new Fl_Input(175, 281, 75, 24, "Strobe Attenuator 1:");
+    } // Fl_Input* o
+    sendCommandsWindow->end();
+  } // Fl_Double_Window* sendCommandsWindow
 }
 
 void Gui::show() {

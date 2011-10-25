@@ -22,6 +22,7 @@
 #include <FL/Fl_Choice.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
+#include <FL/Fl_Input.H>
 
 class Gui {
 public:
@@ -70,47 +71,6 @@ public:
 private:
   void cb_Sync_i(Fl_Menu_*, void*);
   static void cb_Sync(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *Detector;
-  static Fl_Menu_Item *setDetector0;
-private:
-  void cb_setDetector0_i(Fl_Menu_*, void*);
-  static void cb_setDetector0(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector1;
-private:
-  void cb_setDetector1_i(Fl_Menu_*, void*);
-  static void cb_setDetector1(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector2;
-private:
-  void cb_setDetector2_i(Fl_Menu_*, void*);
-  static void cb_setDetector2(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector3;
-private:
-  void cb_setDetector3_i(Fl_Menu_*, void*);
-  static void cb_setDetector3(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector4;
-private:
-  void cb_setDetector4_i(Fl_Menu_*, void*);
-  static void cb_setDetector4(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector5;
-private:
-  void cb_setDetector5_i(Fl_Menu_*, void*);
-  static void cb_setDetector5(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector6;
-private:
-  void cb_setDetector6_i(Fl_Menu_*, void*);
-  static void cb_setDetector6(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector7;
-private:
-  void cb_setDetector7_i(Fl_Menu_*, void*);
-  static void cb_setDetector7(Fl_Menu_*, void*);
 public:
   mainHistogram *mainHistogramWindow;
   mainImage *mainImageWindow;
@@ -234,6 +194,7 @@ private:
 public:
   Fl_Choice *fileTypeChoice;
   static Fl_Menu_Item menu_fileTypeChoice[];
+  Fl_Value_Output *testOutput;
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:
@@ -257,6 +218,14 @@ private:
   static void cb_set(Fl_Button*, void*);
   void cb_clear_i(Fl_Button*, void*);
   static void cb_clear(Fl_Button*, void*);
+public:
+  Fl_Double_Window *sendCommandsWindow;
+  Fl_Button *sendCommandsWindow_sendBut;
+private:
+  void cb_sendCommandsWindow_sendBut_i(Fl_Button*, void*);
+  static void cb_sendCommandsWindow_sendBut(Fl_Button*, void*);
+  void cb_Close1_i(Fl_Button*, void*);
+  static void cb_Close1(Fl_Button*, void*);
 public:
   void show();
   Application *app; 

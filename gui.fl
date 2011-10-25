@@ -8,14 +8,14 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {438 44 1252 739} type Double color 19 resizable
+      xywh {222 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
       code3 {\#include "usbd2xx.h"} visible
     } {
       Fl_Menu_Bar menuBar {
-        label menuBar
+        label menuBar open
         xywh {-5 -1 1255 25} box BORDER_BOX color 29
       } {
         Submenu fileMenu {
@@ -68,51 +68,6 @@ class Gui {open
             xywh {0 0 100 20}
           }
         }
-        Submenu Detector {
-          label Detector open
-          xywh {0 0 70 21}
-        } {
-          MenuItem setDetector0 {
-            label All
-            callback {app->setDetector(0)}
-            xywh {0 0 36 21} type Radio
-          }
-          MenuItem setDetector1 {
-            label {Detector 1}
-            callback {app->setDetector(1)}
-            xywh {10 10 36 21} type Radio
-          }
-          MenuItem setDetector2 {
-            label {Detector 2}
-            callback {app->setDetector(2)}
-            xywh {10 10 36 21} type Radio
-          }
-          MenuItem setDetector3 {
-            label {Detector 3}
-            callback {app->setDetector(3)}
-            xywh {20 20 36 21} type Radio
-          }
-          MenuItem setDetector4 {
-            label {Detector 4}
-            callback {app->setDetector(4)}
-            xywh {30 30 36 21} type Radio
-          }
-          MenuItem setDetector5 {
-            label {Detector 5}
-            callback {app->setDetector(5)}
-            xywh {40 40 36 21} type Radio
-          }
-          MenuItem setDetector6 {
-            label {Detector 6}
-            callback {app->setDetector(6)}
-            xywh {50 50 36 21} type Radio
-          }
-          MenuItem setDetector7 {
-            label {Detector 7}
-            callback {app->setDetector(7)}
-            xywh {60 60 36 21} type Radio
-          }
-        }
       }
       Fl_Box mainHistogramWindow {
         label Histogram
@@ -132,7 +87,7 @@ class Gui {open
         code0 {\#include "subImage.h"}
         class subImage
       }
-      Fl_Group TopOutput {open
+      Fl_Group TopOutput {
         xywh {325 35 695 520}
       } {
         Fl_Output rateOutput0 {
@@ -400,7 +355,7 @@ class Gui {open
       Fl_Button testBut {
         label Test
         callback {app->test();}
-        xywh {15 275 75 25}
+        xywh {15 276 75 25}
       }
       Fl_Value_Input nEvents {
         label events
@@ -418,12 +373,12 @@ class Gui {open
       Fl_Button {} {
         label BREAK
         callback {app->break_acq(193);}
-        xywh {215 245 63 20}
+        xywh {320 245 63 20}
       }
       Fl_Button {} {
         label CLEAR
         callback {app->break_acq(192);}
-        xywh {215 270 63 20}
+        xywh {320 270 63 20}
       }
       Fl_Button stopReadingDataButton {
         label Stop
@@ -436,7 +391,7 @@ class Gui {open
         xywh {1115 320 63 20} labelcolor 1
       }
       Fl_Choice fileTypeChoice {
-        label {File type:} open selected
+        label {File type:} open
         xywh {176 160 75 25} down_box BORDER_BOX
       } {
         MenuItem {} {
@@ -448,6 +403,10 @@ class Gui {open
           xywh {0 0 31 20}
         }
       }
+      Fl_Value_Output testOutput {
+        label {value:}
+        xywh {135 276 77 24}
+      }
     }
     code {app=new Application();} {}
     code {data=new Foxsidata();} {}
@@ -455,8 +414,8 @@ class Gui {open
     code {buff=new Fl_Text_Buffer();
 consoleBuf->buffer(buff);} {}
     Fl_Window sendParamsWindow {
-      label {Send Parameters} open
-      xywh {383 44 780 531} type Double hide
+      label {Send Parameters}
+      xywh {383 44 780 531} type Double visible
     } {
       Fl_Button sendParamsWindow_sendBut {
         label Send
@@ -931,6 +890,61 @@ app->send_params();
         callback {for(int i=0; i<64; i++) 
   sendParamsWindow_chan[i]->clear();}
         xywh {619 455 63 20}
+      }
+    }
+    Fl_Window sendCommandsWindow {
+      label {Send Commands} open
+      xywh {436 54 351 320} type Double visible
+    } {
+      Fl_Button sendCommandsWindow_sendBut {
+        label Send
+        callback {sendCommandsWindow->hide();} selected
+        xywh {265 10 70 25} value 1 labelcolor 1
+      }
+      Fl_Button {} {
+        label Close
+        callback {sendCommandsWindow->hide();}
+        xywh {265 40 70 25}
+      }
+      Fl_Input {} {
+        label {HV Set (0-4095):}
+        xywh {175 11 75 24}
+      }
+      Fl_Input {} {
+        label {Clock Set Low Byte:}
+        xywh {175 41 75 24}
+      }
+      Fl_Input {} {
+        label {Clock Set Low Middle:}
+        xywh {175 71 75 24}
+      }
+      Fl_Input {} {
+        label {Clock Set High Middle:}
+        xywh {175 101 75 24}
+      }
+      Fl_Input {} {
+        label {Clock Set High:}
+        xywh {175 131 75 24}
+      }
+      Fl_Input {} {
+        label {HIghclock Set Low Byte:}
+        xywh {175 161 75 24}
+      }
+      Fl_Input {} {
+        label {Highclock Set High Byte:}
+        xywh {175 191 75 24}
+      }
+      Fl_Input {} {
+        label {Load Clock From Latch:}
+        xywh {175 221 75 24}
+      }
+      Fl_Input {} {
+        label {Strobe Attenuator 0:}
+        xywh {175 251 75 24}
+      }
+      Fl_Input {} {
+        label {Strobe Attenuator 1:}
+        xywh {175 281 75 24}
       }
     }
   }
