@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {222 44 1252 739} type Double color 19 resizable
+      xywh {281 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -59,13 +59,23 @@ class Gui {open
           }
         }
         Submenu menuProc {
-          label Menu open
+          label Window open
           xywh {0 0 100 20}
         } {
           MenuItem Sync {
             label {Data Sync}
             callback {app->dataSync();}
             xywh {0 0 100 20}
+          }
+          MenuItem {} {
+            label Commanding
+            callback {sendCommandsWindow->show()}
+            xywh {0 0 31 20}
+          }
+          MenuItem {} {
+            label {ACTEL Commanding}
+            callback {sendParamsWindow->show();}
+            xywh {0 0 31 20}
           }
         }
       }
@@ -244,12 +254,6 @@ class Gui {open
           }
         }
       }
-      Fl_Box mainChartWindow {
-        label 1
-        xywh {470 155 130 115} box GTK_UP_BOX labeltype NO_LABEL
-        code0 {\#include "mainChart.h"}
-        class mainChart
-      }
       Fl_Output pixelNum {
         label Pixel
         xywh {445 495 80 25}
@@ -262,23 +266,9 @@ class Gui {open
         label {Unlock View}
         xywh {420 525 105 25} selection_color 1
       }
-      Fl_Text_Display {} {
-        label {detector 1}
-        xywh {529 295 15 15}
-      }
       Fl_Light_Button mainHistogramLockbut {
         label Unlock
         xywh {900 465 65 25} selection_color 1
-      }
-      Fl_Box mainChartWindow1 {
-        label 1
-        xywh {615 155 130 115} box GTK_UP_BOX labeltype NO_LABEL
-        code0 {\#include "mainChart.h"}
-        class mainChart
-      }
-      Fl_Text_Display {} {
-        label {detector 2}
-        xywh {670 295 15 15}
       }
       Fl_Value_Output mainHistogramXlabelmid {
         label {Energy:}
@@ -339,7 +329,7 @@ class Gui {open
       }
       Fl_Box mainLightcurveWindow {
         label {Light curve}
-        xywh {760 155 300 125} box GTK_UP_BOX
+        xywh {420 160 300 125} box GTK_UP_BOX
         code0 {\#include "mainLightcurve.h"}
         class mainLightcurve
       }
@@ -414,7 +404,7 @@ class Gui {open
     code {buff=new Fl_Text_Buffer();
 consoleBuf->buffer(buff);} {}
     Fl_Window sendParamsWindow {
-      label {Send Parameters}
+      label {Send Parameters} open
       xywh {383 44 780 531} type Double visible
     } {
       Fl_Button sendParamsWindow_sendBut {
@@ -894,57 +884,44 @@ app->send_params();
     }
     Fl_Window sendCommandsWindow {
       label {Send Commands} open
-      xywh {436 54 351 320} type Double visible
+      xywh {436 54 364 175} type Double visible
     } {
-      Fl_Button sendCommandsWindow_sendBut {
+      Fl_Button {} {
         label Send
-        callback {sendCommandsWindow->hide();} selected
+        callback {app->send_voltage_command();} selected
         xywh {265 10 70 25} value 1 labelcolor 1
       }
       Fl_Button {} {
         label Close
         callback {sendCommandsWindow->hide();}
-        xywh {265 40 70 25}
+        xywh {265 130 70 25}
       }
-      Fl_Input {} {
+      Fl_Button {} {
+        label Send
+        callback {app->send_clockset_command();}
+        xywh {265 70 70 25} value 1 labelcolor 1
+      }
+      Fl_Button {} {
+        label {Strobe Attenuator State 0}
+        callback {app->send_atten_state(0);}
+        xywh {70 100 180 25} box THIN_UP_BOX labelcolor 1
+      }
+      Fl_Button {} {
+        label {Strobe Attenuator State 1}
+        callback {app->send_atten_state(1);}
+        xywh {70 130 180 25} box THIN_UP_BOX labelcolor 1
+      }
+      Fl_Value_Input highVoltage_input {
         label {HV Set (0-4095):}
         xywh {175 11 75 24}
       }
-      Fl_Input {} {
-        label {Clock Set Low Byte:}
-        xywh {175 41 75 24}
+      Fl_Value_Input clockLow_input {
+        label {Clock Set Low:}
+        xywh {175 40 75 24}
       }
-      Fl_Input {} {
-        label {Clock Set Low Middle:}
-        xywh {175 71 75 24}
-      }
-      Fl_Input {} {
-        label {Clock Set High Middle:}
-        xywh {175 101 75 24}
-      }
-      Fl_Input {} {
+      Fl_Value_Input clockHigh_input {
         label {Clock Set High:}
-        xywh {175 131 75 24}
-      }
-      Fl_Input {} {
-        label {HIghclock Set Low Byte:}
-        xywh {175 161 75 24}
-      }
-      Fl_Input {} {
-        label {Highclock Set High Byte:}
-        xywh {175 191 75 24}
-      }
-      Fl_Input {} {
-        label {Load Clock From Latch:}
-        xywh {175 221 75 24}
-      }
-      Fl_Input {} {
-        label {Strobe Attenuator 0:}
-        xywh {175 251 75 24}
-      }
-      Fl_Input {} {
-        label {Strobe Attenuator 1:}
-        xywh {175 281 75 24}
+        xywh {175 70 75 24}
       }
     }
   }

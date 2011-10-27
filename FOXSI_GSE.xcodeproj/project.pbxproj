@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		86341487143FB0EB00C0D98E /* telemetry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86341486143FB0EB00C0D98E /* telemetry.cpp */; };
+		866488A3145737B6003D2713 /* commands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866488A2145737B6003D2713 /* commands.cpp */; };
 		86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86739DD8138C708900D6C498 /* usbd2xx.cpp */; };
 		86739E8F138C79F500D6C498 /* libftd2xx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 86739E8E138C79F500D6C498 /* libftd2xx.dylib */; };
 		86E4A437138C2AEC0004DBB3 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86E4A436138C2AEC0004DBB3 /* OpenGL.framework */; };
@@ -51,6 +52,8 @@
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		86341485143FB0EB00C0D98E /* telemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = telemetry.h; sourceTree = "<group>"; };
 		86341486143FB0EB00C0D98E /* telemetry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = telemetry.cpp; sourceTree = "<group>"; };
+		866488A1145737B6003D2713 /* commands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = commands.h; sourceTree = "<group>"; };
+		866488A2145737B6003D2713 /* commands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = commands.cpp; sourceTree = "<group>"; };
 		86739DD8138C708900D6C498 /* usbd2xx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = usbd2xx.cpp; sourceTree = "<group>"; };
 		86739DD9138C708900D6C498 /* usbd2xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = usbd2xx.h; sourceTree = "<group>"; };
 		86739E8E138C79F500D6C498 /* libftd2xx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libftd2xx.dylib; path = /usr/local/lib/libftd2xx.dylib; sourceTree = "<absolute>"; };
@@ -163,6 +166,8 @@
 			children = (
 				86341485143FB0EB00C0D98E /* telemetry.h */,
 				86341486143FB0EB00C0D98E /* telemetry.cpp */,
+				866488A1145737B6003D2713 /* commands.h */,
+				866488A2145737B6003D2713 /* commands.cpp */,
 				86E4A43B138C2B720004DBB3 /* Application.h */,
 				86E4A43A138C2B720004DBB3 /* Application.cxx */,
 				86E4A43D138C2B900004DBB3 /* Foxsidata.cxx */,
@@ -292,6 +297,7 @@
 				86E4A453138C2BA40004DBB3 /* gui.fl in Sources */,
 				86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */,
 				86341487143FB0EB00C0D98E /* telemetry.cpp in Sources */,
+				866488A3145737B6003D2713 /* commands.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

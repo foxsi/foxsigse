@@ -58,6 +58,20 @@ void Gui::cb_Sync(Fl_Menu_* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Sync_i(o,v);
 }
 
+void Gui::cb_Commanding_i(Fl_Menu_*, void*) {
+  sendCommandsWindow->show();
+}
+void Gui::cb_Commanding(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Commanding_i(o,v);
+}
+
+void Gui::cb_ACTEL_i(Fl_Menu_*, void*) {
+  sendParamsWindow->show();
+}
+void Gui::cb_ACTEL(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_ACTEL_i(o,v);
+}
+
 Fl_Menu_Item Gui::menu_menuBar[] = {
  {"File", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Choose Output Dir", 0,  (Fl_Callback*)Gui::cb_outputDirChooser, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -68,8 +82,10 @@ Fl_Menu_Item Gui::menu_menuBar[] = {
  {"Write Lightcurve", 0,  (Fl_Callback*)Gui::cb_WriteLightcurve, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Quit", 0x400071,  (Fl_Callback*)Gui::cb_exitButton, 0, 0, FL_NORMAL_LABEL, 0, 14, 1},
  {0,0,0,0,0,0,0,0,0},
- {"Menu", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Window", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Data Sync", 0,  (Fl_Callback*)Gui::cb_Sync, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Commanding", 0,  (Fl_Callback*)Gui::cb_Commanding, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"ACTEL Commanding", 0,  (Fl_Callback*)Gui::cb_ACTEL, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {0,0,0,0,0,0,0,0,0}
 };
@@ -253,11 +269,11 @@ void Gui::cb_clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_clear_i(o,v);
 }
 
-void Gui::cb_sendCommandsWindow_sendBut_i(Fl_Button*, void*) {
-  sendCommandsWindow->hide();
+void Gui::cb_Send_i(Fl_Button*, void*) {
+  app->send_voltage_command();
 }
-void Gui::cb_sendCommandsWindow_sendBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_sendCommandsWindow_sendBut_i(o,v);
+void Gui::cb_Send(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Send_i(o,v);
 }
 
 void Gui::cb_Close1_i(Fl_Button*, void*) {
@@ -265,6 +281,27 @@ void Gui::cb_Close1_i(Fl_Button*, void*) {
 }
 void Gui::cb_Close1(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Close1_i(o,v);
+}
+
+void Gui::cb_Send1_i(Fl_Button*, void*) {
+  app->send_clockset_command();
+}
+void Gui::cb_Send1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Send1_i(o,v);
+}
+
+void Gui::cb_Strobe_i(Fl_Button*, void*) {
+  app->send_atten_state(0);
+}
+void Gui::cb_Strobe(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Strobe_i(o,v);
+}
+
+void Gui::cb_Strobe1_i(Fl_Button*, void*) {
+  app->send_atten_state(1);
+}
+void Gui::cb_Strobe1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Strobe1_i(o,v);
 }
 
 Gui::Gui() {
@@ -418,17 +455,6 @@ Gui::Gui() {
       } // Fl_Group* o
       dataPlayback->end();
     } // Fl_Group* dataPlayback
-    { mainChartWindow = new mainChart(470, 155, 130, 115, "1");
-      mainChartWindow->box(FL_GTK_UP_BOX);
-      mainChartWindow->color(FL_BACKGROUND_COLOR);
-      mainChartWindow->selection_color(FL_BACKGROUND_COLOR);
-      mainChartWindow->labeltype(FL_NO_LABEL);
-      mainChartWindow->labelfont(0);
-      mainChartWindow->labelsize(14);
-      mainChartWindow->labelcolor(FL_FOREGROUND_COLOR);
-      mainChartWindow->align(Fl_Align(FL_ALIGN_CENTER));
-      mainChartWindow->when(FL_WHEN_RELEASE);
-    } // mainChart* mainChartWindow
     { pixelNum = new Fl_Output(445, 495, 80, 25, "Pixel");
     } // Fl_Output* pixelNum
     { pixelCounts = new Fl_Output(445, 465, 80, 25, "Cts");
@@ -436,24 +462,9 @@ Gui::Gui() {
     { subImageLockbut = new Fl_Light_Button(420, 525, 105, 25, "Unlock View");
       subImageLockbut->selection_color((Fl_Color)1);
     } // Fl_Light_Button* subImageLockbut
-    { new Fl_Text_Display(529, 295, 15, 15, "detector 1");
-    } // Fl_Text_Display* o
     { mainHistogramLockbut = new Fl_Light_Button(900, 465, 65, 25, "Unlock");
       mainHistogramLockbut->selection_color((Fl_Color)1);
     } // Fl_Light_Button* mainHistogramLockbut
-    { mainChartWindow1 = new mainChart(615, 155, 130, 115, "1");
-      mainChartWindow1->box(FL_GTK_UP_BOX);
-      mainChartWindow1->color(FL_BACKGROUND_COLOR);
-      mainChartWindow1->selection_color(FL_BACKGROUND_COLOR);
-      mainChartWindow1->labeltype(FL_NO_LABEL);
-      mainChartWindow1->labelfont(0);
-      mainChartWindow1->labelsize(14);
-      mainChartWindow1->labelcolor(FL_FOREGROUND_COLOR);
-      mainChartWindow1->align(Fl_Align(FL_ALIGN_CENTER));
-      mainChartWindow1->when(FL_WHEN_RELEASE);
-    } // mainChart* mainChartWindow1
-    { new Fl_Text_Display(670, 295, 15, 15, "detector 2");
-    } // Fl_Text_Display* o
     { mainHistogramXlabelmid = new Fl_Value_Output(735, 707, 35, 23, "Energy:");
       mainHistogramXlabelmid->box(FL_THIN_UP_BOX);
     } // Fl_Value_Output* mainHistogramXlabelmid
@@ -487,7 +498,7 @@ Gui::Gui() {
     { closeBut = new Fl_Light_Button(209, 65, 80, 25, "Close");
       closeBut->callback((Fl_Callback*)cb_closeBut);
     } // Fl_Light_Button* closeBut
-    { mainLightcurveWindow = new mainLightcurve(760, 155, 300, 125, "Light curve");
+    { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 125, "Light curve");
       mainLightcurveWindow->box(FL_GTK_UP_BOX);
       mainLightcurveWindow->color(FL_BACKGROUND_COLOR);
       mainLightcurveWindow->selection_color(FL_BACKGROUND_COLOR);
@@ -878,36 +889,37 @@ Gui::Gui() {
     } // Fl_Button* o
     sendParamsWindow->end();
   } // Fl_Double_Window* sendParamsWindow
-  { sendCommandsWindow = new Fl_Double_Window(351, 320, "Send Commands");
+  { sendCommandsWindow = new Fl_Double_Window(364, 175, "Send Commands");
     sendCommandsWindow->user_data((void*)(this));
-    { sendCommandsWindow_sendBut = new Fl_Button(265, 10, 70, 25, "Send");
-      sendCommandsWindow_sendBut->value(1);
-      sendCommandsWindow_sendBut->labelcolor((Fl_Color)1);
-      sendCommandsWindow_sendBut->callback((Fl_Callback*)cb_sendCommandsWindow_sendBut);
-    } // Fl_Button* sendCommandsWindow_sendBut
-    { Fl_Button* o = new Fl_Button(265, 40, 70, 25, "Close");
+    { Fl_Button* o = new Fl_Button(265, 10, 70, 25, "Send");
+      o->value(1);
+      o->labelcolor((Fl_Color)1);
+      o->callback((Fl_Callback*)cb_Send);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(265, 130, 70, 25, "Close");
       o->callback((Fl_Callback*)cb_Close1);
     } // Fl_Button* o
-    { new Fl_Input(175, 11, 75, 24, "HV Set (0-4095):");
-    } // Fl_Input* o
-    { new Fl_Input(175, 41, 75, 24, "Clock Set Low Byte:");
-    } // Fl_Input* o
-    { new Fl_Input(175, 71, 75, 24, "Clock Set Low Middle:");
-    } // Fl_Input* o
-    { new Fl_Input(175, 101, 75, 24, "Clock Set High Middle:");
-    } // Fl_Input* o
-    { new Fl_Input(175, 131, 75, 24, "Clock Set High:");
-    } // Fl_Input* o
-    { new Fl_Input(175, 161, 75, 24, "HIghclock Set Low Byte:");
-    } // Fl_Input* o
-    { new Fl_Input(175, 191, 75, 24, "Highclock Set High Byte:");
-    } // Fl_Input* o
-    { new Fl_Input(175, 221, 75, 24, "Load Clock From Latch:");
-    } // Fl_Input* o
-    { new Fl_Input(175, 251, 75, 24, "Strobe Attenuator 0:");
-    } // Fl_Input* o
-    { new Fl_Input(175, 281, 75, 24, "Strobe Attenuator 1:");
-    } // Fl_Input* o
+    { Fl_Button* o = new Fl_Button(265, 70, 70, 25, "Send");
+      o->value(1);
+      o->labelcolor((Fl_Color)1);
+      o->callback((Fl_Callback*)cb_Send1);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(70, 100, 180, 25, "Strobe Attenuator State 0");
+      o->box(FL_THIN_UP_BOX);
+      o->labelcolor((Fl_Color)1);
+      o->callback((Fl_Callback*)cb_Strobe);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(70, 130, 180, 25, "Strobe Attenuator State 1");
+      o->box(FL_THIN_UP_BOX);
+      o->labelcolor((Fl_Color)1);
+      o->callback((Fl_Callback*)cb_Strobe1);
+    } // Fl_Button* o
+    { highVoltage_input = new Fl_Value_Input(175, 11, 75, 24, "HV Set (0-4095):");
+    } // Fl_Value_Input* highVoltage_input
+    { clockLow_input = new Fl_Value_Input(175, 40, 75, 24, "Clock Set Low:");
+    } // Fl_Value_Input* clockLow_input
+    { clockHigh_input = new Fl_Value_Input(175, 70, 75, 24, "Clock Set High:");
+    } // Fl_Value_Input* clockHigh_input
     sendCommandsWindow->end();
   } // Fl_Double_Window* sendCommandsWindow
 }

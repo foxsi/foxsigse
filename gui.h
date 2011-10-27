@@ -17,12 +17,10 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Value_Output.H>
-#include "mainChart.h"
 #include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Choice.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
-#include <FL/Fl_Input.H>
 
 class Gui {
 public:
@@ -71,6 +69,10 @@ public:
 private:
   void cb_Sync_i(Fl_Menu_*, void*);
   static void cb_Sync(Fl_Menu_*, void*);
+  void cb_Commanding_i(Fl_Menu_*, void*);
+  static void cb_Commanding(Fl_Menu_*, void*);
+  void cb_ACTEL_i(Fl_Menu_*, void*);
+  static void cb_ACTEL(Fl_Menu_*, void*);
 public:
   mainHistogram *mainHistogramWindow;
   mainImage *mainImageWindow;
@@ -132,12 +134,10 @@ public:
   Fl_Value_Output *noiseValOut1;
   Fl_Value_Output *noiseValOut2;
   Fl_Value_Output *noiseValOut3;
-  mainChart *mainChartWindow;
   Fl_Output *pixelNum;
   Fl_Output *pixelCounts;
   Fl_Light_Button *subImageLockbut;
   Fl_Light_Button *mainHistogramLockbut;
-  mainChart *mainChartWindow1;
   Fl_Value_Output *mainHistogramXlabelmid;
   Fl_Value_Output *mainHistogramXlabelmax;
   Fl_Value_Output *mainHistogramYlabelmax;
@@ -220,13 +220,21 @@ private:
   static void cb_clear(Fl_Button*, void*);
 public:
   Fl_Double_Window *sendCommandsWindow;
-  Fl_Button *sendCommandsWindow_sendBut;
 private:
-  void cb_sendCommandsWindow_sendBut_i(Fl_Button*, void*);
-  static void cb_sendCommandsWindow_sendBut(Fl_Button*, void*);
+  void cb_Send_i(Fl_Button*, void*);
+  static void cb_Send(Fl_Button*, void*);
   void cb_Close1_i(Fl_Button*, void*);
   static void cb_Close1(Fl_Button*, void*);
+  void cb_Send1_i(Fl_Button*, void*);
+  static void cb_Send1(Fl_Button*, void*);
+  void cb_Strobe_i(Fl_Button*, void*);
+  static void cb_Strobe(Fl_Button*, void*);
+  void cb_Strobe1_i(Fl_Button*, void*);
+  static void cb_Strobe1(Fl_Button*, void*);
 public:
+  Fl_Value_Input *highVoltage_input;
+  Fl_Value_Input *clockLow_input;
+  Fl_Value_Input *clockHigh_input;
   void show();
   Application *app; 
   Foxsidata *data; 

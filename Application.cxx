@@ -1,13 +1,13 @@
 // application class
 
 #include "Application.h"
+#include "commands.h"
 #include <FL/Fl_File_Chooser.H>
 #include "gui.h"
 #include "Foxsidata.h"
 #include "usbd2xx.h"
 #include <pthread.h>
 #include <sched.h>
-
 #include <sys/time.h>
 #include <time.h>
 
@@ -515,6 +515,20 @@ void Application::clear_console(void)
 void Application::test(void)
 {
 
+}
+void Application::send_atten_state(bool value)
+{
+	command_attenuator_state(value);
+}
+
+void Application::send_voltage_command(void)
+{
+	command_voltage_set(gui->highVoltage_input->value());
+}
+
+void Application::send_clockset_command(void)
+{
+	command_clock_set(gui->clockHigh_input->value(), gui->clockLow_input->value());
 }
 
 void Application::stop_reading_data(void)

@@ -15,6 +15,9 @@ public:
 	Application();
 	
 	// Menu Item Actions
+	void send_clockset_command(void);
+	void send_atten_state(bool value);
+	void send_voltage_command(void);
 	
 	// --------------------- File Menu -------------------------------
 	// Set the directory that the data file will be written to
@@ -76,7 +79,8 @@ public:
 	// not yet implemented
 	static void printf_to_console(const char *string1, char *string2);
 	static void print_to_console(const char *text);
-
+	
+		
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
