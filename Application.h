@@ -85,8 +85,6 @@ private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
 	static void* new_read_data();
-
-	
 	
 };
 

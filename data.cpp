@@ -13,24 +13,27 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include "gui.h"
+#include "usbd2xx.h"
+
 #define MAXPATH 128
+#define NUM_THREADS 8
+
+extern Gui *gui;
 
 char obsfilespec[MAXPATH];
 int newdisplay;
 int displayonce,displaycont;
-extern int stop_message;
-extern Gui *gui;
-extern int stop_message;
+int stop_message;
 unsigned short int buffer[1];
 unsigned short int buffer0[1];
+int *taskids[NUM_THREADS];
+int fout;
+pthread_mutex_t mymutex;
 
-extern pthread_mutex_t mymutex;
-extern int fout;
-
-void* watch_buffer(void* p)
+void* data_watch_buffer(void* p)
 {
-	/* Watches the buffer variable for changes. When changes occur, display 
-	 * them on the GUI.
+	/* Watches the buffer variable for changes. When changes occur, parse 
+	 * the buffer variable into a data packet and update the display.
 	 */
 	
 	// This function never stops unless told to do so by setting stop_message to 1
@@ -58,7 +61,7 @@ void* watch_buffer(void* p)
 	}
 }
 
-void* read_data2(void *p)
+void* data_read_data(void *p)
 {
 	/* Read the data in continuously. Data is moved from the buffer0 variable
 	 * to buffer and will write the data to a file is needed.
@@ -71,7 +74,7 @@ void* read_data2(void *p)
 	while (1) {
 
 		// read the data
-		simulate_data();
+		data_simulate_data();
 		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
 		{
 			if (newdisplay == 0)
@@ -96,13 +99,13 @@ void* read_data2(void *p)
 	}
 }
 
-void simulate_data(void)
+void data_simulate_data(void)
 {
 	//printf("%hd ", (arc4random() % 10));
 	buffer[0] = (unsigned short int) (arc4random() % 10);
 }
 
-void start_file(void)
+void data_start_file(void)
 {
 	/* Open a file to write the data to. The file pointer is set to fout.
 	 * 
@@ -124,59 +127,38 @@ void start_file(void)
     }    	
 }
 
-void* read_gse(void* p)
+void data_start_reading(void)
 {
-	ssize_t wlen;
+	pthread_t thread;
+    struct sched_param param;
+    pthread_attr_t tattr;
 	
-	Fl::lock();
+	int *variable;
+	int ret;
+	gui->stopReadingDataButton->activate();
 	
-	Fl::awake();
-	Fl::unlock();
-	//return j;
-	//start_file();
+	stop_message = 0;
 	
-	for(unsigned short int i; ;i++ )
-	{
-		// do some work
-		usleep(5000);
-		buffer0[0] = i;
-		
-		// write to file
-		if(fout > 0)
-		{
-			if( (wlen = write(fout,(const void *) buffer0,2) ) != 2){};
-		}
-		
-		// copy the result to the global buffer variable to share it
-		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
-		{
-			// an unsigned short int is 2 bytes
-			memcpy( (void *)buffer, (void *)buffer0,1);			
-			pthread_mutex_unlock(&mymutex);
-		}
-		
-		// check if should stop
-		if (stop_message == 1){
-			if (fout > 0)
-				close(fout);
-			Fl::lock();
-			
-			Fl::unlock();
-			Fl::awake(p);
-			pthread_exit(NULL);
-		}
-	}
-	// Obtain a lock before we access the browser widget...
-	Fl::lock();
+	// define a high (custom) priority for the read_data thread
+    int newprio = -10;
+	param.sched_priority = newprio;
+	ret = pthread_attr_init(&tattr);
+	ret = pthread_attr_setschedparam (&tattr, &param);
 	
-	Fl::unlock();
-	
-	// Send a message to the main thread, at which point it will
-	// process any pending redraws for our browser widget.  The
-	// message we pass here isn't used for anything, so we could also
-	// just pass NULL.
-	Fl::awake(p);
-	
-	return 0L;
+	// start the read_data thread
+	ret = pthread_create(&thread, &tattr, data_read_data, (void *) taskids[0]);
+	pthread_mutex_init(&mymutex,NULL);
+
+	//newprio = -5;
+	//param.sched_priority = newprio;
+	//ret = pthread_attr_init(&tattr);
+	//ret = pthread_attr_setschedparam (&tattr, &param);
+	// start the watch_buffer thread
+	ret = pthread_create(&thread, NULL, data_watch_buffer, (void *) taskids[1]);	
 }
 
+void data_stop_reading(void)
+{
+	stop_message = 1;	
+	pthread_mutex_destroy(&mymutex);
+}

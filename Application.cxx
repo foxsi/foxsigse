@@ -1,39 +1,28 @@
 // application class
 
 #include "Application.h"
-#include "commands.h"
 #include <FL/Fl_File_Chooser.H>
-#include "gui.h"
-#include "Foxsidata.h"
-#include "usbd2xx.h"
-#include <pthread.h>
-#include <sched.h>
-#include <sys/time.h>
-#include <time.h>
+
 #include "data.h"
+#include "commands.h"
+#include "gui.h"
+
+
+
 
 #define XSTRIPS 128
 #define YSTRIPS 128
-
 #define CHANNELS 1024
-
 #define MAXPATH 128
-#define NUM_THREADS 8
 
 extern Gui *gui;
 
 extern int HistogramFunction[CHANNELS];
 extern double detImage[XSTRIPS][YSTRIPS];
 
-int *taskids[NUM_THREADS];
-
-extern unsigned short int buffer[1];
-extern unsigned short int buffer0[1];
-pthread_mutex_t mymutex;
-int fout;
-
-int stop_message;
+extern int stop_message;
 FILE *dataFile;
+extern int fout;
 
 // filename is set automatically with local time
 char dataFilename[MAXPATH];
@@ -517,36 +506,7 @@ void Application::clear_console(void)
 	
 void Application::test(void)
 {
-	pthread_t thread;
-    struct sched_param param;
-    pthread_attr_t tattr;
-	
-	int *variable;
-	int ret;
-	gui->stopReadingDataButton->activate();
-	
-	stop_message = 0;
-	
-	variable = (int *) malloc(sizeof(int));
-	*variable = 6;
-	
-	// define the custom priority for one of the threads
-    int newprio = -10;
-	param.sched_priority = newprio;
-	ret = pthread_attr_init(&tattr);
-	ret = pthread_attr_setschedparam (&tattr, &param);
-
-	// start the read_data thread
-	ret = pthread_create(&thread, &tattr, read_data2, (void *) taskids[0]);
-	
-	//newprio = -5;
-	//param.sched_priority = newprio;
-	//ret = pthread_attr_init(&tattr);
-	//ret = pthread_attr_setschedparam (&tattr, &param);
-	pthread_mutex_init(&mymutex,NULL);
-	// start the watch_buffer thread
-	ret = pthread_create(&thread, NULL, watch_buffer, (void *) taskids[1]);
-	
+	data_start_reading();	
 }
 void Application::send_atten_state(bool value)
 {
@@ -565,7 +525,6 @@ void Application::send_clockset_command(void)
 
 void Application::stop_reading_data(void)
 {
-	// send the thread the message to stop itself
-	stop_message = 1;	
-	pthread_mutex_destroy(&mymutex);
+	// send the thread the message to stop itself	
+	data_stop_reading();
 }

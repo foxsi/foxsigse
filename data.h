@@ -12,8 +12,15 @@
  *
  */
 
-void* testfunction(void *p);
-void* watch_buffer(void *p);
-void start_file(void);
-void simulate_data(void);
-void* read_data2(void *p);
+#ifndef _data_h_     // prevent multiple includes
+#define _data_h_
+
+void* data_testfunction(void *p);
+void* data_watch_buffer(void *p);
+void data_start_file(void);
+void data_simulate_data(void);
+void* data_read_data(void *p);
+void data_start_reading(void);
+void data_stop_reading(void);
+
+#endif

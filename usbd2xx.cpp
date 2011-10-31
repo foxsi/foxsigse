@@ -266,7 +266,7 @@ void USB_d2xx::printFrame(void)
 {
 	// Data are stored as 16-bit words (short int)
 	
-//	unsigned short int data[2];
+	//	unsigned short int data[2];
 	int nData = 78; // n bytes per frame.
 	int pixel_value = 0;
 	int ydata[YSTRIPS];
