@@ -10,7 +10,7 @@
 #include <sched.h>
 #include <sys/time.h>
 #include <time.h>
-
+#include "data.h"
 
 #define XSTRIPS 128
 #define YSTRIPS 128
@@ -18,14 +18,17 @@
 #define CHANNELS 1024
 
 #define MAXPATH 128
+#define NUM_THREADS 8
 
 extern Gui *gui;
 
 extern int HistogramFunction[CHANNELS];
 extern double detImage[XSTRIPS][YSTRIPS];
 
-unsigned short int buffer;
-unsigned short int buffer0;
+int *taskids[NUM_THREADS];
+
+extern unsigned short int buffer[1];
+extern unsigned short int buffer0[1];
 pthread_mutex_t mymutex;
 int fout;
 
@@ -514,7 +517,36 @@ void Application::clear_console(void)
 	
 void Application::test(void)
 {
+	pthread_t thread;
+    struct sched_param param;
+    pthread_attr_t tattr;
+	
+	int *variable;
+	int ret;
+	gui->stopReadingDataButton->activate();
+	
+	stop_message = 0;
+	
+	variable = (int *) malloc(sizeof(int));
+	*variable = 6;
+	
+	// define the custom priority for one of the threads
+    int newprio = -10;
+	param.sched_priority = newprio;
+	ret = pthread_attr_init(&tattr);
+	ret = pthread_attr_setschedparam (&tattr, &param);
 
+	// start the read_data thread
+	ret = pthread_create(&thread, &tattr, read_data2, (void *) taskids[0]);
+	
+	//newprio = -5;
+	//param.sched_priority = newprio;
+	//ret = pthread_attr_init(&tattr);
+	//ret = pthread_attr_setschedparam (&tattr, &param);
+	pthread_mutex_init(&mymutex,NULL);
+	// start the watch_buffer thread
+	ret = pthread_create(&thread, NULL, watch_buffer, (void *) taskids[1]);
+	
 }
 void Application::send_atten_state(bool value)
 {
@@ -535,4 +567,5 @@ void Application::stop_reading_data(void)
 {
 	// send the thread the message to stop itself
 	stop_message = 1;	
+	pthread_mutex_destroy(&mymutex);
 }

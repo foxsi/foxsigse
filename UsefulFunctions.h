@@ -5,6 +5,11 @@
  *  Created by Steven Christe on 7/22/09.
  *  Copyright 2009 FOXSI. All rights reserved.
  *
+ *  Description
+ *  -----------
+ *
+ *  Holds random miscellaneous useful functions.
+ *
  */
 
 #ifndef _UsefulFunctions_h_     // prevent multiple includes
@@ -26,8 +31,5 @@ unsigned getbits(unsigned x, int p, int n);
 //reverses bit order in an unsigned.
 unsigned reversebits(unsigned x, int n);
 
-void* testfunction(void *p);
-void* watchfunction(void *p);
-void startfile(void);
 
 #endif

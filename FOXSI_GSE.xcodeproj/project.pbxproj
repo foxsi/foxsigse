@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		860F0780145F03D000F82F08 /* data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 860F077F145F03D000F82F08 /* data.cpp */; };
 		86341487143FB0EB00C0D98E /* telemetry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86341486143FB0EB00C0D98E /* telemetry.cpp */; };
 		866488A3145737B6003D2713 /* commands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866488A2145737B6003D2713 /* commands.cpp */; };
 		86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86739DD8138C708900D6C498 /* usbd2xx.cpp */; };
@@ -50,6 +51,8 @@
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		860F077E145F03D000F82F08 /* data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = data.h; sourceTree = "<group>"; };
+		860F077F145F03D000F82F08 /* data.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = data.cpp; sourceTree = "<group>"; };
 		86341485143FB0EB00C0D98E /* telemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = telemetry.h; sourceTree = "<group>"; };
 		86341486143FB0EB00C0D98E /* telemetry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = telemetry.cpp; sourceTree = "<group>"; };
 		866488A1145737B6003D2713 /* commands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = commands.h; sourceTree = "<group>"; };
@@ -183,8 +186,10 @@
 				86739EAA138C7B0600D6C498 /* WinTypes.h */,
 				86E4A447138C2B900004DBB3 /* subImage.cxx */,
 				86E4A448138C2B900004DBB3 /* subImage.h */,
-				86E4A449138C2B900004DBB3 /* UsefulFunctions.cpp */,
+				860F077E145F03D000F82F08 /* data.h */,
+				860F077F145F03D000F82F08 /* data.cpp */,
 				86E4A44A138C2B900004DBB3 /* UsefulFunctions.h */,
+				86E4A449138C2B900004DBB3 /* UsefulFunctions.cpp */,
 				86739DD8138C708900D6C498 /* usbd2xx.cpp */,
 				86739DD9138C708900D6C498 /* usbd2xx.h */,
 				C9601E9710B1FAED0018BADE /* main.h */,
@@ -298,6 +303,7 @@
 				86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */,
 				86341487143FB0EB00C0D98E /* telemetry.cpp in Sources */,
 				866488A3145737B6003D2713 /* commands.cpp in Sources */,
+				860F0780145F03D000F82F08 /* data.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
