@@ -10,14 +10,16 @@ void Gui::cb_About(Fl_Menu_* o, void* v) {
 }
 
 void Gui::cb_Preferences_i(Fl_Menu_*, void*) {
-  PreferenceWindow->show();
+  app->update_PreferenceWindow();
+PreferenceWindow->show();
 }
 void Gui::cb_Preferences(Fl_Menu_* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Preferences_i(o,v);
 }
 
 void Gui::cb_Quit_i(Fl_Menu_*, void*) {
-  exit(1);
+  prefs->flush();
+exit(1);
 }
 void Gui::cb_Quit(Fl_Menu_* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Quit_i(o,v);
@@ -28,48 +30,6 @@ void Gui::cb_outputDirChooser_i(Fl_Menu_*, void*) {
 }
 void Gui::cb_outputDirChooser(Fl_Menu_* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_outputDirChooser_i(o,v);
-}
-
-void Gui::cb_readFile_i(Fl_Menu_*, void*) {
-  app->readFile();
-}
-void Gui::cb_readFile(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_readFile_i(o,v);
-}
-
-void Gui::cb_readUSBStream_i(Fl_Menu_*, void*) {
-  app->readUSBStream();
-}
-void Gui::cb_readUSBStream(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_readUSBStream_i(o,v);
-}
-
-void Gui::cb_readTeleStream_i(Fl_Menu_*, void*) {
-  app->readTeleStream();
-}
-void Gui::cb_readTeleStream(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_readTeleStream_i(o,v);
-}
-
-void Gui::cb_WritePicScreen_i(Fl_Menu_*, void*) {
-  app->WriteSpec();
-}
-void Gui::cb_WritePicScreen(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_WritePicScreen_i(o,v);
-}
-
-void Gui::cb_WriteLightcurve_i(Fl_Menu_*, void*) {
-  app->WriteLightcurve();
-}
-void Gui::cb_WriteLightcurve(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_WriteLightcurve_i(o,v);
-}
-
-void Gui::cb_Sync_i(Fl_Menu_*, void*) {
-  app->dataSync();
-}
-void Gui::cb_Sync(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Sync_i(o,v);
 }
 
 void Gui::cb_Commanding_i(Fl_Menu_*, void*) {
@@ -94,14 +54,13 @@ Fl_Menu_Item Gui::menu_menuBar[] = {
  {0,0,0,0,0,0,0,0,0},
  {"File", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Choose Output Dir", 0,  (Fl_Callback*)Gui::cb_outputDirChooser, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Read Data file", 0,  (Fl_Callback*)Gui::cb_readFile, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Read USB Stream", 0,  (Fl_Callback*)Gui::cb_readUSBStream, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Read Tele Stream", 0,  (Fl_Callback*)Gui::cb_readTeleStream, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Write Spec", 0,  (Fl_Callback*)Gui::cb_WritePicScreen, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Write Lightcurve", 0,  (Fl_Callback*)Gui::cb_WriteLightcurve, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Read Data file", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Read USB Stream", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Read Tele Stream", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Write Spec", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Write Lightcurve", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {"Window", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
- {"Data Sync", 0,  (Fl_Callback*)Gui::cb_Sync, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Commanding", 0,  (Fl_Callback*)Gui::cb_Commanding, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"ACTEL Commanding", 0,  (Fl_Callback*)Gui::cb_ACTEL, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
@@ -115,14 +74,6 @@ Fl_Menu_Item* Gui::readTeleStream = Gui::menu_menuBar + 9;
 Fl_Menu_Item* Gui::WritePicScreen = Gui::menu_menuBar + 10;
 Fl_Menu_Item* Gui::WriteLightcurve = Gui::menu_menuBar + 11;
 Fl_Menu_Item* Gui::menuProc = Gui::menu_menuBar + 13;
-Fl_Menu_Item* Gui::Sync = Gui::menu_menuBar + 14;
-
-void Gui::cb_shutterstateOutput_i(Fl_Output*, void*) {
-  app->getShutState();
-}
-void Gui::cb_shutterstateOutput(Fl_Output* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_shutterstateOutput_i(o,v);
-}
 
 void Gui::cb_nextFrameBut_i(Fl_Button*, void*) {
   data->nextFrame();
@@ -234,12 +185,6 @@ void Gui::cb_Clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Clear_i(o,v);
 }
 
-Fl_Menu_Item Gui::menu_fileTypeChoice[] = {
- {"Text", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Binary", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {0,0,0,0,0,0,0,0,0}
-};
-
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
   app->save_settings();
 app->send_params();
@@ -321,6 +266,12 @@ void Gui::cb_Strobe1(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Strobe1_i(o,v);
 }
 
+Fl_Menu_Item Gui::menu_fileTypeChoice[] = {
+ {"Text", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Binary", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0}
+};
+
 void Gui::cb_OK_i(Fl_Button*, void*) {
   app->save_preferences();
 PreferenceWindow->hide();
@@ -396,7 +347,6 @@ Gui::Gui() {
       { rateOutput7 = new Fl_Output(760, 115, 45, 25);
       } // Fl_Output* rateOutput7
       { shutterstateOutput = new Fl_Output(465, 65, 30, 25, "Shut state");
-        shutterstateOutput->callback((Fl_Callback*)cb_shutterstateOutput);
       } // Fl_Output* shutterstateOutput
       { TempOutput = new Fl_Output(375, 145, 30, 25, "Temp");
       } // Fl_Output* TempOutput
@@ -573,10 +523,6 @@ Gui::Gui() {
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Clear);
     } // Fl_Button* o
-    { fileTypeChoice = new Fl_Choice(176, 160, 75, 25, "File type:");
-      fileTypeChoice->down_box(FL_BORDER_BOX);
-      fileTypeChoice->menu(menu_fileTypeChoice);
-    } // Fl_Choice* fileTypeChoice
     { testOutput = new Fl_Value_Output(135, 276, 77, 24, "value:");
     } // Fl_Value_Output* testOutput
     mainWindow->end();
@@ -587,7 +533,7 @@ Gui::Gui() {
   usb=new USB_d2xx();
   buff=new Fl_Text_Buffer();
   consoleBuf->buffer(buff);
-  prefs=new Fl_Preferences(Fl_Preferences::USER, "fltk.org", "test/preferences");
+  prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");
   { sendParamsWindow = new Fl_Double_Window(780, 531, "Send Parameters");
     sendParamsWindow->user_data((void*)(this));
     { sendParamsWindow_sendBut = new Fl_Button(415, 425, 70, 25, "Send");
@@ -968,10 +914,15 @@ Gui::Gui() {
     } // Fl_Box* o
     AboutWindow->end();
   } // Fl_Double_Window* AboutWindow
-  { PreferenceWindow = new Fl_Double_Window(361, 109, "Preferences");
+  { PreferenceWindow = new Fl_Double_Window(365, 113, "Preferences");
     PreferenceWindow->user_data((void*)(this));
     { pixelhalflife_value = new Fl_Value_Input(310, 11, 30, 24, "pixel half life (s)");
+      pixelhalflife_value->value(5);
     } // Fl_Value_Input* pixelhalflife_value
+    { fileTypeChoice = new Fl_Choice(265, 40, 75, 25, "File type:");
+      fileTypeChoice->down_box(FL_BORDER_BOX);
+      fileTypeChoice->menu(menu_fileTypeChoice);
+    } // Fl_Choice* fileTypeChoice
     { Fl_Button* o = new Fl_Button(210, 80, 63, 20, "OK");
       o->callback((Fl_Callback*)cb_OK);
     } // Fl_Button* o

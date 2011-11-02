@@ -44,35 +44,12 @@ private:
   static void cb_outputDirChooser(Fl_Menu_*, void*);
 public:
   static Fl_Menu_Item *readFile;
-private:
-  void cb_readFile_i(Fl_Menu_*, void*);
-  static void cb_readFile(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *readUSBStream;
-private:
-  void cb_readUSBStream_i(Fl_Menu_*, void*);
-  static void cb_readUSBStream(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *readTeleStream;
-private:
-  void cb_readTeleStream_i(Fl_Menu_*, void*);
-  static void cb_readTeleStream(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *WritePicScreen;
-private:
-  void cb_WritePicScreen_i(Fl_Menu_*, void*);
-  static void cb_WritePicScreen(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *WriteLightcurve;
-private:
-  void cb_WriteLightcurve_i(Fl_Menu_*, void*);
-  static void cb_WriteLightcurve(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *menuProc;
-  static Fl_Menu_Item *Sync;
 private:
-  void cb_Sync_i(Fl_Menu_*, void*);
-  static void cb_Sync(Fl_Menu_*, void*);
   void cb_Commanding_i(Fl_Menu_*, void*);
   static void cb_Commanding(Fl_Menu_*, void*);
   void cb_ACTEL_i(Fl_Menu_*, void*);
@@ -91,10 +68,6 @@ public:
   Fl_Output *rateOutput6;
   Fl_Output *rateOutput7;
   Fl_Output *shutterstateOutput;
-private:
-  void cb_shutterstateOutput_i(Fl_Output*, void*);
-  static void cb_shutterstateOutput(Fl_Output*, void*);
-public:
   Fl_Output *TempOutput;
   Fl_Output *histEnergy;
   Fl_Output *histCounts;
@@ -196,8 +169,6 @@ private:
   void cb_Clear_i(Fl_Button*, void*);
   static void cb_Clear(Fl_Button*, void*);
 public:
-  Fl_Choice *fileTypeChoice;
-  static Fl_Menu_Item menu_fileTypeChoice[];
   Fl_Value_Output *testOutput;
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
@@ -242,6 +213,8 @@ public:
   Fl_Double_Window *AboutWindow;
   Fl_Double_Window *PreferenceWindow;
   Fl_Value_Input *pixelhalflife_value;
+  Fl_Choice *fileTypeChoice;
+  static Fl_Menu_Item menu_fileTypeChoice[];
 private:
   void cb_OK_i(Fl_Button*, void*);
   static void cb_OK(Fl_Button*, void*);

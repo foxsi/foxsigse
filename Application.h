@@ -18,20 +18,11 @@ public:
 	void set_datafile_dir(void);
 	// Read data from file 
 	void readFile();
-	// Quite and close the program
-	void Exit();
-	// Read data coming in from USB stream, straight from ASIC (DEPRECATED!)
-	void readUSBStream();  
-	// Read data coming in from Telemetry stream (DEPRECATED)
-	void readTeleStream(); 
-	// Write the spectrum to a file
-	void WriteSpec();  
-	// Write a lightcurve to a file
-	void WriteLightcurve();  
+ 
 	// Flush all data buffers
 	void FlushData(void); 
 	
-	void dataSync();   //sync data...may not be necessary (Menu Menu)
+	// void dataSync();   //sync data...may not be necessary (Menu Menu)
 	
 	void setDetector(int detector);  //set the detector to show in main windows (Detector Menu)
 	
@@ -47,7 +38,6 @@ public:
 	//START Text Output Actions -------------------------------------------------------
 	float getRate(int detector);   //get the count rate 
 	int getFrameNum(void);  //get the frame number
-	int getShutState(void);  //get the shutter state
 	float getTemp(void);  //get the temperature
 	const char getPixel(void);
 	
@@ -76,13 +66,13 @@ public:
 	static void print_to_console(const char *text);
 	float get_pixel_half_life(void);
 	
+	void update_PreferenceWindow(void);
+	
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
 	static void* new_read_data();
-	float pixel_half_life;
 
-	
 };
 
 #endif

@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {56 44 1252 739} type Double color 19 resizable
+      xywh {51 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -29,12 +29,14 @@ class Gui {open
           }
           MenuItem {} {
             label {Preferences...}
-            callback {PreferenceWindow->show();}
+            callback {app->update_PreferenceWindow();
+PreferenceWindow->show();} selected
             xywh {0 0 36 21}
           }
           MenuItem {} {
             label {Quit FOXSI GSE}
-            callback {exit(1);}
+            callback {prefs->flush();
+exit(1);}
             xywh {5 5 36 21} shortcut 0x400071
           }
         }
@@ -49,27 +51,22 @@ class Gui {open
           }
           MenuItem readFile {
             label {Read Data file}
-            callback {app->readFile();}
             xywh {0 0 100 20}
           }
           MenuItem readUSBStream {
             label {Read USB Stream}
-            callback {app->readUSBStream()}
             xywh {0 0 36 21}
           }
           MenuItem readTeleStream {
             label {Read Tele Stream}
-            callback {app->readTeleStream()}
             xywh {0 0 36 21}
           }
           MenuItem WritePicScreen {
             label {Write Spec}
-            callback {app->WriteSpec();}
             xywh {10 10 100 20}
           }
           MenuItem WriteLightcurve {
             label {Write Lightcurve}
-            callback {app->WriteLightcurve();}
             xywh {10 10 100 20}
           }
         }
@@ -77,11 +74,6 @@ class Gui {open
           label Window open
           xywh {0 0 100 20}
         } {
-          MenuItem Sync {
-            label {Data Sync}
-            callback {app->dataSync();}
-            xywh {0 0 100 20}
-          }
           MenuItem {} {
             label Commanding
             callback {sendCommandsWindow->show()}
@@ -142,7 +134,6 @@ class Gui {open
         }
         Fl_Output shutterstateOutput {
           label {Shut state}
-          callback {app->getShutState()}
           xywh {465 65 30 25}
         }
         Fl_Output TempOutput {
@@ -395,19 +386,6 @@ class Gui {open
         callback {app->clear_console();}
         xywh {1115 320 63 20} labelcolor 1
       }
-      Fl_Choice fileTypeChoice {
-        label {File type:} open
-        xywh {176 160 75 25} down_box BORDER_BOX
-      } {
-        MenuItem {} {
-          label Text
-          xywh {0 0 31 20}
-        }
-        MenuItem {} {
-          label Binary
-          xywh {0 0 31 20}
-        }
-      }
       Fl_Value_Output testOutput {
         label {value:}
         xywh {135 276 77 24}
@@ -418,8 +396,7 @@ class Gui {open
     code {usb=new USB_d2xx();} {}
     code {buff=new Fl_Text_Buffer();
 consoleBuf->buffer(buff);} {}
-    code {prefs=new Fl_Preferences(Fl_Preferences::USER, "fltk.org", "test/preferences");} {selected
-    }
+    code {prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");} {}
     Fl_Window sendParamsWindow {
       label {Send Parameters}
       xywh {712 363 780 531} type Double visible
@@ -964,11 +941,24 @@ app->send_params();
     }
     Fl_Window PreferenceWindow {
       label Preferences open
-      xywh {368 277 361 109} type Double visible
+      xywh {351 241 365 113} type Double visible
     } {
       Fl_Value_Input pixelhalflife_value {
         label {pixel half life (s)}
-        xywh {310 11 30 24}
+        xywh {310 11 30 24} value 5
+      }
+      Fl_Choice fileTypeChoice {
+        label {File type:} open
+        xywh {265 40 75 25} down_box BORDER_BOX
+      } {
+        MenuItem {} {
+          label Text
+          xywh {5 5 31 20}
+        }
+        MenuItem {} {
+          label Binary
+          xywh {5 5 31 20}
+        }
       }
       Fl_Button {} {
         label OK

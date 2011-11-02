@@ -66,6 +66,19 @@ void Application::FlushData(void)
 void Application::save_preferences(void)
 {
 	gui->prefs->set("pixel_half_life", (float) gui->pixelhalflife_value->value());
+	gui->prefs->set("file_type", (float) gui->fileTypeChoice->value());
+}
+
+void Application::update_PreferenceWindow(void)
+{
+	float pixel_half_life;
+	int file_type;
+	
+	gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
+	gui->prefs->get("file_type", file_type, 0);
+	
+	gui->pixelhalflife_value->value(pixel_half_life);
+	gui->fileTypeChoice->value(file_type);
 }
 
 void Application::start_file()
@@ -148,14 +161,8 @@ void Application::readFile()
 
 // add application routines here:
 
-//quit the program
-void Application::Exit()
-{
-	exit(0);
-}
-
-void Application::readUSBStream(void)
-{
+//void Application::readUSBStream(void)
+//{
 	//opens a new window
 	//Fl_Double_Window *subWindow = new Fl_Double_Window(400,200, "subWindow");
 	//Fl_Text_Display *textDisplay = new Fl_Text_Display(0,0,400,200, 0);
@@ -171,93 +178,13 @@ void Application::readUSBStream(void)
 	//subWindow->end();
 	//subWindow->show();
 	
-	if (gui->usb->open() < 0) {
-		cout << "Could not open device.\n\n";
-	}
-	gui->usb->readFrame();
-	gui->usb->printFrame();
-	gui->usb->close();
-}
-
-void Application::readTeleStream(void)
-{
-
-}
-
-void Application::WriteSpec(void)
-{
-
-}
-
-void Application::WriteLightcurve(void)
-{
-
-}
-
-void Application::dataSync(void)
-{
-
-}
-
-void Application::setDetector(int detector)
-{
-
-}
-
-float Application::getRate(int detector)
-{
-
-	switch ( detector )
-      	{
-        case 0:
-		return 0.0;
-		break;
-	case 1:
-        	return 1.0;
-        	break;
-        case 2:
-		return 2.0;
-		break;
-	case 3:
-        	return 3.0;
-        	break;
-        case 4:
-		return 4.0;
-		break;
-	case 5:
-        	return 5.0;
-        	break;
-        case 6:
-		return 6.0;
-		break;
-	case 7:
-        	return 7.0;
-        	break;
-        default:
-        	return -1.0;
-	}
-
-}
-
-int Application::getFrameNum(void)
-{
-	return 1010;
-}
-
-int Application::getShutState(void)
-{
-	return 1;
-}
-
-float Application::getTemp(void)
-{
-	return 1;
-}
-
-const char Application::getPixel(void)
-{
-	return '1';
-}
+//	if (gui->usb->open() < 0) {
+//		cout << "Could not open device.\n\n";
+//	}
+//	gui->usb->readFrame();
+//	gui->usb->printFrame();
+//	gui->usb->close();
+//}
 
 void Application::initialize_data(void)
 {
@@ -503,6 +430,8 @@ void Application::restore_settings(void)
 {
 	gui->usb->restoreSettings();
 }
+
+
 
 void Application::clear_console(void)
 {
