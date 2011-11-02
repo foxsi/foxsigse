@@ -1,16 +1,8 @@
 #ifndef _mainImage_h_     // prevent multiple includes
 #define _mainImage_h_
 
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Gl_Window.H>
-#include <FL/gl.h>
-//#include <GL/glu.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "Application.h"
 #include <time.h>
-#include <math.h>
+#include <FL/Fl_Gl_Window.H>
 
 class mainImage : public Fl_Gl_Window {
    public:
@@ -18,6 +10,7 @@ class mainImage : public Fl_Gl_Window {
 	void draw();
 	int handle(int eventType);
 	double maximumValue(double *array);
+	clock_t start_time;
 };
 
 #endif

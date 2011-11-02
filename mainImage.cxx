@@ -1,6 +1,19 @@
 
 #include "mainImage.h"
+
+#include <FL/Fl.H>
+#include <FL/gl.h>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Gl_Window.H>
+
+#include <time.h>
+#include <math.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "gui.h"
+#include "Application.h"
 
 #define XSTRIPS 128
 #define YSTRIPS 128
@@ -16,6 +29,8 @@
 
 double detImage[XSTRIPS][YSTRIPS];
 double detImagemask[XSTRIPS][YSTRIPS];
+double detImagealpha[XSTRIPS][YSTRIPS];
+
 double ymax;
 float GL_cursor[2];
 int mousePixel[2];
@@ -27,9 +42,8 @@ extern Foxsidata *data;
 
 mainImage::mainImage(int x,int y,int w,int h,const char *l)
         : Fl_Gl_Window(x,y,w,h,l)
-{
-	/* initialize random seed: */
-	srand ( time(NULL) );
+{	
+	start_time = clock();
 	
 	//initialize the image
 	for(int i=0;i<XSTRIPS;i++)
@@ -37,19 +51,26 @@ mainImage::mainImage(int x,int y,int w,int h,const char *l)
 		for(int j=0;j<YSTRIPS;j++)
 	   	{
 			detImage[i][j] = 0;
+			detImagealpha[i][j] = 0;
 		}
 	}
 	detImage[15][15] = 1.0;
 	detImage[75][75] = 0.5;
-	//detImage = FOXSIdata->getImage();
 }
+
 // the drawing method: draws the histFunc into the window
 void mainImage::draw() 
 {
 	double grey;
 	double bleu;
-
+	double alpha;
+	clock_t current_time;
+	double duration;
+	current_time = clock();
+	float pixel_half_life;
+	
 	ymax = maximumValue(*detImage);
+	duration = ( double ) ( current_time ) / CLOCKS_PER_SEC;
 	
 	//int cursorBox = 2;
 		if (!valid()) {
@@ -58,6 +79,9 @@ void mainImage::draw()
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	glViewport(0,0,w(),h());	
    	glOrtho(0,XSTRIPS+2*XBORDER,0,YSTRIPS+2*YBORDER,0,-1);
@@ -73,7 +97,12 @@ void mainImage::draw()
 		for(int i=0;i<YSTRIPS;i++)
 	   	{
 			grey = detImage[i][j]/ymax;
-			glColor3f(grey, grey, grey);
+
+			gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
+			
+			printf("%f", pixel_half_life);
+			alpha = exp(-(current_time - detImagealpha[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+			glColor4f(grey, grey, grey, alpha);
 			glBegin(GL_QUADS);
 				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
 				glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
@@ -82,7 +111,7 @@ void mainImage::draw()
 			//now draw the mask
 			bleu = detImagemask[i][j];
 			if (bleu == 1){
-				glColor3f(0, 0, bleu);
+				glColor4f(0, 0, bleu, 1.0);
 			glBegin(GL_QUADS);
 			glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
 			glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
@@ -204,3 +233,4 @@ double mainImage::maximumValue(double *array)
 	
 	return max;                // return highest value in array
 }
+

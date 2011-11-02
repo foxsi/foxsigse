@@ -257,8 +257,7 @@ void Foxsidata::readDatafile(char* filename)
 	parseBuffer();
 	cout << "Filesize : " << fileSize << endl;
 	cout << "Current Frame : " << currentFrame << " : current position : " << currentPosition << endl;
-	sprintf( text, "%d", currentFrame);
-	gui->framenumOutput->value(text);
+	gui->framenumOutput->value(currentFrame);
 
 }
 
@@ -267,8 +266,7 @@ void Foxsidata::nextFrame()
 	char text[8];
 	
 	currentFrame++;
-	sprintf( text, "%d", currentFrame);
-	gui->framenumOutput->value(text);
+	gui->framenumOutput->value(currentFrame);
 	
 	parseBuffer();
 }
@@ -278,8 +276,7 @@ void Foxsidata::previousFrame()
 	char text[8];
 	
 	currentFrame--;
-	sprintf( text, "%d", currentFrame);
-	gui->framenumOutput->value(text);
+	gui->framenumOutput->value(currentFrame);
 	currentPosition = currentPosition - FRAMESIZE-1;
 	
 	parseBuffer();

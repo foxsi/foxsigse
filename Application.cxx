@@ -51,6 +51,8 @@ Application::Application()
 	//imgy = 0;
 	//filename[0]='\0';
 	
+	// Initialize preferences
+	
 }
 
 void Application::FlushData(void)
@@ -59,6 +61,11 @@ void Application::FlushData(void)
 	//
 	gui->data->FlushHistogram();
 	gui->data->FlushImage();
+}
+
+void Application::save_preferences(void)
+{
+	gui->prefs->set("pixel_half_life", (float) gui->pixelhalflife_value->value());
 }
 
 void Application::start_file()
@@ -506,6 +513,8 @@ void Application::clear_console(void)
 	
 void Application::test(void)
 {
+	print_to_console("Reading begun...\n");
+	gui->stopReadingDataButton->activate();
 	data_start_reading();	
 }
 void Application::send_atten_state(bool value)
@@ -525,6 +534,8 @@ void Application::send_clockset_command(void)
 
 void Application::stop_reading_data(void)
 {
+	print_to_console("Reading stopped.\n");
+	gui->stopReadingDataButton->deactivate();
 	// send the thread the message to stop itself	
 	data_stop_reading();
 }

@@ -23,13 +23,14 @@
 #include <assert.h>
 #include "UsefulFunctions.h"
 
-struct strip_data 
+// Description of a frame - describes in bit fields
+struct strip_data  // 2 bytes
 {
 	unsigned data : 10;
 	unsigned number : 6;
 };
 
-struct asic_data 
+struct asic_data // 146 bytes
 {
 	unsigned chip_bit : 16;
 	unsigned trig_bit : 16;
@@ -43,10 +44,11 @@ struct asic_data
 	unsigned pedestal : 16;
 };
 
-struct asic_frame 
+struct asic_frame // 592 bytes
 {
 	unsigned sync1 : 16;  // (16 bits) 
 	unsigned sync2 : 16;
+	unsigned frame_num : 16;
 	unsigned det_time : 16;
 	asic_data adata[4];
 	// unsigned blank : 16;

@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {281 44 1252 739} type Double color 19 resizable
+      xywh {56 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -18,6 +18,26 @@ class Gui {open
         label menuBar open
         xywh {-5 -1 1255 25} box BORDER_BOX color 29
       } {
+        Submenu {} {
+          label {FOXSI GSE} open
+          xywh {0 0 100 20} labelfont 1
+        } {
+          MenuItem {} {
+            label {About FOXSI GSE}
+            callback {AboutWindow->show()}
+            xywh {0 0 36 21}
+          }
+          MenuItem {} {
+            label {Preferences...}
+            callback {PreferenceWindow->show();}
+            xywh {0 0 36 21}
+          }
+          MenuItem {} {
+            label {Quit FOXSI GSE}
+            callback {exit(1);}
+            xywh {5 5 36 21} shortcut 0x400071
+          }
+        }
         Submenu fileMenu {
           label File open
           xywh {0 0 100 20}
@@ -51,11 +71,6 @@ class Gui {open
             label {Write Lightcurve}
             callback {app->WriteLightcurve();}
             xywh {10 10 100 20}
-          }
-          MenuItem exitButton {
-            label Quit
-            callback {exit(1);}
-            xywh {0 0 36 21} shortcut 0x400071 labelcolor 1
           }
         }
         Submenu menuProc {
@@ -97,7 +112,7 @@ class Gui {open
         code0 {\#include "subImage.h"}
         class subImage
       }
-      Fl_Group TopOutput {
+      Fl_Group TopOutput {open
         xywh {325 35 695 520}
       } {
         Fl_Output rateOutput0 {
@@ -125,10 +140,6 @@ class Gui {open
         Fl_Output rateOutput7 {
           xywh {760 115 45 25}
         }
-        Fl_Output framenumOutput {
-          label {Frame \#}
-          xywh {605 35 45 25}
-        }
         Fl_Output shutterstateOutput {
           label {Shut state}
           callback {app->getShutState()}
@@ -147,111 +158,115 @@ class Gui {open
           xywh {940 530 80 25}
         }
       }
-      Fl_Group dataPlayback {
-        xywh {560 35 599 106}
+      Fl_Group dataPlayback {open
+        xywh {630 44 599 106}
       } {
         Fl_Button nextFrameBut {
           label {Next Frame}
           callback {data->nextFrame()}
-          xywh {675 65 80 25}
+          xywh {745 74 80 25}
           code0 {\#include "Application.h"}
           code1 {\#include "Foxsidata.h"}
         }
         Fl_Button prevFrameBut {
           label {Previous Frame}
           callback {data->previousFrame()}
-          xywh {560 65 110 25}
+          xywh {630 74 110 25}
           code0 {\#include "Application.h"}
           code1 {\#include "Foxsidata.h"}
         }
         Fl_Light_Button syncLightBut {
           label Sync
-          xywh {765 35 70 25}
+          xywh {835 44 70 25}
         }
         Fl_Button flushBut {
           label Flush
           callback {app->FlushData()}
-          xywh {840 35 80 25}
+          xywh {910 44 80 25}
           code0 {\#include "Application.h"}
         }
         Fl_Button printFrame {
           label {Print Frame}
           callback {data->printFrame()}
-          xywh {760 65 80 25}
+          xywh {830 74 80 25}
           code0 {\#include "Application.h"}
           code1 {\#include "Foxsidata.h"}
         }
         Fl_Value_Output frameTime {
           label {frame time}
-          xywh {725 36 33 24}
+          xywh {793 45 33 24}
         }
         Fl_Group {} {open
-          xywh {1010 36 148 24}
+          xywh {1080 45 148 24}
         } {
           Fl_Value_Output chipbitValOut0 {
             label {Chip bit}
-            xywh {1010 36 33 24} deactivate
+            xywh {1080 45 33 24} deactivate
           }
           Fl_Value_Output chipbitValOut1 {
-            xywh {1046 36 33 24} deactivate
+            xywh {1116 45 33 24} deactivate
           }
           Fl_Value_Output chipbitValOut2 {
-            xywh {1085 36 33 24} deactivate
+            xywh {1155 45 33 24} deactivate
           }
           Fl_Value_Output chipbitValOut3 {
-            xywh {1125 36 33 24} deactivate
+            xywh {1195 45 33 24} deactivate
           }
         }
         Fl_Group {} {open
-          xywh {1010 63 148 24}
+          xywh {1080 72 148 24}
         } {
           Fl_Value_Output trigbitValOut0 {
             label {Trig bit}
-            xywh {1010 63 33 24} deactivate
+            xywh {1080 72 33 24} deactivate
           }
           Fl_Value_Output trigbitValOut1 {
-            xywh {1046 63 33 24} deactivate
+            xywh {1116 72 33 24} deactivate
           }
           Fl_Value_Output trigbitValOut2 {
-            xywh {1085 63 33 24} deactivate
+            xywh {1155 72 33 24} deactivate
           }
           Fl_Value_Output trigbitValOut3 {
-            xywh {1125 63 33 24} deactivate
+            xywh {1195 72 33 24} deactivate
           }
         }
         Fl_Group {} {open
-          xywh {1010 90 148 24}
+          xywh {1080 99 148 24}
         } {
           Fl_Value_Output seubitValOut0 {
             label {SEU bit}
-            xywh {1010 90 33 24} deactivate
+            xywh {1080 99 33 24} deactivate
           }
           Fl_Value_Output seubitValOut1 {
-            xywh {1046 90 33 24} deactivate
+            xywh {1116 99 33 24} deactivate
           }
           Fl_Value_Output seubitValOut2 {
-            xywh {1085 90 33 24} deactivate
+            xywh {1155 99 33 24} deactivate
           }
           Fl_Value_Output seubitValOut3 {
-            xywh {1125 90 33 24} deactivate
+            xywh {1195 99 33 24} deactivate
           }
         }
         Fl_Group {} {open
-          xywh {1011 117 148 24}
+          xywh {1081 126 148 24}
         } {
           Fl_Value_Output noiseValOut0 {
             label Noise
-            xywh {1011 117 33 24} deactivate
+            xywh {1081 126 33 24} deactivate
           }
           Fl_Value_Output noiseValOut1 {
-            xywh {1047 117 33 24} deactivate
+            xywh {1117 126 33 24} deactivate
           }
           Fl_Value_Output noiseValOut2 {
-            xywh {1086 117 33 24} deactivate
+            xywh {1156 126 33 24} deactivate
           }
           Fl_Value_Output noiseValOut3 {
-            xywh {1126 117 33 24} deactivate
+            xywh {1196 126 33 24} deactivate
           }
+        }
+        Fl_Value_Output framenumOutput {
+          label {Frame \#:}
+          xywh {665 46 55 24}
         }
       }
       Fl_Output pixelNum {
@@ -403,9 +418,11 @@ class Gui {open
     code {usb=new USB_d2xx();} {}
     code {buff=new Fl_Text_Buffer();
 consoleBuf->buffer(buff);} {}
+    code {prefs=new Fl_Preferences(Fl_Preferences::USER, "fltk.org", "test/preferences");} {selected
+    }
     Fl_Window sendParamsWindow {
-      label {Send Parameters} open
-      xywh {383 44 780 531} type Double visible
+      label {Send Parameters}
+      xywh {712 363 780 531} type Double visible
     } {
       Fl_Button sendParamsWindow_sendBut {
         label Send
@@ -883,12 +900,12 @@ app->send_params();
       }
     }
     Fl_Window sendCommandsWindow {
-      label {Send Commands} open
+      label {Send Commands}
       xywh {436 54 364 175} type Double visible
     } {
       Fl_Button {} {
         label Send
-        callback {app->send_voltage_command();} selected
+        callback {app->send_voltage_command();}
         xywh {265 10 70 25} value 1 labelcolor 1
       }
       Fl_Button {} {
@@ -924,6 +941,47 @@ app->send_params();
         xywh {175 70 75 24}
       }
     }
+    Fl_Window AboutWindow {
+      label About
+      xywh {572 180 361 109} type Double visible
+    } {
+      Fl_Box {} {
+        label {FOXSI Ground Station Software}
+        xywh {140 9 80 16} labelfont 1
+      }
+      Fl_Box {} {
+        label {Written by}
+        xywh {140 29 80 16}
+      }
+      Fl_Box {} {
+        label {Steven Christe, Lindsay Glesener, Stephen McBride}
+        xywh {140 49 80 16}
+      }
+      Fl_Box {} {
+        label 2011
+        xywh {140 69 80 16}
+      }
+    }
+    Fl_Window PreferenceWindow {
+      label Preferences open
+      xywh {368 277 361 109} type Double visible
+    } {
+      Fl_Value_Input pixelhalflife_value {
+        label {pixel half life (s)}
+        xywh {310 11 30 24}
+      }
+      Fl_Button {} {
+        label OK
+        callback {app->save_preferences();
+PreferenceWindow->hide();}
+        xywh {210 80 63 20}
+      }
+      Fl_Button {} {
+        label Cancel
+        callback {PreferenceWindow->hide()}
+        xywh {280 80 63 20}
+      }
+    }
   }
   Function {show()} {open
   } {
@@ -940,5 +998,7 @@ subImageWindow->show();} {}
   decl {USB_d2xx *usb;} {public local
   }
   decl {Fl_Text_Buffer *buff;} {public local
+  }
+  decl {Fl_Preferences *prefs;} {public local
   }
 } 

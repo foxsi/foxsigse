@@ -2,12 +2,6 @@
 #ifndef __Application_H
 #define __Application_H
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-
 // put your global typedefs here
 
 class Application {
@@ -74,17 +68,20 @@ public:
 	// clear the existing text displayed in the console
 	// executed when someone clicks the "Clear" Button next to the console
 	void clear_console(void);
-	
+	void save_preferences(void);
+
 	// convienience function to print text to the console
 	// not yet implemented
 	static void printf_to_console(const char *string1, char *string2);
 	static void print_to_console(const char *text);
+	float get_pixel_half_life(void);
 	
-		
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
 	static void* new_read_data();
+	float pixel_half_life;
+
 	
 };
 

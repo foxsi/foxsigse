@@ -21,6 +21,7 @@
 #include <FL/Fl_Choice.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
+#include <FL/Fl_Box.H>
 
 class Gui {
 public:
@@ -28,6 +29,14 @@ public:
   Fl_Double_Window *mainWindow;
   Fl_Menu_Bar *menuBar;
   static Fl_Menu_Item menu_menuBar[];
+private:
+  void cb_About_i(Fl_Menu_*, void*);
+  static void cb_About(Fl_Menu_*, void*);
+  void cb_Preferences_i(Fl_Menu_*, void*);
+  static void cb_Preferences(Fl_Menu_*, void*);
+  void cb_Quit_i(Fl_Menu_*, void*);
+  static void cb_Quit(Fl_Menu_*, void*);
+public:
   static Fl_Menu_Item *fileMenu;
   static Fl_Menu_Item *outputDirChooser;
 private:
@@ -59,11 +68,6 @@ private:
   void cb_WriteLightcurve_i(Fl_Menu_*, void*);
   static void cb_WriteLightcurve(Fl_Menu_*, void*);
 public:
-  static Fl_Menu_Item *exitButton;
-private:
-  void cb_exitButton_i(Fl_Menu_*, void*);
-  static void cb_exitButton(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *menuProc;
   static Fl_Menu_Item *Sync;
 private:
@@ -86,7 +90,6 @@ public:
   Fl_Output *rateOutput5;
   Fl_Output *rateOutput6;
   Fl_Output *rateOutput7;
-  Fl_Output *framenumOutput;
   Fl_Output *shutterstateOutput;
 private:
   void cb_shutterstateOutput_i(Fl_Output*, void*);
@@ -134,6 +137,7 @@ public:
   Fl_Value_Output *noiseValOut1;
   Fl_Value_Output *noiseValOut2;
   Fl_Value_Output *noiseValOut3;
+  Fl_Value_Output *framenumOutput;
   Fl_Output *pixelNum;
   Fl_Output *pixelCounts;
   Fl_Light_Button *subImageLockbut;
@@ -235,10 +239,20 @@ public:
   Fl_Value_Input *highVoltage_input;
   Fl_Value_Input *clockLow_input;
   Fl_Value_Input *clockHigh_input;
+  Fl_Double_Window *AboutWindow;
+  Fl_Double_Window *PreferenceWindow;
+  Fl_Value_Input *pixelhalflife_value;
+private:
+  void cb_OK_i(Fl_Button*, void*);
+  static void cb_OK(Fl_Button*, void*);
+  void cb_Cancel_i(Fl_Button*, void*);
+  static void cb_Cancel(Fl_Button*, void*);
+public:
   void show();
   Application *app; 
   Foxsidata *data; 
   USB_d2xx *usb; 
   Fl_Text_Buffer *buff; 
+  Fl_Preferences *prefs; 
 };
 #endif
