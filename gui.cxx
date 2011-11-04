@@ -110,7 +110,8 @@ void Gui::cb_initializeBut(Fl_Light_Button* o, void* v) {
 }
 
 void Gui::cb_startReadingDataButton_i(Fl_Button*, void*) {
-  app->start_reading_data();
+  app->read_preferences();
+app->start_reading_data();
 }
 void Gui::cb_startReadingDataButton(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_startReadingDataButton_i(o,v);
@@ -128,14 +129,6 @@ void Gui::cb_sendParamsBut_i(Fl_Button*, void*) {
 }
 void Gui::cb_sendParamsBut(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_sendParamsBut_i(o,v);
-}
-
-void Gui::cb_testBut_i(Fl_Button*, void*) {
-  app->read_preferences();
-app->test();
-}
-void Gui::cb_testBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_testBut_i(o,v);
 }
 
 void Gui::cb_writeFileBut_i(Fl_Light_Button*, void*) {
@@ -255,8 +248,8 @@ void Gui::cb_Strobe1(Fl_Button* o, void* v) {
 }
 
 Fl_Menu_Item Gui::menu_fileTypeChoice[] = {
- {"Text", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Binary", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Text (slow)", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Binary (fast)", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0}
 };
 
@@ -473,7 +466,6 @@ Gui::Gui() {
     } // Fl_Light_Button* initializeBut
     { startReadingDataButton = new Fl_Button(390, 35, 60, 25, "Read");
       startReadingDataButton->callback((Fl_Callback*)cb_startReadingDataButton);
-      startReadingDataButton->deactivate();
     } // Fl_Button* startReadingDataButton
     { closeBut = new Fl_Light_Button(209, 65, 80, 25, "Close");
       closeBut->callback((Fl_Callback*)cb_closeBut);
@@ -495,7 +487,6 @@ Gui::Gui() {
       sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
     } // Fl_Button* sendParamsBut
     { testBut = new Fl_Button(15, 276, 75, 25, "Test");
-      testBut->callback((Fl_Callback*)cb_testBut);
     } // Fl_Button* testBut
     { nEvents = new Fl_Value_Input(345, 35, 40, 24, "events");
     } // Fl_Value_Input* nEvents

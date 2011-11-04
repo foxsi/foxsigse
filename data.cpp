@@ -62,7 +62,7 @@ void* data_watch_buffer(void* p)
 			pthread_mutex_lock( &mymutex); /* wait on readgse */
 			Fl::lock();
 			
-			data_frame_printf(buffer0);
+			data_frame_print_to_file(buffer0);
 			data_update_display(buffer0);
 			
 			newdisplay = 0;

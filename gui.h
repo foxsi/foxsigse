@@ -140,10 +140,6 @@ private:
   static void cb_sendParamsBut(Fl_Button*, void*);
 public:
   Fl_Button *testBut;
-private:
-  void cb_testBut_i(Fl_Button*, void*);
-  static void cb_testBut(Fl_Button*, void*);
-public:
   Fl_Value_Input *nEvents;
   Fl_Light_Button *writeFileBut;
 private:

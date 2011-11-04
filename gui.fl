@@ -31,7 +31,7 @@ class Gui {open
             label {Preferences...}
             callback {app->read_preferences();
 app->update_preferencewindow();
-PreferenceWindow->show();} selected
+PreferenceWindow->show();}
             xywh {0 0 36 21}
           }
           MenuItem {} {
@@ -312,8 +312,9 @@ exit(1);}
       }
       Fl_Button startReadingDataButton {
         label Read
-        callback {app->start_reading_data();}
-        xywh {390 35 60 25} deactivate
+        callback {app->read_preferences();
+app->start_reading_data();} selected
+        xywh {390 35 60 25}
       }
       Fl_Light_Button closeBut {
         label Close
@@ -337,8 +338,6 @@ exit(1);}
       }
       Fl_Button testBut {
         label Test
-        callback {app->read_preferences();
-app->test();}
         xywh {15 276 75 25}
       }
       Fl_Value_Input nEvents {
@@ -940,11 +939,11 @@ app->send_params();
         xywh {70 45 75 25} down_box BORDER_BOX
       } {
         MenuItem {} {
-          label Text
+          label {Text (slow)}
           xywh {5 5 31 20}
         }
         MenuItem {} {
-          label Binary
+          label {Binary (fast)}
           xywh {5 5 31 20}
         }
       }

@@ -193,6 +193,8 @@ void Application::start_reading_data(void)
 {
 	print_to_console("Reading begun...\n");
 	gui->stopReadingDataButton->activate();
+	gui->startReadingDataButton->deactivate();
+
 	data_start_reading();	
 }
 
@@ -208,52 +210,7 @@ void Application::print_to_console(const char *text)
 	gui->consoleBuf->insert(text);
 }
 
-void* Application::new_read_data()
-{
-//	unsigned int i;
-//	long len;
-//	ssize_t wlen;
-//	unsigned short int status;
-//	unsigned short int buffer0[1024],buffer1[1024];
-//
-//	while (1) 
-//	{
-//		// alternate between reading data into buffer0 and buffer1
-//		// copy it into buffer with memcopy
-//		
-//		len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer0);
-//		
-//		if(fout > 0)
-//		{
-//			if( (wlen = write(fout,(const void *) buffer0,2048) ) != 2048){};
-//		}
-//		
-//		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
-//		{
-//			if(newdisplay == 0)
-//			{
-//				memcpy((void *) buffer,(void *) buffer0,2048);
-//				newdisplay = 1;
-//			}
-//			pthread_mutex_unlock(&mymutex);
-//			
-//		}
-//		
-//		len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer1);
-//		
-//		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
-//		{
-//			memcpy((void *) buffer,(void *) buffer1,2048);
-//			pthread_mutex_unlock(&mymutex);
-//		}
-//		
-//		if(fout >0)
-//		{
-//			if( (wlen = write(fout,(const void *) buffer1,2048) ) != 2048){};
-//		}
-//	}
-	return 0;
-}
+
 
 void* Application::read_data(void* variable)
 {
@@ -376,8 +333,6 @@ void Application::restore_settings(void)
 	gui->usb->restoreSettings();
 }
 
-
-
 void Application::clear_console(void)
 {
 	// clear the text in the console
@@ -387,10 +342,9 @@ void Application::clear_console(void)
 	
 void Application::test(void)
 {
-	print_to_console("Reading begun...\n");
-	gui->stopReadingDataButton->activate();
-	data_start_reading();	
+
 }
+
 void Application::send_atten_state(bool value)
 {
 	command_attenuator_state(value);
