@@ -30,12 +30,16 @@
 double detImage[XSTRIPS][YSTRIPS];
 double detImagemask[XSTRIPS][YSTRIPS];
 double detImagealpha[XSTRIPS][YSTRIPS];
+double detImagetime[XSTRIPS][YSTRIPS];
 
 double ymax;
 float GL_cursor[2];
 int mousePixel[2];
 int chosenPixel[2];
 extern float detsubImage[ZOOMNUM][ZOOMNUM];
+extern float detsubImagealpha[ZOOMNUM][ZOOMNUM];
+
+extern float pixel_half_life;
 
 extern Gui *gui;
 extern Foxsidata *data;
@@ -52,10 +56,12 @@ mainImage::mainImage(int x,int y,int w,int h,const char *l)
 	   	{
 			detImage[i][j] = 0;
 			detImagealpha[i][j] = 0;
+			detImagetime[i][j] = 0;
 		}
 	}
 	detImage[15][15] = 1.0;
 	detImage[75][75] = 0.5;
+	
 }
 
 // the drawing method: draws the histFunc into the window
@@ -67,7 +73,6 @@ void mainImage::draw()
 	clock_t current_time;
 	double duration;
 	current_time = clock();
-	float pixel_half_life;
 	
 	ymax = maximumValue(*detImage);
 	duration = ( double ) ( current_time ) / CLOCKS_PER_SEC;
@@ -98,10 +103,8 @@ void mainImage::draw()
 	   	{
 			grey = detImage[i][j]/ymax;
 
-			gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
-			
-			printf("%f", pixel_half_life);
-			alpha = exp(-(current_time - detImagealpha[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+			alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+			detImagealpha[i][j] = alpha;
 			glColor4f(grey, grey, grey, alpha);
 			glBegin(GL_QUADS);
 				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
@@ -134,7 +137,6 @@ void mainImage::draw()
 	//	glVertex2f(mousePixel[0] + XBORDER, mousePixel[1]+1 + YBORDER);
 	//glEnd();
 
-	
 	//draw an expanded view
 	/*if ((FLcursorX[1]!=0)&&(FLcursorY[1]!=0))
 	{
@@ -200,7 +202,12 @@ int mainImage::handle(int eventType)
 
 				curPixel[0] = mousePixel[0] + i - ZOOMNUM/2;
 				curPixel[1] = mousePixel[1] + j - ZOOMNUM/2;
-				if ((curPixel[0] < 0)||(curPixel[1] < 0)||(curPixel[0] > XSTRIPS)||(curPixel[1] > YSTRIPS)){ detsubImage[i][j] = 0.0; } else { detsubImage[i][j] = detImage[curPixel[0]][curPixel[1]]; }
+				if ((curPixel[0] < 0)||(curPixel[1] < 0)||(curPixel[0] > XSTRIPS)||(curPixel[1] > YSTRIPS))
+				{ detsubImage[i][j] = 0.0; } 
+				else { 
+					detsubImage[i][j] = detImage[curPixel[0]][curPixel[1]];
+					detsubImagealpha[i][j] = detImagealpha[curPixel[0]][curPixel[1]];
+				}
 			}
 		}
 

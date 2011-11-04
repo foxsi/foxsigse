@@ -23,15 +23,17 @@
 
 extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
-extern double detImagealpha[XSTRIPS][YSTRIPS];
+extern double detImagetime[XSTRIPS][YSTRIPS];
 
 // Note that an unsigned short int is 2 bytes
 #define FRAME_SIZE_IN_SHORTINTS 295
 #define FRAME_SIZE_IN_BYTES 590
 
 extern Gui *gui;
+extern Application *app;
+char dataFilename[MAXPATH];
+FILE *dataFile;
 
-char obsfilespec[MAXPATH];
 int newdisplay;
 int stop_message;
 unsigned short int buffer[FRAME_SIZE_IN_SHORTINTS];
@@ -41,6 +43,10 @@ unsigned short int framecount;
 int *taskids[NUM_THREADS];
 int fout;
 pthread_mutex_t mymutex;
+double nreads;
+
+extern char *data_file_save_dir;
+extern int file_type;
 
 void* data_watch_buffer(void* p)
 {
@@ -63,6 +69,7 @@ void* data_watch_buffer(void* p)
 			fflush(stdout);
 		
 			pthread_mutex_unlock(&mymutex);
+			
 			gui->mainHistogramWindow->redraw();
 			gui->mainImageWindow->redraw();
 			Fl::awake(); // Without this it may not redraw until next event (like a mouse movement)!
@@ -83,15 +90,51 @@ void* data_read_data(void *p)
 	 * by data_watch_buffer which uses it to update the displays.
 	 */
 	ssize_t wlen;
+	int badSync = 0;
+	int badRead = 0;
+	int status = 0;
+	char buffer[50];
+
+	int maxreads;
+	
+	maxreads = gui->nEvents->value();
+	
+	// Read the read delay from the preferences
+	int read_delay;
+	gui->prefs->get("read_delay", read_delay, 0);
+	
+	// Read the data source from the preferences
+	int data_source;
+	gui->prefs->get("data_source", data_source, 0);
+	
 	// This function never stops unless told to do so by setting stop_message to 1
 	while (1) {
-
-		// read the data
-		data_simulate_data();
 		
-		if(fout >0)
+		// For the desired reading speed		
+		if (read_delay != 0) {usleep(read_delay);}
+		
+		// read the data
+		if (data_source == 0){
+			data_simulate_data();
+		}
+		
+		if (data_source == 1) {
+			status = gui->usb->findSync();
+			if(status<1){
+				badSync++;
+				continue;
+			}
+			
+			status = gui->usb->readFrame();
+			if(status<1){
+				badRead++;
+				continue;
+			}
+		}
+		
+		if(fout > 0)
 		{
-			if( (wlen = write(fout,(const void *) buffer,2048) ) != 2048){};
+			if( (wlen = write(fout,(const void *) buffer,FRAME_SIZE_IN_BYTES) ) != FRAME_SIZE_IN_BYTES){};
 		}
 		
 		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
@@ -104,12 +147,34 @@ void* data_read_data(void *p)
 			pthread_mutex_unlock(&mymutex);
 		}
 		
-		if (stop_message == 1){
-			if (fout > 0)
-				close(fout);
-			pthread_exit(NULL);
+		// Check to see if if only a fixed number of frames should be read
+		// if so set the stop message
+		if ((maxreads != 0) && (nreads >= maxreads)){
+			stop_message = 1;
 		}
 		
+		if (stop_message == 1){
+			Fl::lock();
+			app->print_to_console("Read finished or stopped.\n");
+						
+			if (data_source == 1) {
+				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
+				gui->consoleBuf->insert(buffer);						
+			}
+			gui->stopReadingDataButton->deactivate();
+
+			Fl::unlock();	
+			
+			app->printf_to_console("Closing file: %s.\n", dataFilename);
+			if (fout > 0)
+				close(fout);
+			if (dataFile != NULL)
+				fclose(dataFile);
+			
+			pthread_mutex_destroy(&mymutex);
+			pthread_exit(NULL);
+		}
+		nreads++;	
 	}
 }
 
@@ -182,20 +247,55 @@ void data_start_file(void)
 	 * 
 	 */
 
-	char stringtemp[80];
-	struct tm *times;
-	time_t ltime;
+	//char stringtemp[80];
+//	struct tm *times;
+//	time_t ltime;
+//
+//	time(&ltime);
+//	times = localtime(&ltime);
+//	strftime(stringtemp,25,"data_%Y%m%d_%H%M%S.dat",times);
+//	strncpy(obsfilespec,stringtemp,MAXPATH - 1);
+//	obsfilespec[MAXPATH - 1] = '\0';
+//	printf("%s \r",obsfilespec);
+//	{
+//		if((fout = open(obsfilespec,O_RDWR|O_CREAT,0600)) < 0)
+//			printf("Cannot open file\n");
+//	}
+	// Opens the data file for saving data
+	//
 	
-	time(&ltime);
-	times = localtime(&ltime);
-	strftime(stringtemp,25,"data_%Y%m%d_%H%M%S.dat",times);
-	strncpy(obsfilespec,stringtemp,MAXPATH - 1);
-	obsfilespec[MAXPATH - 1] = '\0';
-	printf("%s \r",obsfilespec);
-	{
-		if((fout = open(obsfilespec,O_RDWR|O_CREAT,0600)) < 0)
-			printf("Cannot open file\n");
-    }    	
+	// the following variables holds the fully qualified filename (dir + filename)
+	// if directory NOT set then will create file inside of current working directory
+	// which is likely <foxsi gse dir>/build/Debug/
+	
+	if (gui->writeFileBut->value() == 1) {
+		data_set_datafilename();
+		app->printf_to_console("Trying to open file: %s\n", dataFilename);
+		if (gui->fileTypeChoice->value() == 0) {
+			dataFile = fopen(dataFilename, "w");
+			
+			if (dataFile == NULL)
+				app->printf_to_console("Cannot open file %s.\n", dataFilename); 
+			else 
+				app->printf_to_console("Opened file %s.\n", dataFilename);
+			
+		}
+		if (gui->fileTypeChoice->value() == 1) {
+			if((fout = open(dataFilename,O_RDWR|O_CREAT,0600)) < 0){
+				app->printf_to_console("Cannot open file %s.\n", dataFilename);}
+			else {
+				app->printf_to_console("Opened file %s.\n", dataFilename);
+			}
+			
+		}
+		
+	} else {
+		app->printf_to_console( "Closing file %s.\n", dataFilename);
+		if (gui->fileTypeChoice->value() == 1){close(fout);}
+		if (gui->fileTypeChoice->value() == 0){fclose(dataFile);}
+		fout = 0;
+	}
+	
 }
 
 void data_start_reading(void)
@@ -216,6 +316,8 @@ void data_start_reading(void)
 	ret = pthread_attr_init(&tattr);
 	ret = pthread_attr_setschedparam (&tattr, &param);
 	
+	app->print_to_console("Reading...\n");
+	
 	// start the read_data thread
 	ret = pthread_create(&thread, &tattr, data_read_data, (void *) taskids[0]);
 	pthread_mutex_init(&mymutex,NULL);
@@ -224,27 +326,29 @@ void data_start_reading(void)
 	//param.sched_priority = newprio;
 	//ret = pthread_attr_init(&tattr);
 	//ret = pthread_attr_setschedparam (&tattr, &param);
+	
 	// start the watch_buffer thread
 	ret = pthread_create(&thread, NULL, data_watch_buffer, (void *) taskids[1]);	
+	
+	
 }
 
 void data_stop_reading(void)
 {
 	stop_message = 1;	
-	pthread_mutex_destroy(&mymutex);
-	if (fout > 0) {
-		close(fout);
-	}
 }
 
-void data_frame_printf(unsigned short int *frame)
+void data_frame_print_to_file(unsigned short int *frame)
 {
-	printf("watch_buffer: frame[0] = %hu\n frame[1] = %hu\n", frame[0], frame[1]);
+	if (gui->writeFileBut->value() == 1) {gui->usb->writeFrame(dataFile);}
 }
 
 void data_update_display(unsigned short int *frame)
 {
 	unsigned short int tmp;
+	
+	// parse the buffer variable and update the display
+	// some example code is below
 	
 	struct strip_data  // 2 bytes
 	{
@@ -255,14 +359,45 @@ void data_update_display(unsigned short int *frame)
 	
 	memcpy(&strip,&buffer[29],2);
 	
+	gui->nEventsDone->value(nreads); 
+	
 	gui->framenumOutput->value(frame[5]);
 	gui->testOutput->value(strip.number);
 	
 	HistogramFunction[strip.data]++;
 	tmp = arc4random() % 64 + 1;
 	detImage[tmp][strip.number] = 1;
-	detImagealpha[tmp][strip.number] = clock();
+	detImagetime[tmp][strip.number] = clock();
 	// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);
 	
 }
+
+void data_set_datafilename(void)
+{
+	// Open a file to write the data to
+	// Name of file is automatically set with current date
+	struct tm *times;
+	time_t ltime;
 	
+	// The directory the file will go in is set in the preferences
+	gui->prefs->get("data_file_save_dir", data_file_save_dir, "/Users/schriste/");
+	
+	gui->prefs->get("file_type", file_type, 0);
+	
+	char stringtemp[80];
+	time(&ltime);
+	times = localtime(&ltime);
+
+	if (file_type == 0) {
+		strftime(stringtemp,24,"data_%Y%m%d_%H%M%S.txt",times);
+	}
+	if (file_type == 1) {
+		strftime(stringtemp,24,"data_%Y%m%d_%H%M%S.dat",times);
+	}
+	
+	strncpy(dataFilename, data_file_save_dir, MAXPATH - 1);
+	strcat(dataFilename, stringtemp);
+	dataFilename[MAXPATH - 1] = '\0';
+	printf("%s\n",dataFilename);
+
+}

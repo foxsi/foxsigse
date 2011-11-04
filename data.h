@@ -23,7 +23,8 @@ void* data_read_data(void *p);
 void data_start_reading(void);
 void data_stop_reading(void);
 void data_update_display(unsigned short int *frame);
-void data_frame_printf(unsigned short int *frame);
+void data_frame_print_to_file(unsigned short int *frame);
+void data_set_datafilename(void);
 
 
 #endif

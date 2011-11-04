@@ -22,6 +22,7 @@
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl_File_Input.H>
 
 class Gui {
 public:
@@ -38,11 +39,6 @@ private:
   static void cb_Quit(Fl_Menu_*, void*);
 public:
   static Fl_Menu_Item *fileMenu;
-  static Fl_Menu_Item *outputDirChooser;
-private:
-  void cb_outputDirChooser_i(Fl_Menu_*, void*);
-  static void cb_outputDirChooser(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *readFile;
   static Fl_Menu_Item *readUSBStream;
   static Fl_Menu_Item *readTeleStream;
@@ -121,7 +117,6 @@ public:
   Fl_Value_Output *mainHistogramYlabelmid;
   Fl_Text_Display *consoleBuf;
   static Fl_Menu_Item menu_Detector[];
-  static Fl_Menu_Item menu_Data[];
   Fl_Light_Button *initializeBut;
 private:
   void cb_initializeBut_i(Fl_Light_Button*, void*);
@@ -220,7 +215,13 @@ private:
   static void cb_OK(Fl_Button*, void*);
   void cb_Cancel_i(Fl_Button*, void*);
   static void cb_Cancel(Fl_Button*, void*);
+  void cb_Change_i(Fl_Button*, void*);
+  static void cb_Change(Fl_Button*, void*);
 public:
+  Fl_File_Input *datafilesavedir_fileInput;
+  Fl_Value_Input *readdelay_value;
+  Fl_Choice *DataSource_choice;
+  static Fl_Menu_Item menu_DataSource_choice[];
   void show();
   Application *app; 
   Foxsidata *data; 

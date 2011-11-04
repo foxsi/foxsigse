@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {51 44 1252 739} type Double color 19 resizable
+      xywh {28 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -29,7 +29,8 @@ class Gui {open
           }
           MenuItem {} {
             label {Preferences...}
-            callback {app->update_PreferenceWindow();
+            callback {app->read_preferences();
+app->update_preferencewindow();
 PreferenceWindow->show();} selected
             xywh {0 0 36 21}
           }
@@ -44,11 +45,6 @@ exit(1);}
           label File open
           xywh {0 0 100 20}
         } {
-          MenuItem outputDirChooser {
-            label {Choose Output Dir}
-            callback {app->set_datafile_dir()}
-            xywh {0 0 36 21}
-          }
           MenuItem readFile {
             label {Read Data file}
             xywh {0 0 100 20}
@@ -309,15 +305,6 @@ exit(1);}
           xywh {0 0 31 20}
         }
       }
-      Fl_Choice {} {
-        label {Data Source:} open
-        xywh {90 35 115 25} down_box BORDER_BOX
-      } {
-        MenuItem {} {
-          label {ACTEL USB}
-          xywh {0 0 31 20}
-        }
-      }
       Fl_Light_Button initializeBut {
         label Initialize
         callback {app->initialize_data()}
@@ -350,12 +337,13 @@ exit(1);}
       }
       Fl_Button testBut {
         label Test
-        callback {app->test();}
+        callback {app->read_preferences();
+app->test();}
         xywh {15 276 75 25}
       }
       Fl_Value_Input nEvents {
         label events
-        xywh {345 35 40 24} value 1
+        xywh {345 35 40 24}
       }
       Fl_Light_Button writeFileBut {
         label {Write to file}
@@ -399,7 +387,7 @@ consoleBuf->buffer(buff);} {}
     code {prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");} {}
     Fl_Window sendParamsWindow {
       label {Send Parameters}
-      xywh {712 363 780 531} type Double visible
+      xywh {500 269 780 531} type Double visible
     } {
       Fl_Button sendParamsWindow_sendBut {
         label Send
@@ -941,15 +929,15 @@ app->send_params();
     }
     Fl_Window PreferenceWindow {
       label Preferences open
-      xywh {351 241 365 113} type Double visible
+      xywh {43 223 429 175} type Double visible
     } {
       Fl_Value_Input pixelhalflife_value {
         label {pixel half life (s)}
-        xywh {310 11 30 24} value 5
+        xywh {295 46 70 24} value 5
       }
       Fl_Choice fileTypeChoice {
         label {File type:} open
-        xywh {265 40 75 25} down_box BORDER_BOX
+        xywh {70 45 75 25} down_box BORDER_BOX
       } {
         MenuItem {} {
           label Text
@@ -964,12 +952,42 @@ app->send_params();
         label OK
         callback {app->save_preferences();
 PreferenceWindow->hide();}
-        xywh {210 80 63 20}
+        xywh {280 145 63 20}
       }
       Fl_Button {} {
         label Cancel
         callback {PreferenceWindow->hide()}
-        xywh {280 80 63 20}
+        xywh {350 145 63 20}
+      }
+      Fl_Button {} {
+        label Change
+        callback {app->set_datafile_dir();}
+        xywh {340 15 75 25}
+      }
+      Fl_File_Input datafilesavedir_fileInput {
+        label {save dir:}
+        xywh {70 6 260 34}
+      }
+      Fl_Value_Input readdelay_value {
+        label {read delay (us)}
+        xywh {295 71 70 24} value 10000
+      }
+      Fl_Choice DataSource_choice {
+        label {Data Source:} open
+        xywh {95 80 95 25} down_box BORDER_BOX
+      } {
+        MenuItem {} {
+          label Simulate
+          xywh {5 5 31 20}
+        }
+        MenuItem {} {
+          label ACTEL
+          xywh {5 5 31 20}
+        }
+        MenuItem {} {
+          label Formatter
+          xywh {5 5 31 20}
+        }
       }
     }
   }

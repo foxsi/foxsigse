@@ -59,6 +59,8 @@ public:
 	// executed when someone clicks the "Clear" Button next to the console
 	void clear_console(void);
 	void save_preferences(void);
+	void read_preferences(void);
+	void update_preferencewindow(void);
 
 	// convienience function to print text to the console
 	// not yet implemented
@@ -66,12 +68,10 @@ public:
 	static void print_to_console(const char *text);
 	float get_pixel_half_life(void);
 	
-	void update_PreferenceWindow(void);
 	
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
-	static void* new_read_data();
 
 };
 

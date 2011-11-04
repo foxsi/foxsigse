@@ -7,9 +7,6 @@
 #include "commands.h"
 #include "gui.h"
 
-
-
-
 #define XSTRIPS 128
 #define YSTRIPS 128
 #define CHANNELS 1024
@@ -21,12 +18,12 @@ extern int HistogramFunction[CHANNELS];
 extern double detImage[XSTRIPS][YSTRIPS];
 
 extern int stop_message;
-FILE *dataFile;
+extern FILE *dataFile;
 extern int fout;
 
 // filename is set automatically with local time
-char dataFilename[MAXPATH];
-char dataFileDir[MAXPATH];
+extern char dataFilename[MAXPATH];
+extern char dataFileDir[MAXPATH];
 
 // these are declared in transFunc.cpp
 //extern HistogramFunction histFunc[4];
@@ -40,19 +37,18 @@ char dataFileDir[MAXPATH];
 //char *imgname;	//name of the image
 //GLubyte *imgpix;	//pixel buffer for image
 
+// Preference variables
+int file_type;
+char *data_file_save_dir;
+int read_delay;
+int data_source;
+float pixel_half_life;
 
 Application::Application()
 {
 	// Constructor method for the Application class
 	// Add initialization here:
-  
-	//nchan = -1;	//value not set yet, i.e. image not read
-	//imgx = 0;
-	//imgy = 0;
-	//filename[0]='\0';
-	
-	// Initialize preferences
-	
+
 }
 
 void Application::FlushData(void)
@@ -66,81 +62,44 @@ void Application::FlushData(void)
 void Application::save_preferences(void)
 {
 	gui->prefs->set("pixel_half_life", (float) gui->pixelhalflife_value->value());
-	gui->prefs->set("file_type", (float) gui->fileTypeChoice->value());
+	gui->prefs->set("file_type", gui->fileTypeChoice->value());
+	gui->prefs->set("data_file_save_dir", gui->datafilesavedir_fileInput->value());
+	gui->prefs->set("read_delay", gui->readdelay_value->value());
+	gui->prefs->set("data_source", gui->DataSource_choice->value());
 }
 
-void Application::update_PreferenceWindow(void)
+void Application::read_preferences(void)
 {
-	float pixel_half_life;
-	int file_type;
-	
+	// Read the preferences
 	gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
 	gui->prefs->get("file_type", file_type, 0);
-	
-	gui->pixelhalflife_value->value(pixel_half_life);
-	gui->fileTypeChoice->value(file_type);
+	gui->prefs->get("data_file_save_dir", data_file_save_dir, "/Users/schriste/");
+	gui->prefs->get("read_delay", read_delay, 10000);
+	gui->prefs->get("data_source", data_source, 0);
 }
 
-void Application::start_file()
-{
-	// Opens the data file for saving data
-	//
-	struct tm *times;
-	time_t ltime;
-	
-	// the following variables holds the fully qualified filename (dir + filename)
-	// if directory NOT set then will create file inside of current working directory
-	// which is likely <foxsi gse dir>/build/Debug/
-	char file[200];
-
-	if (gui->writeFileBut->value() == 1) {
-		// Open a file to write the data to
-		// Name of file is automatically set with current date
-		char stringtemp[80];
-		time(&ltime);
-		times = localtime(&ltime);
-		strftime(stringtemp,24,"data_%Y%m%d_%H%M%S.dat",times);
-		strncpy(dataFilename,stringtemp,MAXPATH - 1);
-		strcpy(file, dataFileDir);
-		strcat(file, dataFilename);
-		//if (dataFileDir != "./"){ strcat(dataFilename, dataFileDir); }
-		//dataFilename[MAXPATH - 1] = '\0';
-		if (gui->fileTypeChoice->value() == 0) {
-			dataFile = fopen(file, "w");
-			
-			if (dataFile == NULL)
-				printf_to_console("Cannot open file %s.\n", file); 
-			else 
-				printf_to_console("Opened file %s.\n", file);
-			
-		}
-		if (gui->fileTypeChoice->value() == 1) {
-			if((fout = open(file,O_RDWR|O_CREAT,0600)) < 0){
-				printf_to_console("Cannot open file %s.\n", file);}
-			else {
-				printf_to_console("Opened file %s.\n", file);
-			}
-
-		}
-		
-	} else {
-		printf_to_console( "Closing file %s.\n", dataFilename);
-		fclose(dataFile);
-		fout = 0;
-	}
-
+void Application::update_preferencewindow(void)
+{	
+	// Update them in the Preferences window
+	gui->pixelhalflife_value->value(pixel_half_life);
+	gui->fileTypeChoice->value(file_type);
+	gui->datafilesavedir_fileInput->value(data_file_save_dir);
+	gui->readdelay_value->value(read_delay);
+	gui->DataSource_choice->value(data_source);	
 }
 
 void Application::set_datafile_dir(void)
 {
 	char *temp = fl_dir_chooser("Pick a directory:", "", 0);
-	strcpy(dataFileDir, temp);
-	if(dataFileDir == NULL)
-		return;
-	printf_to_console("Output directory set to %s.\n", dataFileDir);
-	printf("%s", dataFilename);
+	strcpy(data_file_save_dir, temp);
+	gui->datafilesavedir_fileInput->value(data_file_save_dir);
+	printf_to_console("Output directory set to %s.\n", data_file_save_dir);	
 }
 
+void Application::start_file()
+{
+	data_start_file();
+}
 
 // the method that gets executed when the readFile callback is called
 void Application::readFile()
@@ -156,7 +115,7 @@ void Application::readFile()
 	//strcpy(filename,file);
 	FlushData();
 	
-	gui->data->readDatafile(file);
+	//gui->data->readDatafile(file);
 }
 
 // add application routines here:
@@ -232,27 +191,9 @@ void Application::close_data(void)
 
 void Application::start_reading_data(void)
 {
-	pthread_t thread;
-    struct sched_param param;
-    pthread_attr_t tattr;
-	
-	int *variable;
-	int ret;
+	print_to_console("Reading begun...\n");
 	gui->stopReadingDataButton->activate();
-
-	stop_message = 0;
-	
-	variable = (int *) malloc(sizeof(int));
-	*variable = 6;
-	
-	// define the custom priority for one of the threads
-    int newprio = -10;
-	param.sched_priority = newprio;
-	ret = pthread_attr_init(&tattr);
-	ret = pthread_attr_setschedparam (&tattr, &param);
-	
-	ret = pthread_create(&thread, &tattr, read_data, (void *) variable);
-	
+	data_start_reading();	
 }
 
 void Application::printf_to_console(const char *text, char *string1)
@@ -339,7 +280,11 @@ void* Application::read_data(void* variable)
 	Fl::unlock();
 	
 	for (int i = 0; i<gui->nEvents->value(); i++) {
-		usleep(10000);		// adjust this to achieve desired reading speed
+		// get the read delay from the preferences
+		int read_delay;
+		gui->prefs->get("read_delay", read_delay, 10000);
+
+		usleep(read_delay);		// adjust this to achieve desired reading speed
 				
 		// check to see if the Stop button was pushed, if so then clean up 
 		// and stop this thread
@@ -463,8 +408,9 @@ void Application::send_clockset_command(void)
 
 void Application::stop_reading_data(void)
 {
-	print_to_console("Reading stopped.\n");
-	gui->stopReadingDataButton->deactivate();
-	// send the thread the message to stop itself	
 	data_stop_reading();
+	gui->stopReadingDataButton->deactivate();
+	gui->startReadingDataButton->activate();
+
+	// send the thread the message to stop itself	
 }

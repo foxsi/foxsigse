@@ -23,6 +23,8 @@ int subImageMousePixel[2];
 int subImageChosenPixel[2];
 
 float detsubImage[ZOOMNUM][ZOOMNUM];
+float detsubImagealpha[ZOOMNUM][ZOOMNUM];
+
 float GL_subImageCursor[2]; 
 
 subImage::subImage(int x,int y,int w,int h,const char *l)
@@ -35,7 +37,8 @@ subImage::subImage(int x,int y,int w,int h,const char *l)
 void subImage::draw() 
 {
 	float grey;
-	
+	double alpha;
+
 	if (!valid()) {
 		make_current();
 	}
@@ -65,8 +68,9 @@ void subImage::draw()
 				//if ((curPixel[0] < 0)||(curPixel[1] < 0)){ grey = 0.0; } else { grey = detImage[curPixel[0]][curPixel[1]]; }
 				//grey = detImage[curPixel[0]][curPixel[1]];
 				grey = detsubImage[i][j];
+				alpha = detsubImagealpha[i][j];
 				//grey = detImage[i][j];
-				glColor3f(grey, grey, grey);
+				glColor4f(grey, grey, grey,alpha);
 				glBegin(GL_QUADS);
 				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
 				glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
@@ -80,8 +84,8 @@ void subImage::draw()
 			for(int i=0;i<ZOOMNUM;i++)
 			{
 				grey = detsubImage[i][j];
-				
-				glColor3f(grey, grey, grey);
+				alpha = detsubImagealpha[i][j];
+				glColor4f(grey, grey, grey,alpha);
 				glBegin(GL_QUADS);
 				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
 				glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
@@ -95,9 +99,6 @@ void subImage::draw()
 		glVertex2f(GL_subImageCursor[0], GL_subImageCursor[1]); glVertex2f(GL_subImageCursor[0]+1, GL_subImageCursor[1]); 
 		glVertex2f(GL_subImageCursor[0]+1, GL_subImageCursor[1]+1); glVertex2f(GL_subImageCursor[0], GL_subImageCursor[1]+1);
 		glEnd();
-		
-		
-		
 	}
 }
 

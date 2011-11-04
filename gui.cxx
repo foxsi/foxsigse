@@ -10,7 +10,8 @@ void Gui::cb_About(Fl_Menu_* o, void* v) {
 }
 
 void Gui::cb_Preferences_i(Fl_Menu_*, void*) {
-  app->update_PreferenceWindow();
+  app->read_preferences();
+app->update_preferencewindow();
 PreferenceWindow->show();
 }
 void Gui::cb_Preferences(Fl_Menu_* o, void* v) {
@@ -23,13 +24,6 @@ exit(1);
 }
 void Gui::cb_Quit(Fl_Menu_* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Quit_i(o,v);
-}
-
-void Gui::cb_outputDirChooser_i(Fl_Menu_*, void*) {
-  app->set_datafile_dir();
-}
-void Gui::cb_outputDirChooser(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_outputDirChooser_i(o,v);
 }
 
 void Gui::cb_Commanding_i(Fl_Menu_*, void*) {
@@ -53,7 +47,6 @@ Fl_Menu_Item Gui::menu_menuBar[] = {
  {"Quit FOXSI GSE", 0x400071,  (Fl_Callback*)Gui::cb_Quit, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {"File", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
- {"Choose Output Dir", 0,  (Fl_Callback*)Gui::cb_outputDirChooser, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Read Data file", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Read USB Stream", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Read Tele Stream", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -67,13 +60,12 @@ Fl_Menu_Item Gui::menu_menuBar[] = {
  {0,0,0,0,0,0,0,0,0}
 };
 Fl_Menu_Item* Gui::fileMenu = Gui::menu_menuBar + 5;
-Fl_Menu_Item* Gui::outputDirChooser = Gui::menu_menuBar + 6;
-Fl_Menu_Item* Gui::readFile = Gui::menu_menuBar + 7;
-Fl_Menu_Item* Gui::readUSBStream = Gui::menu_menuBar + 8;
-Fl_Menu_Item* Gui::readTeleStream = Gui::menu_menuBar + 9;
-Fl_Menu_Item* Gui::WritePicScreen = Gui::menu_menuBar + 10;
-Fl_Menu_Item* Gui::WriteLightcurve = Gui::menu_menuBar + 11;
-Fl_Menu_Item* Gui::menuProc = Gui::menu_menuBar + 13;
+Fl_Menu_Item* Gui::readFile = Gui::menu_menuBar + 6;
+Fl_Menu_Item* Gui::readUSBStream = Gui::menu_menuBar + 7;
+Fl_Menu_Item* Gui::readTeleStream = Gui::menu_menuBar + 8;
+Fl_Menu_Item* Gui::WritePicScreen = Gui::menu_menuBar + 9;
+Fl_Menu_Item* Gui::WriteLightcurve = Gui::menu_menuBar + 10;
+Fl_Menu_Item* Gui::menuProc = Gui::menu_menuBar + 12;
 
 void Gui::cb_nextFrameBut_i(Fl_Button*, void*) {
   data->nextFrame();
@@ -110,11 +102,6 @@ Fl_Menu_Item Gui::menu_Detector[] = {
  {0,0,0,0,0,0,0,0,0}
 };
 
-Fl_Menu_Item Gui::menu_Data[] = {
- {"ACTEL USB", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {0,0,0,0,0,0,0,0,0}
-};
-
 void Gui::cb_initializeBut_i(Fl_Light_Button*, void*) {
   app->initialize_data();
 }
@@ -144,7 +131,8 @@ void Gui::cb_sendParamsBut(Fl_Button* o, void* v) {
 }
 
 void Gui::cb_testBut_i(Fl_Button*, void*) {
-  app->test();
+  app->read_preferences();
+app->test();
 }
 void Gui::cb_testBut(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_testBut_i(o,v);
@@ -286,6 +274,20 @@ void Gui::cb_Cancel_i(Fl_Button*, void*) {
 void Gui::cb_Cancel(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Cancel_i(o,v);
 }
+
+void Gui::cb_Change_i(Fl_Button*, void*) {
+  app->set_datafile_dir();
+}
+void Gui::cb_Change(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Change_i(o,v);
+}
+
+Fl_Menu_Item Gui::menu_DataSource_choice[] = {
+ {"Simulate", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"ACTEL", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Formatter", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0}
+};
 
 Gui::Gui() {
   { mainWindow = new Fl_Double_Window(1252, 739, "FOXSI GSE");
@@ -465,10 +467,6 @@ Gui::Gui() {
       o->down_box(FL_BORDER_BOX);
       o->menu(menu_Detector);
     } // Fl_Choice* o
-    { Fl_Choice* o = new Fl_Choice(90, 35, 115, 25, "Data Source:");
-      o->down_box(FL_BORDER_BOX);
-      o->menu(menu_Data);
-    } // Fl_Choice* o
     { initializeBut = new Fl_Light_Button(209, 35, 80, 25, "Initialize");
       initializeBut->box(FL_THIN_UP_BOX);
       initializeBut->callback((Fl_Callback*)cb_initializeBut);
@@ -500,7 +498,6 @@ Gui::Gui() {
       testBut->callback((Fl_Callback*)cb_testBut);
     } // Fl_Button* testBut
     { nEvents = new Fl_Value_Input(345, 35, 40, 24, "events");
-      nEvents->value(1);
     } // Fl_Value_Input* nEvents
     { writeFileBut = new Fl_Light_Button(15, 160, 95, 25, "Write to file");
       writeFileBut->callback((Fl_Callback*)cb_writeFileBut);
@@ -914,21 +911,33 @@ Gui::Gui() {
     } // Fl_Box* o
     AboutWindow->end();
   } // Fl_Double_Window* AboutWindow
-  { PreferenceWindow = new Fl_Double_Window(365, 113, "Preferences");
+  { PreferenceWindow = new Fl_Double_Window(429, 175, "Preferences");
     PreferenceWindow->user_data((void*)(this));
-    { pixelhalflife_value = new Fl_Value_Input(310, 11, 30, 24, "pixel half life (s)");
+    { pixelhalflife_value = new Fl_Value_Input(295, 46, 70, 24, "pixel half life (s)");
       pixelhalflife_value->value(5);
     } // Fl_Value_Input* pixelhalflife_value
-    { fileTypeChoice = new Fl_Choice(265, 40, 75, 25, "File type:");
+    { fileTypeChoice = new Fl_Choice(70, 45, 75, 25, "File type:");
       fileTypeChoice->down_box(FL_BORDER_BOX);
       fileTypeChoice->menu(menu_fileTypeChoice);
     } // Fl_Choice* fileTypeChoice
-    { Fl_Button* o = new Fl_Button(210, 80, 63, 20, "OK");
+    { Fl_Button* o = new Fl_Button(280, 145, 63, 20, "OK");
       o->callback((Fl_Callback*)cb_OK);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(280, 80, 63, 20, "Cancel");
+    { Fl_Button* o = new Fl_Button(350, 145, 63, 20, "Cancel");
       o->callback((Fl_Callback*)cb_Cancel);
     } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(340, 15, 75, 25, "Change");
+      o->callback((Fl_Callback*)cb_Change);
+    } // Fl_Button* o
+    { datafilesavedir_fileInput = new Fl_File_Input(70, 6, 260, 34, "save dir:");
+    } // Fl_File_Input* datafilesavedir_fileInput
+    { readdelay_value = new Fl_Value_Input(295, 71, 70, 24, "read delay (us)");
+      readdelay_value->value(10000);
+    } // Fl_Value_Input* readdelay_value
+    { DataSource_choice = new Fl_Choice(95, 80, 95, 25, "Data Source:");
+      DataSource_choice->down_box(FL_BORDER_BOX);
+      DataSource_choice->menu(menu_DataSource_choice);
+    } // Fl_Choice* DataSource_choice
     PreferenceWindow->end();
   } // Fl_Double_Window* PreferenceWindow
 }
