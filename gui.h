@@ -261,6 +261,13 @@ private:
   void cb_clear_i(Fl_Button*, void*);
   static void cb_clear(Fl_Button*, void*);
 public:
+  Fl_Light_Button *sendParamsWindow_test[64];
+private:
+  void cb_set1_i(Fl_Button*, void*);
+  static void cb_set1(Fl_Button*, void*);
+  void cb_clear1_i(Fl_Button*, void*);
+  static void cb_clear1(Fl_Button*, void*);
+public:
   Fl_Double_Window *setHoldTimeWindow;
   Fl_Value_Input *setHoldTimeWindow_holdTime;
   Fl_Button *setHoldTimeWindow_setBut;

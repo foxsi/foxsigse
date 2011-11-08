@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {26 44 1252 688} type Double color 19 resizable
+      xywh {26 44 1252 683} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -132,7 +132,7 @@ class Gui {open
         code0 {\#include "subImage.h"}
         class subImage
       }
-      Fl_Group TopOutput {open
+      Fl_Group TopOutput {
         xywh {325 35 695 520}
       } {
         Fl_Output rateOutput0 {
@@ -452,8 +452,8 @@ class Gui {open
     code {buff=new Fl_Text_Buffer();
 consoleBuf->buffer(buff);} {}
     Fl_Window sendParamsWindow {
-      label {Send Parameters}
-      xywh {383 44 780 531} type Double hide
+      label {Send Parameters} open selected
+      xywh {155 164 1053 524} type Double hide
     } {
       Fl_Button sendParamsWindow_sendBut {
         label Send
@@ -920,6 +920,282 @@ app->send_params();
   sendParamsWindow_chan[i]->clear();}
         xywh {619 455 63 20}
       }
+      Fl_Text_Display {} {
+        label {Channel disable}
+        xywh {705 5 15 20} align 4
+      }
+      Fl_Light_Button {sendParamsWindow_test[0]} {
+        label 0
+        xywh {790 36 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[1]} {
+        label 1
+        xywh {790 56 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[2]} {
+        label 2
+        xywh {790 76 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[3]} {
+        label 3
+        xywh {790 96 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[4]} {
+        label 4
+        xywh {790 116 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[5]} {
+        label 5
+        xywh {790 136 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[6]} {
+        label 6
+        xywh {790 156 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[7]} {
+        label 7
+        xywh {790 176 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[8]} {
+        label 8
+        xywh {790 196 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[9]} {
+        label 9
+        xywh {790 216 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[10]} {
+        label 10
+        xywh {790 236 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[11]} {
+        label 11
+        xywh {790 256 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[12]} {
+        label 12
+        xywh {790 276 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[13]} {
+        label 13
+        xywh {790 296 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[14]} {
+        label 14
+        xywh {790 316 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[15]} {
+        label 15
+        xywh {790 336 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[16]} {
+        label 16
+        xywh {790 356 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[17]} {
+        label 17
+        xywh {790 376 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[18]} {
+        label 18
+        xywh {790 396 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[19]} {
+        label 19
+        xywh {790 416 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[20]} {
+        label 20
+        xywh {790 436 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[21]} {
+        label 21
+        xywh {855 36 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[22]} {
+        label 22
+        xywh {855 56 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[23]} {
+        label 23
+        xywh {855 76 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[24]} {
+        label 24
+        xywh {855 96 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[25]} {
+        label 25
+        xywh {855 116 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[26]} {
+        label 26
+        xywh {855 136 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[27]} {
+        label 27
+        xywh {855 156 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[28]} {
+        label 28
+        xywh {855 176 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[29]} {
+        label 29
+        xywh {855 196 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[30]} {
+        label 30
+        xywh {855 216 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[31]} {
+        label 31
+        xywh {855 236 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[32]} {
+        label 32
+        xywh {855 256 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[33]} {
+        label 33
+        xywh {855 276 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[34]} {
+        label 34
+        xywh {855 296 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[35]} {
+        label 35
+        xywh {855 316 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[36]} {
+        label 36
+        xywh {855 336 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[37]} {
+        label 37
+        xywh {855 356 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[38]} {
+        label 38
+        xywh {855 376 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[39]} {
+        label 39
+        xywh {855 396 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[40]} {
+        label 40
+        xywh {855 416 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[41]} {
+        label 41
+        xywh {855 436 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[42]} {
+        label 42
+        xywh {920 36 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[43]} {
+        label 43
+        xywh {920 56 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[44]} {
+        label 44
+        xywh {920 76 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[45]} {
+        label 45
+        xywh {920 96 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[46]} {
+        label 46
+        xywh {920 116 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[47]} {
+        label 47
+        xywh {920 136 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[48]} {
+        label 48
+        xywh {920 156 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[49]} {
+        label 49
+        xywh {920 176 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[50]} {
+        label 50
+        xywh {920 196 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[51]} {
+        label 51
+        xywh {920 216 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[52]} {
+        label 52
+        xywh {920 236 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[53]} {
+        label 53
+        xywh {920 256 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[54]} {
+        label 54
+        xywh {920 276 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[55]} {
+        label 55
+        xywh {920 296 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[56]} {
+        label 56
+        xywh {920 316 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[57]} {
+        label 57
+        xywh {920 336 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[58]} {
+        label 58
+        xywh {920 356 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[59]} {
+        label 59
+        xywh {920 376 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[60]} {
+        label 60
+        xywh {920 396 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[61]} {
+        label 61
+        xywh {920 416 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[62]} {
+        label 62
+        xywh {920 436 67 20}
+      }
+      Fl_Light_Button {sendParamsWindow_test[63]} {
+        label 63
+        xywh {920 456 67 20}
+      }
+      Fl_Button {} {
+        label {set all}
+        callback {for(int i=0; i<64; i++) 
+  sendParamsWindow_test[i]->set();}
+        xywh {790 456 63 20}
+      }
+      Fl_Button {} {
+        label {clear all}
+        callback {for(int i=0; i<64; i++) 
+  sendParamsWindow_test[i]->clear();}
+        xywh {854 456 63 20}
+      }
+      Fl_Text_Display {} {
+        label {Test enable}
+        xywh {940 6 15 20} align 4
+      }
     }
     Fl_Window setHoldTimeWindow {
       label {Set hold time and take data} open
@@ -932,12 +1208,12 @@ app->send_params();
       Fl_Button setHoldTimeWindow_setBut {
         label Set
         callback {app->send_global_params(0);}
-        xywh {70 65 80 25} deactivate
+        xywh {70 65 80 25}
       }
       Fl_Button setHoldTimeWindow_autorunBut {
         label Autorun
         callback {app->start_auto_run();}
-        xywh {175 65 80 25} deactivate
+        xywh {175 65 80 25}
       }
       Fl_Button {} {
         label Close
@@ -947,14 +1223,14 @@ app->send_params();
     }
     Fl_Window setTrigWindow {
       label {Trigger Options} open
-      xywh {502 184 357 203} type Double visible
+      xywh {502 184 357 203} type Double hide
     } {
       Fl_Value_Input setTrigWindow_delayTime {
         label {Trigger delay (units of 3.2 us)}
         xywh {210 16 25 24} value 3
       }
       Fl_Value_Input setTrigWindow_timeoutTime {
-        label {Trigger timeout (units of 3.2 us)} selected
+        label {Trigger timeout (units of 3.2 us)}
         xywh {211 106 25 24} value 31 deactivate
       }
       Fl_Button {} {

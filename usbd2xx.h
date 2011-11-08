@@ -56,6 +56,10 @@ private:
 	int			disable1[64];	// disable mask for ASIC 1
 	int			disable2[64];	// disable mask for ASIC 2
 	int			disable3[64];	// disable mask for ASIC 3
+	int			test0[64];	// test enable for ASIC 0
+	int			test1[64];	// test enable for ASIC 1
+	int			test2[64];	// test enable mask for ASIC 2
+	int			test3[64];	// test enable mask for ASIC 3
 	
 	struct strip_data 
 	{

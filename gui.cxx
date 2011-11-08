@@ -329,6 +329,22 @@ void Gui::cb_clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_clear_i(o,v);
 }
 
+void Gui::cb_set1_i(Fl_Button*, void*) {
+  for(int i=0; i<64; i++) 
+  sendParamsWindow_test[i]->set();
+}
+void Gui::cb_set1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_set1_i(o,v);
+}
+
+void Gui::cb_clear1_i(Fl_Button*, void*) {
+  for(int i=0; i<64; i++) 
+  sendParamsWindow_test[i]->clear();
+}
+void Gui::cb_clear1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_clear1_i(o,v);
+}
+
 void Gui::cb_setHoldTimeWindow_setBut_i(Fl_Button*, void*) {
   app->send_global_params(0);
 }
@@ -392,7 +408,7 @@ void Gui::cb_setTrigWindow_setTrigMode(Fl_Button* o, void* v) {
 }
 
 Gui::Gui() {
-  { mainWindow = new Fl_Double_Window(1252, 688, "FOXSI GSE");
+  { mainWindow = new Fl_Double_Window(1252, 683, "FOXSI GSE");
     mainWindow->color((Fl_Color)19);
     mainWindow->user_data((void*)(this));
     { menuBar = new Fl_Menu_Bar(-5, -1, 1255, 25, "menuBar");
@@ -670,7 +686,7 @@ Gui::Gui() {
   usb=new USB_d2xx();
   buff=new Fl_Text_Buffer();
   consoleBuf->buffer(buff);
-  { sendParamsWindow = new Fl_Double_Window(780, 531, "Send Parameters");
+  { sendParamsWindow = new Fl_Double_Window(1053, 524, "Send Parameters");
     sendParamsWindow->user_data((void*)(this));
     { sendParamsWindow_sendBut = new Fl_Button(415, 425, 70, 25, "Send");
       sendParamsWindow_sendBut->value(1);
@@ -997,6 +1013,146 @@ Gui::Gui() {
     { Fl_Button* o = new Fl_Button(619, 455, 63, 20, "clear all");
       o->callback((Fl_Callback*)cb_clear);
     } // Fl_Button* o
+    { Fl_Text_Display* o = new Fl_Text_Display(705, 5, 15, 20, "Channel disable");
+      o->align(Fl_Align(FL_ALIGN_LEFT));
+    } // Fl_Text_Display* o
+    { sendParamsWindow_test[0] = new Fl_Light_Button(790, 36, 67, 20, "0");
+    } // Fl_Light_Button* sendParamsWindow_test[0]
+    { sendParamsWindow_test[1] = new Fl_Light_Button(790, 56, 67, 20, "1");
+    } // Fl_Light_Button* sendParamsWindow_test[1]
+    { sendParamsWindow_test[2] = new Fl_Light_Button(790, 76, 67, 20, "2");
+    } // Fl_Light_Button* sendParamsWindow_test[2]
+    { sendParamsWindow_test[3] = new Fl_Light_Button(790, 96, 67, 20, "3");
+    } // Fl_Light_Button* sendParamsWindow_test[3]
+    { sendParamsWindow_test[4] = new Fl_Light_Button(790, 116, 67, 20, "4");
+    } // Fl_Light_Button* sendParamsWindow_test[4]
+    { sendParamsWindow_test[5] = new Fl_Light_Button(790, 136, 67, 20, "5");
+    } // Fl_Light_Button* sendParamsWindow_test[5]
+    { sendParamsWindow_test[6] = new Fl_Light_Button(790, 156, 67, 20, "6");
+    } // Fl_Light_Button* sendParamsWindow_test[6]
+    { sendParamsWindow_test[7] = new Fl_Light_Button(790, 176, 67, 20, "7");
+    } // Fl_Light_Button* sendParamsWindow_test[7]
+    { sendParamsWindow_test[8] = new Fl_Light_Button(790, 196, 67, 20, "8");
+    } // Fl_Light_Button* sendParamsWindow_test[8]
+    { sendParamsWindow_test[9] = new Fl_Light_Button(790, 216, 67, 20, "9");
+    } // Fl_Light_Button* sendParamsWindow_test[9]
+    { sendParamsWindow_test[10] = new Fl_Light_Button(790, 236, 67, 20, "10");
+    } // Fl_Light_Button* sendParamsWindow_test[10]
+    { sendParamsWindow_test[11] = new Fl_Light_Button(790, 256, 67, 20, "11");
+    } // Fl_Light_Button* sendParamsWindow_test[11]
+    { sendParamsWindow_test[12] = new Fl_Light_Button(790, 276, 67, 20, "12");
+    } // Fl_Light_Button* sendParamsWindow_test[12]
+    { sendParamsWindow_test[13] = new Fl_Light_Button(790, 296, 67, 20, "13");
+    } // Fl_Light_Button* sendParamsWindow_test[13]
+    { sendParamsWindow_test[14] = new Fl_Light_Button(790, 316, 67, 20, "14");
+    } // Fl_Light_Button* sendParamsWindow_test[14]
+    { sendParamsWindow_test[15] = new Fl_Light_Button(790, 336, 67, 20, "15");
+    } // Fl_Light_Button* sendParamsWindow_test[15]
+    { sendParamsWindow_test[16] = new Fl_Light_Button(790, 356, 67, 20, "16");
+    } // Fl_Light_Button* sendParamsWindow_test[16]
+    { sendParamsWindow_test[17] = new Fl_Light_Button(790, 376, 67, 20, "17");
+    } // Fl_Light_Button* sendParamsWindow_test[17]
+    { sendParamsWindow_test[18] = new Fl_Light_Button(790, 396, 67, 20, "18");
+    } // Fl_Light_Button* sendParamsWindow_test[18]
+    { sendParamsWindow_test[19] = new Fl_Light_Button(790, 416, 67, 20, "19");
+    } // Fl_Light_Button* sendParamsWindow_test[19]
+    { sendParamsWindow_test[20] = new Fl_Light_Button(790, 436, 67, 20, "20");
+    } // Fl_Light_Button* sendParamsWindow_test[20]
+    { sendParamsWindow_test[21] = new Fl_Light_Button(855, 36, 67, 20, "21");
+    } // Fl_Light_Button* sendParamsWindow_test[21]
+    { sendParamsWindow_test[22] = new Fl_Light_Button(855, 56, 67, 20, "22");
+    } // Fl_Light_Button* sendParamsWindow_test[22]
+    { sendParamsWindow_test[23] = new Fl_Light_Button(855, 76, 67, 20, "23");
+    } // Fl_Light_Button* sendParamsWindow_test[23]
+    { sendParamsWindow_test[24] = new Fl_Light_Button(855, 96, 67, 20, "24");
+    } // Fl_Light_Button* sendParamsWindow_test[24]
+    { sendParamsWindow_test[25] = new Fl_Light_Button(855, 116, 67, 20, "25");
+    } // Fl_Light_Button* sendParamsWindow_test[25]
+    { sendParamsWindow_test[26] = new Fl_Light_Button(855, 136, 67, 20, "26");
+    } // Fl_Light_Button* sendParamsWindow_test[26]
+    { sendParamsWindow_test[27] = new Fl_Light_Button(855, 156, 67, 20, "27");
+    } // Fl_Light_Button* sendParamsWindow_test[27]
+    { sendParamsWindow_test[28] = new Fl_Light_Button(855, 176, 67, 20, "28");
+    } // Fl_Light_Button* sendParamsWindow_test[28]
+    { sendParamsWindow_test[29] = new Fl_Light_Button(855, 196, 67, 20, "29");
+    } // Fl_Light_Button* sendParamsWindow_test[29]
+    { sendParamsWindow_test[30] = new Fl_Light_Button(855, 216, 67, 20, "30");
+    } // Fl_Light_Button* sendParamsWindow_test[30]
+    { sendParamsWindow_test[31] = new Fl_Light_Button(855, 236, 67, 20, "31");
+    } // Fl_Light_Button* sendParamsWindow_test[31]
+    { sendParamsWindow_test[32] = new Fl_Light_Button(855, 256, 67, 20, "32");
+    } // Fl_Light_Button* sendParamsWindow_test[32]
+    { sendParamsWindow_test[33] = new Fl_Light_Button(855, 276, 67, 20, "33");
+    } // Fl_Light_Button* sendParamsWindow_test[33]
+    { sendParamsWindow_test[34] = new Fl_Light_Button(855, 296, 67, 20, "34");
+    } // Fl_Light_Button* sendParamsWindow_test[34]
+    { sendParamsWindow_test[35] = new Fl_Light_Button(855, 316, 67, 20, "35");
+    } // Fl_Light_Button* sendParamsWindow_test[35]
+    { sendParamsWindow_test[36] = new Fl_Light_Button(855, 336, 67, 20, "36");
+    } // Fl_Light_Button* sendParamsWindow_test[36]
+    { sendParamsWindow_test[37] = new Fl_Light_Button(855, 356, 67, 20, "37");
+    } // Fl_Light_Button* sendParamsWindow_test[37]
+    { sendParamsWindow_test[38] = new Fl_Light_Button(855, 376, 67, 20, "38");
+    } // Fl_Light_Button* sendParamsWindow_test[38]
+    { sendParamsWindow_test[39] = new Fl_Light_Button(855, 396, 67, 20, "39");
+    } // Fl_Light_Button* sendParamsWindow_test[39]
+    { sendParamsWindow_test[40] = new Fl_Light_Button(855, 416, 67, 20, "40");
+    } // Fl_Light_Button* sendParamsWindow_test[40]
+    { sendParamsWindow_test[41] = new Fl_Light_Button(855, 436, 67, 20, "41");
+    } // Fl_Light_Button* sendParamsWindow_test[41]
+    { sendParamsWindow_test[42] = new Fl_Light_Button(920, 36, 67, 20, "42");
+    } // Fl_Light_Button* sendParamsWindow_test[42]
+    { sendParamsWindow_test[43] = new Fl_Light_Button(920, 56, 67, 20, "43");
+    } // Fl_Light_Button* sendParamsWindow_test[43]
+    { sendParamsWindow_test[44] = new Fl_Light_Button(920, 76, 67, 20, "44");
+    } // Fl_Light_Button* sendParamsWindow_test[44]
+    { sendParamsWindow_test[45] = new Fl_Light_Button(920, 96, 67, 20, "45");
+    } // Fl_Light_Button* sendParamsWindow_test[45]
+    { sendParamsWindow_test[46] = new Fl_Light_Button(920, 116, 67, 20, "46");
+    } // Fl_Light_Button* sendParamsWindow_test[46]
+    { sendParamsWindow_test[47] = new Fl_Light_Button(920, 136, 67, 20, "47");
+    } // Fl_Light_Button* sendParamsWindow_test[47]
+    { sendParamsWindow_test[48] = new Fl_Light_Button(920, 156, 67, 20, "48");
+    } // Fl_Light_Button* sendParamsWindow_test[48]
+    { sendParamsWindow_test[49] = new Fl_Light_Button(920, 176, 67, 20, "49");
+    } // Fl_Light_Button* sendParamsWindow_test[49]
+    { sendParamsWindow_test[50] = new Fl_Light_Button(920, 196, 67, 20, "50");
+    } // Fl_Light_Button* sendParamsWindow_test[50]
+    { sendParamsWindow_test[51] = new Fl_Light_Button(920, 216, 67, 20, "51");
+    } // Fl_Light_Button* sendParamsWindow_test[51]
+    { sendParamsWindow_test[52] = new Fl_Light_Button(920, 236, 67, 20, "52");
+    } // Fl_Light_Button* sendParamsWindow_test[52]
+    { sendParamsWindow_test[53] = new Fl_Light_Button(920, 256, 67, 20, "53");
+    } // Fl_Light_Button* sendParamsWindow_test[53]
+    { sendParamsWindow_test[54] = new Fl_Light_Button(920, 276, 67, 20, "54");
+    } // Fl_Light_Button* sendParamsWindow_test[54]
+    { sendParamsWindow_test[55] = new Fl_Light_Button(920, 296, 67, 20, "55");
+    } // Fl_Light_Button* sendParamsWindow_test[55]
+    { sendParamsWindow_test[56] = new Fl_Light_Button(920, 316, 67, 20, "56");
+    } // Fl_Light_Button* sendParamsWindow_test[56]
+    { sendParamsWindow_test[57] = new Fl_Light_Button(920, 336, 67, 20, "57");
+    } // Fl_Light_Button* sendParamsWindow_test[57]
+    { sendParamsWindow_test[58] = new Fl_Light_Button(920, 356, 67, 20, "58");
+    } // Fl_Light_Button* sendParamsWindow_test[58]
+    { sendParamsWindow_test[59] = new Fl_Light_Button(920, 376, 67, 20, "59");
+    } // Fl_Light_Button* sendParamsWindow_test[59]
+    { sendParamsWindow_test[60] = new Fl_Light_Button(920, 396, 67, 20, "60");
+    } // Fl_Light_Button* sendParamsWindow_test[60]
+    { sendParamsWindow_test[61] = new Fl_Light_Button(920, 416, 67, 20, "61");
+    } // Fl_Light_Button* sendParamsWindow_test[61]
+    { sendParamsWindow_test[62] = new Fl_Light_Button(920, 436, 67, 20, "62");
+    } // Fl_Light_Button* sendParamsWindow_test[62]
+    { sendParamsWindow_test[63] = new Fl_Light_Button(920, 456, 67, 20, "63");
+    } // Fl_Light_Button* sendParamsWindow_test[63]
+    { Fl_Button* o = new Fl_Button(790, 456, 63, 20, "set all");
+      o->callback((Fl_Callback*)cb_set1);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(854, 456, 63, 20, "clear all");
+      o->callback((Fl_Callback*)cb_clear1);
+    } // Fl_Button* o
+    { Fl_Text_Display* o = new Fl_Text_Display(940, 6, 15, 20, "Test enable");
+      o->align(Fl_Align(FL_ALIGN_LEFT));
+    } // Fl_Text_Display* o
     sendParamsWindow->end();
   } // Fl_Double_Window* sendParamsWindow
   { setHoldTimeWindow = new Fl_Double_Window(312, 165, "Set hold time and take data");
@@ -1005,11 +1161,9 @@ Gui::Gui() {
     } // Fl_Value_Input* setHoldTimeWindow_holdTime
     { setHoldTimeWindow_setBut = new Fl_Button(70, 65, 80, 25, "Set");
       setHoldTimeWindow_setBut->callback((Fl_Callback*)cb_setHoldTimeWindow_setBut);
-      setHoldTimeWindow_setBut->deactivate();
     } // Fl_Button* setHoldTimeWindow_setBut
     { setHoldTimeWindow_autorunBut = new Fl_Button(175, 65, 80, 25, "Autorun");
       setHoldTimeWindow_autorunBut->callback((Fl_Callback*)cb_setHoldTimeWindow_autorunBut);
-      setHoldTimeWindow_autorunBut->deactivate();
     } // Fl_Button* setHoldTimeWindow_autorunBut
     { Fl_Button* o = new Fl_Button(125, 115, 80, 25, "Close");
       o->callback((Fl_Callback*)cb_Close1);

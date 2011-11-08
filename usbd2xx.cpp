@@ -508,7 +508,7 @@ void USB_d2xx::writeFrame(FILE *dataFile)
 // Set individual ASIC slow control parameters
 void USB_d2xx::setConfig(void)
 {
-	const int n=39;		// number of components in write array
+	const int n=52;		// number of components in write array
 	const int nV=45;	// number of values in sendParamsWindow
 	char cBufWrite[n];	// write array
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
@@ -516,11 +516,13 @@ void USB_d2xx::setConfig(void)
 	// load user input configuration settings from sendParamsWindow.
 	int value[nV];
 	int chan[64];
+	int test[64];
 	int asic = gui->sendParamsWindow_asic->value();
 	
 	// initialize configuration arrays
 	for(int i=0; i<nV; i++)	value[i] = 0;
 	for(int i=0; i<64; i++)	chan[i] = 0;
+	for(int i=0; i<64; i++)	test[i] = 0;
 	
 	// initialize write buffer.
 	for(int i=0; i<n; i++) cBufWrite[i] = 0;
@@ -529,6 +531,7 @@ void USB_d2xx::setConfig(void)
 	// CHAN values are from the channel disable buttons.
 	for(int i=0; i<nV; i++)	value[i] = gui->sendParamsWindow_value[i]->value();
 	for(int i=0; i<64; i++)	chan[i]  = gui->sendParamsWindow_chan[i]->value();
+	for(int i=0; i<64; i++)	test[i]  = gui->sendParamsWindow_test[i]->value();
 	
 	// logic to assemble configuration settings into write array.
 	// Note the pattern is not the same for each register and some bits are intentionally unused!
@@ -536,10 +539,10 @@ void USB_d2xx::setConfig(void)
 	cBufWrite[1] = value[5]*16 + value[6]*8 + value[7]*4 + value[8]*2 + value[9] + 32*asic;
 	cBufWrite[2] = value[10]*16 + value[11]*8 + value[12]*4 + value[13]*2 + value[14] + 32*asic;
 	cBufWrite[3] = value[15]*16 + value[16]*8 + value[17]*4 + value[18]*2 + value[19] + 32*asic;
-	cBufWrite[4] = value[20]*16 + value[21]*8 + value[22]*4 + value[23]*2 + getbits(value[24],5,1) + 32*asic; // 4 single bits + LSB of dummy digital delay.
-	cBufWrite[5] = getbits(value[24], 4, 5) + 32*asic; // 5 MSB of dummy digital delay.
-	cBufWrite[6] = getbits(value[25], 9, 5) + 32*asic;  // 5 LSB of digital threshold.
-	cBufWrite[7] = getbits(value[25], 4, 5) + 32*asic;  // 5 MSB of digital threshold.
+	cBufWrite[4] = value[20]*16 + value[21]*8 + value[22]*4 + value[23]*2 + getbits(value[24],4,1) + 32*asic; // 4 single bits + LSB of dummy digital delay.
+	cBufWrite[5] = getbits(value[24], 9, 5) + 32*asic; // 5 MSB of dummy digital delay.
+	cBufWrite[6] = getbits(value[25], 4, 5) + 32*asic;  // 5 LSB of digital threshold.
+	cBufWrite[7] = getbits(value[25], 9, 5) + 32*asic;  // 5 MSB of digital threshold.
 	cBufWrite[8] = chan[0]*16 + chan[1]*8 + chan[2]*4 + chan[3]*2 + chan[4] + 32*asic;
 	cBufWrite[9] = chan[5]*16 + chan[6]*8 + chan[7]*4 + chan[8]*2 + chan[9] + 32*asic;
 	cBufWrite[10] = chan[10]*16 + chan[11]*8 + chan[12]*4 + chan[13]*2 + chan[14] + 32*asic;
@@ -553,24 +556,37 @@ void USB_d2xx::setConfig(void)
 	cBufWrite[18] = chan[50]*16 + chan[51]*8 + chan[52]*4 + chan[53]*2 + chan[54] + 32*asic;
 	cBufWrite[19] = chan[55]*16 + chan[56]*8 + chan[57]*4 + chan[58]*2 + chan[59] + 32*asic;
 	cBufWrite[20] = chan[60]*8 + chan[61]*4 + chan[62]*2 + chan[63]*1 + 32*asic;  // No MSB for the last disable register.
-	cBufWrite[21] = value[26]*4 + value[27]*2 + value[28] + 32*asic;
-	cBufWrite[22] = getbits(value[29], 4, 5) + 32*asic; // digital threshold
-	cBufWrite[23] = getbits(value[30], 3, 4) + 32*asic;
-	cBufWrite[24] = getbits(value[31], 3, 4) + 32*asic;
-	cBufWrite[25] = getbits(value[32], 3, 4) + 32*asic;
-	cBufWrite[26] = getbits(value[33], 3, 4) + 32*asic;
-	cBufWrite[27] = getbits(value[34], 2, 3) + 32*asic;
-	cBufWrite[28] = getbits(value[35], 2, 3) + 32*asic;
-	cBufWrite[29] = getbits(value[36], 2, 3) + 32*asic;
-	cBufWrite[30] = getbits(value[37], 2, 3) + 32*asic;
-	cBufWrite[31] = getbits(value[38], 2, 3) + 32*asic;
-	cBufWrite[32] = getbits(value[39], 2, 3) + 32*asic;
-	cBufWrite[33] = getbits(value[40], 2, 3) + 32*asic;
-	cBufWrite[34] = getbits(value[41], 2, 3) + 32*asic;
-	cBufWrite[35] = getbits(value[42], 2, 3) + 32*asic;
-	cBufWrite[36] = getbits(value[43], 2, 3) + 32*asic;
-	cBufWrite[37] = getbits(value[44], 2, 3) + 32*asic;
-	cBufWrite[38] = 0;
+	cBufWrite[21] = test[0]*16 + test[1]*8 + test[2]*4 + test[3]*2 + test[4] + 32*asic;
+	cBufWrite[22] = test[5]*16 + test[6]*8 + test[7]*4 + test[8]*2 + test[9] + 32*asic;
+	cBufWrite[23] = test[10]*16 + test[11]*8 + test[12]*4 + test[13]*2 + test[14] + 32*asic;
+	cBufWrite[24] = test[15]*16 + test[16]*8 + test[17]*4 + test[18]*2 + test[19] + 32*asic;
+	cBufWrite[25] = test[20]*16 + test[21]*8 + test[22]*4 + test[23]*2 + test[24] + 32*asic;
+	cBufWrite[26] = test[25]*16 + test[26]*8 + test[27]*4 + test[28]*2 + test[29] + 32*asic;
+	cBufWrite[27] = test[30]*16 + test[31]*8 + test[32]*4 + test[33]*2 + test[34] + 32*asic;
+	cBufWrite[28] = test[35]*16 + test[36]*8 + test[37]*4 + test[38]*2 + test[39] + 32*asic;
+	cBufWrite[29] = test[40]*16 + test[41]*8 + test[42]*4 + test[43]*2 + test[44] + 32*asic;
+	cBufWrite[30] = test[45]*16 + test[46]*8 + test[47]*4 + test[48]*2 + test[49] + 32*asic;
+	cBufWrite[31] = test[50]*16 + test[51]*8 + test[52]*4 + test[53]*2 + test[54] + 32*asic;
+	cBufWrite[32] = test[55]*16 + test[56]*8 + test[57]*4 + test[58]*2 + test[59] + 32*asic;
+	cBufWrite[33] = test[60]*8 + test[61]*4 + test[62]*2 + test[63]*1 + 32*asic;  // No MSB for the last disable register.
+	cBufWrite[34] = value[26]*4 + value[27]*2 + value[28] + 32*asic;
+	cBufWrite[35] = getbits(value[29], 4, 5) + 32*asic; // digital threshold
+	cBufWrite[36] = getbits(value[30], 3, 4) + 32*asic;
+	cBufWrite[37] = getbits(value[31], 3, 4) + 32*asic;
+	cBufWrite[38] = getbits(value[32], 3, 4) + 32*asic;
+	cBufWrite[39] = getbits(value[33], 3, 4) + 32*asic;
+	cBufWrite[40] = getbits(value[34], 2, 3) + 32*asic;
+	cBufWrite[41] = getbits(value[35], 2, 3) + 32*asic;
+	cBufWrite[42] = getbits(value[36], 2, 3) + 32*asic;
+	cBufWrite[43] = getbits(value[37], 2, 3) + 32*asic;
+	cBufWrite[44] = getbits(value[38], 2, 3) + 32*asic;
+	cBufWrite[45] = getbits(value[39], 2, 3) + 32*asic;
+	cBufWrite[46] = getbits(value[40], 2, 3) + 32*asic;
+	cBufWrite[47] = getbits(value[41], 2, 3) + 32*asic;
+	cBufWrite[48] = getbits(value[42], 2, 3) + 32*asic;
+	cBufWrite[49] = getbits(value[43], 2, 3) + 32*asic;
+	cBufWrite[50] = getbits(value[44], 2, 3) + 32*asic;
+	cBufWrite[51] = 0;
 
 	// Testing purposes
 //	for(int i=0; i<39; i++)
@@ -578,7 +594,7 @@ void USB_d2xx::setConfig(void)
 	
 	/* Write */
 	dwBytesWritten = 0;
-	if((ftStatus = FT_Write(ftHandle, cBufWrite, 39, &dwBytesWritten)) != FT_OK) {
+	if((ftStatus = FT_Write(ftHandle, cBufWrite, n, &dwBytesWritten)) != FT_OK) {
 		printf("Error FT_Write(%d)\n", ftStatus);
 		return;
 	}
@@ -668,18 +684,22 @@ void USB_d2xx::saveSettings()
 		case 0:
 			for(int i=0; i<nVal; i++)	asic0settings[i] = gui->sendParamsWindow_value[i]->value();
 			for(int i=0; i<nChan; i++)	disable0[i] = gui->sendParamsWindow_chan[i]->value();
+			for(int i=0; i<nChan; i++)	test0[i] = gui->sendParamsWindow_test[i]->value();
 			break;
 		case 1:
 			for(int i=0; i<nVal; i++)	asic1settings[i] = gui->sendParamsWindow_value[i]->value();
 			for(int i=0; i<nChan; i++)	disable1[i] = gui->sendParamsWindow_chan[i]->value();
+			for(int i=0; i<nChan; i++)	test1[i] = gui->sendParamsWindow_test[i]->value();
 			break;
 		case 2:
 			for(int i=0; i<nVal; i++)	asic2settings[i] = gui->sendParamsWindow_value[i]->value();
 			for(int i=0; i<nChan; i++)	disable2[i] = gui->sendParamsWindow_chan[i]->value();
+			for(int i=0; i<nChan; i++)	test2[i] = gui->sendParamsWindow_test[i]->value();
 			break;
 		case 3:
 			for(int i=0; i<nVal; i++)	asic3settings[i] = gui->sendParamsWindow_value[i]->value();
 			for(int i=0; i<nChan; i++)	disable3[i] = gui->sendParamsWindow_chan[i]->value();
+			for(int i=0; i<nChan; i++)	test3[i] = gui->sendParamsWindow_test[i]->value();
 			break;
 		default:
 			break;
@@ -703,18 +723,22 @@ void USB_d2xx::restoreSettings()
 		case 0:
 			for(int i=0; i<nVal; i++)	gui->sendParamsWindow_value[i]->value(asic0settings[i]);
 			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_chan[i]->value(disable0[i]);
+			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_test[i]->value(test0[i]);
 			break;
 		case 1:
 			for(int i=0; i<nVal; i++)	gui->sendParamsWindow_value[i]->value(asic1settings[i]);
 			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_chan[i]->value(disable1[i]);
+			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_test[i]->value(test1[i]);
 			break;
 		case 2:
 			for(int i=0; i<nVal; i++)	gui->sendParamsWindow_value[i]->value(asic2settings[i]);
 			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_chan[i]->value(disable2[i]);
+			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_test[i]->value(test2[i]);
 			break;
 		case 3:
 			for(int i=0; i<nVal; i++)	gui->sendParamsWindow_value[i]->value(asic3settings[i]);
 			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_chan[i]->value(disable3[i]);
+			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_test[i]->value(test3[i]);
 			break;
 		default:
 			break;
@@ -776,6 +800,11 @@ void USB_d2xx::loadDefaultSettings()
 		disable1[i] = 1;
 		disable2[i] = 0;
 		disable3[i] = 0;
+		test0[i] = 0;
+		test1[i] = 0;
+		test2[i] = 0;
+		test3[i] = 0;
 	}
+	
 }
 
