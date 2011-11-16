@@ -22,6 +22,7 @@
 #include <sys/ioctl.h>
 
 #include <string>
+#include "telemetry.h"
 
 int fsercmd,ttyout,devicefile,clocklo;
 struct termios sertty;
@@ -52,25 +53,32 @@ void command_attenuator_state(bool state)
 	sleep(1);
 }
 
-void command_voltage_set(int hv_value)
+void command_voltage_set(float voltage)
 {
+	// hv_value is not one to one for actual voltage
+
 	int status;
+	int hv_value_cmd;
+	
+	// convert from actual voltage to a command value
+	hv_value_cmd = telemetry_voltage_convert_hvvalue(voltage);
 	
 	//sscanf(hv_value,"%u",&hvvalue);
 	
-	if( hv_value > 4095)
+	if( hv_value_cmd > 4095)
 	{
-		printf (" HV value greater than 4095, too large %d \n",hv_value);
+		printf ("HV value greater than 511, too large %d. \nNot sending.\n",voltage);
+	} else {		
+		printf("Setting HV to %u  , %x \n",hv_value_cmd,hv_value_cmd);
+		
+		create_cmd_hv(hv_value_cmd);
+		
+		fsercmd = command_initialize_serial();
+		
+		if (fsercmd > 0){write(fsercmd,&cmd[0],4);}
+		printf("Sending bytes %02x %02x %02x %02x \n",cmd[0],cmd[1],cmd[2],cmd[3]);
+		sleep(1);
 	}
-	printf("Setting HV to %u  , %x \n",hv_value,hv_value);
-	
-	create_cmd_hv(hv_value);
-	
-	fsercmd = command_initialize_serial();
-	
-	if (fsercmd > 0){write(fsercmd,&cmd[0],4);}
-	printf("Sending bytes %02x %02x %02x %02x \n",cmd[0],cmd[1],cmd[2],cmd[3]);
-	sleep(1);
 }
 
 void command_clock_set(int clockhi, int clocklo)
@@ -120,16 +128,6 @@ void command_clock_set(int clockhi, int clocklo)
 	printf("Sending bytes %02x %02x %02x %02x \n",cmd[0],cmd[1],cmd[2],cmd[3]);
 	if (fsercmd > 0){write(fsercmd,&cmd,4);}
 	
-	cmd[0] = 0xf8;
-	cmd[1] = 0x07;
-	cmd[2] = 0x0;
-	cmd[3] = 0x0;
-	cmd[3] ^= cmd[0];
-	cmd[3] ^= cmd[1];
-	cmd[3] ^= cmd[2];
-	printf("Sending bytes %02x %02x %02x %02x \n",cmd[0],cmd[1],cmd[2],cmd[3]);
-	if (fsercmd > 0){write(fsercmd,&cmd,4);}
-	
 	printf("Setting hi clock to %u  , %x \n",clockhi,clockhi);
 	cmd[0] = 0xf8;
 	cmd[1] = 0x04;
@@ -144,6 +142,16 @@ void command_clock_set(int clockhi, int clocklo)
 	cmd[0] = 0xf8;
 	cmd[1] = 0x05;
 	cmd[2] = (unsigned char) ( (clockhi >> 8) & 0xff);
+	cmd[3] = 0x0;
+	cmd[3] ^= cmd[0];
+	cmd[3] ^= cmd[1];
+	cmd[3] ^= cmd[2];
+	printf("Sending bytes %02x %02x %02x %02x \n",cmd[0],cmd[1],cmd[2],cmd[3]);
+	if (fsercmd > 0){write(fsercmd,&cmd,4);}
+	
+	cmd[0] = 0xf8;
+	cmd[1] = 0x07;
+	cmd[2] = 0x0;
 	cmd[3] = 0x0;
 	cmd[3] ^= cmd[0];
 	cmd[3] ^= cmd[1];

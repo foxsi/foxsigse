@@ -161,6 +161,7 @@ private:
   static void cb_Clear(Fl_Button*, void*);
 public:
   Fl_Value_Output *testOutput;
+  Fl_Value_Output *HVOutput;
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:
@@ -193,10 +194,10 @@ private:
   static void cb_Close1(Fl_Button*, void*);
   void cb_Send1_i(Fl_Button*, void*);
   static void cb_Send1(Fl_Button*, void*);
-  void cb_Strobe_i(Fl_Button*, void*);
-  static void cb_Strobe(Fl_Button*, void*);
-  void cb_Strobe1_i(Fl_Button*, void*);
-  static void cb_Strobe1(Fl_Button*, void*);
+  void cb_Send2_i(Fl_Button*, void*);
+  static void cb_Send2(Fl_Button*, void*);
+  void cb_Send3_i(Fl_Button*, void*);
+  static void cb_Send3(Fl_Button*, void*);
 public:
   Fl_Value_Input *highVoltage_input;
   Fl_Value_Input *clockLow_input;

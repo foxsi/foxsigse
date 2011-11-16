@@ -11,7 +11,7 @@
 #define _commands_h_
 
 void command_attenuator_state(bool state);
-void command_voltage_set(int hv_value);
+void command_voltage_set(float voltage);
 void command_clock_set(int clockhi, int clocklo);
 void create_cmd_attenuator(bool state);
 void create_cmd_hv(int hvvalue);

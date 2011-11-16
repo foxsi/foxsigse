@@ -233,18 +233,18 @@ void Gui::cb_Send1(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Send1_i(o,v);
 }
 
-void Gui::cb_Strobe_i(Fl_Button*, void*) {
+void Gui::cb_Send2_i(Fl_Button*, void*) {
   app->send_atten_state(0);
 }
-void Gui::cb_Strobe(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Strobe_i(o,v);
+void Gui::cb_Send2(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Send2_i(o,v);
 }
 
-void Gui::cb_Strobe1_i(Fl_Button*, void*) {
+void Gui::cb_Send3_i(Fl_Button*, void*) {
   app->send_atten_state(1);
 }
-void Gui::cb_Strobe1(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Strobe1_i(o,v);
+void Gui::cb_Send3(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Send3_i(o,v);
 }
 
 Fl_Menu_Item Gui::menu_fileTypeChoice[] = {
@@ -513,6 +513,8 @@ Gui::Gui() {
     } // Fl_Button* o
     { testOutput = new Fl_Value_Output(135, 276, 77, 24, "value:");
     } // Fl_Value_Output* testOutput
+    { HVOutput = new Fl_Value_Output(940, 186, 65, 24, "HV");
+    } // Fl_Value_Output* HVOutput
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow
@@ -871,17 +873,17 @@ Gui::Gui() {
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Send1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(70, 100, 180, 25, "Strobe Attenuator State 0");
+    { Fl_Button* o = new Fl_Button(70, 100, 180, 25, "Send Attenuator State 0");
       o->box(FL_THIN_UP_BOX);
       o->labelcolor((Fl_Color)1);
-      o->callback((Fl_Callback*)cb_Strobe);
+      o->callback((Fl_Callback*)cb_Send2);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(70, 130, 180, 25, "Strobe Attenuator State 1");
+    { Fl_Button* o = new Fl_Button(70, 130, 180, 25, "Send Attenuator State 1");
       o->box(FL_THIN_UP_BOX);
       o->labelcolor((Fl_Color)1);
-      o->callback((Fl_Callback*)cb_Strobe1);
+      o->callback((Fl_Callback*)cb_Send3);
     } // Fl_Button* o
-    { highVoltage_input = new Fl_Value_Input(175, 11, 75, 24, "HV Set (0-4095):");
+    { highVoltage_input = new Fl_Value_Input(175, 11, 75, 24, "HV Set (volts):");
     } // Fl_Value_Input* highVoltage_input
     { clockLow_input = new Fl_Value_Input(175, 40, 75, 24, "Clock Set Low:");
     } // Fl_Value_Input* clockLow_input

@@ -25,6 +25,7 @@ void data_stop_reading(void);
 void data_update_display(unsigned short int *frame);
 void data_frame_print_to_file(unsigned short int *frame);
 void data_set_datafilename(void);
+void data_init_formatter(void);
 
 
 #endif

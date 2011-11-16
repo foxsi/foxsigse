@@ -7,7 +7,7 @@ class Gui {open
   Function {Gui()} {open
   } {
     Fl_Window mainWindow {
-      label {FOXSI GSE} open
+      label {FOXSI GSE} open selected
       xywh {28 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
@@ -313,7 +313,7 @@ exit(1);}
       Fl_Button startReadingDataButton {
         label Read
         callback {app->read_preferences();
-app->start_reading_data();} selected
+app->start_reading_data();}
         xywh {390 35 60 25}
       }
       Fl_Light_Button closeBut {
@@ -376,6 +376,10 @@ app->start_reading_data();} selected
       Fl_Value_Output testOutput {
         label {value:}
         xywh {135 276 77 24}
+      }
+      Fl_Value_Output HVOutput {
+        label HV
+        xywh {940 186 65 24}
       }
     }
     code {app=new Application();} {}
@@ -883,17 +887,17 @@ app->send_params();
         xywh {265 70 70 25} value 1 labelcolor 1
       }
       Fl_Button {} {
-        label {Strobe Attenuator State 0}
+        label {Send Attenuator State 0}
         callback {app->send_atten_state(0);}
         xywh {70 100 180 25} box THIN_UP_BOX labelcolor 1
       }
       Fl_Button {} {
-        label {Strobe Attenuator State 1}
+        label {Send Attenuator State 1}
         callback {app->send_atten_state(1);}
         xywh {70 130 180 25} box THIN_UP_BOX labelcolor 1
       }
       Fl_Value_Input highVoltage_input {
-        label {HV Set (0-4095):}
+        label {HV Set (volts):}
         xywh {175 11 75 24}
       }
       Fl_Value_Input clockLow_input {

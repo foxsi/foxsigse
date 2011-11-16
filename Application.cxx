@@ -210,8 +210,6 @@ void Application::print_to_console(const char *text)
 	gui->consoleBuf->insert(text);
 }
 
-
-
 void* Application::read_data(void* variable)
 {
 	char buffer[50];
