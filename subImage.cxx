@@ -38,7 +38,7 @@ void subImage::draw()
 {
 	float grey;
 	double alpha;
-
+	
 	if (!valid()) {
 		make_current();
 	}
@@ -92,7 +92,7 @@ void subImage::draw()
 				glEnd();
 			}
 		}
-	
+		
 		//draw a red box under the cursor selection
 		glColor3f(1, 0, 0);	//red
 		glBegin(GL_LINE_LOOP);
@@ -105,10 +105,10 @@ void subImage::draw()
 int subImage::handle(int eventType)
 {
 	int button;
-		char text[8];
-
+	char text[8];
+	
 	button=Fl::event_button();
-
+	
 	//convert between fltk coordinates and opengl coordinates
 	GL_subImageCursor[0]=floor(Fl::event_x()*(ZOOMNUM + 2*XBORDER)/w());
 	GL_subImageCursor[1]=floor((h()-Fl::event_y())*(ZOOMNUM + 2*YBORDER)/h());
@@ -120,10 +120,10 @@ int subImage::handle(int eventType)
 	//translate to pixel number but keep within bounds 
 	//subImageMousePixel[0] = (GL_subImageCursor[0] - XBORDER) > 1 ? chosenPixel[0] - XBORDER : 1;
 	//subImageMousePixel[0] = subImageMousePixel[0] < ZOOMNUM ? subImageMousePixel[0]: ZOOMNUM;
-
+	
 	//subImageMousePixel[1] = (GL_subImageCursor[1] - YBORDER) > 1 ? chosenPixel[1] - YBORDER : 1;
 	//subImageMousePixel[1] = subImageMousePixel[1] < ZOOMNUM ? subImageMousePixel[1]: ZOOMNUM;
-
+	
 	subImageMousePixel[0] = GL_subImageCursor[0] - XBORDER + chosenPixel[0]-ZOOMNUM/2;
 	subImageMousePixel[1] = GL_subImageCursor[1] - YBORDER + chosenPixel[1]-ZOOMNUM/2;
 	//printf("pixel: (%4.2f,%4.2f)\n", FLcursorX[0] - XBORDER+1, FLcursorY[0]-YBORDER+1);
@@ -132,7 +132,7 @@ int subImage::handle(int eventType)
 	{
 		subImageChosenPixel[0] = subImageMousePixel[0]; subImageChosenPixel[1] = subImageMousePixel[1];
 	}
-
+	
 	//update the text info
 	sprintf( text, "%d,%d", subImageMousePixel[0], subImageMousePixel[1]);
 	gui->pixelNum->value(text);

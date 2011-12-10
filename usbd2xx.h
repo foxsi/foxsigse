@@ -32,11 +32,12 @@ public:
 	int findSync();		// Read data until sync word is found, then stop.
 	int readFrame();	// Read one frame from the device.
 	void writeFrame(FILE *dataFile);	// Write last frame to file.
+	void writeHeader(FILE *dataFile);	// Write header at start of file.
 	void close();		// Close and cleanup the device and data file.
 	void printFrame();	// Print out the last frame that was read
 	void setConfig();	// Write configuration register to FPGA.
-	void setGlobalConfig();	// Write config settings that are global, not just one ASIC.
-	void breakAcq(int data);	// Break ACQ loop.
+	void setGlobalConfig(int option);	// Write config settings that are global, not just one ASIC.
+	//void breakAcq(int data);	// Break ACQ loop.
 	void saveSettings();	// Save current control settings for one ASIC.
 	void restoreSettings();	// Restore last control settings for one ASIC.
 	void loadDefaultSettings();	// set or restore default settings for one ASIC.
@@ -56,6 +57,10 @@ private:
 	int			disable1[64];	// disable mask for ASIC 1
 	int			disable2[64];	// disable mask for ASIC 2
 	int			disable3[64];	// disable mask for ASIC 3
+	int			test0[64];	// test enable for ASIC 0
+	int			test1[64];	// test enable for ASIC 1
+	int			test2[64];	// test enable mask for ASIC 2
+	int			test3[64];	// test enable mask for ASIC 3
 	
 	struct strip_data 
 	{

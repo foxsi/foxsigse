@@ -96,7 +96,7 @@ void Foxsidata::addPhoton(double channel, double time, int detector, int xstrip,
 	//update image
 	//image[xstrip][ystrip][detector]++;
 	image[xstrip][ystrip]++;
-
+	
 	//update overall image, currently assumes the pixels line up (no tilt between detectors)
 	//image[xstrip][ystrip][0]++;
 }
@@ -149,48 +149,48 @@ void Foxsidata::Properties(void) const
 }
 
 /*void Foxsidata::simulateData(void)
-{
-	int	numphotons;
-	struct timeval tv;
-	struct timezone tz;
-	struct tm *tm;
-	double museconds;
-	double seconds;
-    
-	gettimeofday(&tv, &tz);
-	tm=localtime(&tv.tv_sec);
-	
-	museconds = tv.tv_usec;
-	
-  	srand ( time(NULL) );
-	
-	for(int i = 0; i < 10; i++)
-	{
-		numphotons = rand() % 7 + 5;
-		
-		for(int j = 0; j < numphotons; j++)
-		{
-			int detector, channel;
-			detector = rand() % 7 + 1;
-			channel = rand() % 128 + 1;
-			
-			tm=localtime(&tv.tv_sec);
-			gettimeofday(&tv, &tz);
-			
-			museconds = tv.tv_usec;
-			seconds = tv.tv_sec;
-			
-			cout << "museconds--" << seconds+museconds/1e6 << endl;
-			listofPhotons->Add(channel,seconds+museconds/1e6,2, 0, 0, 0);
-		}
-		
-		//cout << "---Data Rate---" << getRate() << endl;
-		
-	}
-	Properties();
-	
-}
-*/
+ {
+ int	numphotons;
+ struct timeval tv;
+ struct timezone tz;
+ struct tm *tm;
+ double museconds;
+ double seconds;
+ 
+ gettimeofday(&tv, &tz);
+ tm=localtime(&tv.tv_sec);
+ 
+ museconds = tv.tv_usec;
+ 
+ srand ( time(NULL) );
+ 
+ for(int i = 0; i < 10; i++)
+ {
+ numphotons = rand() % 7 + 5;
+ 
+ for(int j = 0; j < numphotons; j++)
+ {
+ int detector, channel;
+ detector = rand() % 7 + 1;
+ channel = rand() % 128 + 1;
+ 
+ tm=localtime(&tv.tv_sec);
+ gettimeofday(&tv, &tz);
+ 
+ museconds = tv.tv_usec;
+ seconds = tv.tv_sec;
+ 
+ cout << "museconds--" << seconds+museconds/1e6 << endl;
+ listofPhotons->Add(channel,seconds+museconds/1e6,2, 0, 0, 0);
+ }
+ 
+ //cout << "---Data Rate---" << getRate() << endl;
+ 
+ }
+ Properties();
+ 
+ }
+ */
 
 float Foxsidata::getImage(void)
 {
@@ -247,7 +247,7 @@ void Foxsidata::readDatafile(char* filename)
 	result = fread (ASICfile_wordbuffer,1,fileSize,file);
 	if (result != fileSize) {fputs ("Reading error",stderr); exit (3);}  
 	
-
+	
 	currentFrame = 0;
 	currentPosition = 0;
 	//clear out the variables	
@@ -258,7 +258,7 @@ void Foxsidata::readDatafile(char* filename)
 	cout << "Filesize : " << fileSize << endl;
 	cout << "Current Frame : " << currentFrame << " : current position : " << currentPosition << endl;
 	gui->framenumOutput->value(currentFrame);
-
+	
 }
 
 void Foxsidata::nextFrame()
@@ -291,10 +291,10 @@ void Foxsidata::parseBuffer()
 	//char text[8];
 	unsigned int xmask;
 	unsigned int ymask;	
-
+	
 	//STRIP_DATA strip;
 	strip_data strip;
-
+	
 	//check for data sync, if synced light the sync button and read the frame
 	if ((ASICfile_wordbuffer[0 + currentPosition] == 0xeb90) && (ASICfile_wordbuffer[1 + currentPosition] == 0xeb90))
 	{gui->syncLightBut->value(1);} 
@@ -304,14 +304,14 @@ void Foxsidata::parseBuffer()
 		gui->syncLightBut->value(0); 
 		syncBuffer();
 	}
-
+	
 	cout << "Beginning of frame at position " << currentPosition << endl;
 	cout << "Parsing..." << endl;
 	
 	current_ASICframe.sync1 = ASICfile_wordbuffer[currentPosition + 0 ];
 	current_ASICframe.sync2 = ASICfile_wordbuffer[currentPosition + 1];
 	current_ASICframe.det_time = ASICfile_wordbuffer[currentPosition + 2];
-
+	
 	gui->frameTime->value(current_ASICframe.det_time);
 	
 	//asic data
@@ -320,7 +320,7 @@ void Foxsidata::parseBuffer()
 		current_ASICframe.adata[i].chip_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 3 + currentPosition];
 		current_ASICframe.adata[i].trig_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 4 + currentPosition];
 		current_ASICframe.adata[i].seu_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 5 + currentPosition];
-				
+		
 		current_ASICframe.adata[i].asic_mask0 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 6 + currentPosition];
 		current_ASICframe.adata[i].asic_mask1 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 7 + currentPosition];
 		current_ASICframe.adata[i].asic_mask2 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 8 + currentPosition];
@@ -383,7 +383,7 @@ void Foxsidata::parseBuffer()
 	}
 	
 	currentPosition = ASIC_FRAMESIZE*(NUM_ASICS-1) + 11 + NUM_STRIPS + currentPosition;
-
+	
 	//done loading the one frame
 	//printFrame();
 	cout << "End of frame at position " << currentPosition << endl;

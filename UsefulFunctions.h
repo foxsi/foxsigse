@@ -31,5 +31,7 @@ unsigned getbits(unsigned x, int p, int n);
 //reverses bit order in an unsigned.
 unsigned reversebits(unsigned x, int n);
 
+//// test pointer function for threading
+//void *do_some_work(void *variable);
 
 #endif

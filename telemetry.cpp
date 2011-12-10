@@ -10,7 +10,7 @@
 #include "telemetry.h"
 #include "math.h"
 
-float telemetry_ysi44031_convert_temperature(int value)
+float temperature_convert_ysi44031(int value)
 {
 	// Take the reading of A/D Voltage from the YSI 44031 temperature
 	// sensor and convert to a temperature (in Celsius).
@@ -39,22 +39,4 @@ float telemetry_ysi44031_convert_temperature(int value)
 	temperature = 1 / (c1 + c2 * log(resistance) + c3 * (pow(log(resistance),3))) - 273.15 - 9.73;
 	printf("%f\n", temperature);
 	return temperature;
-}
-
-float telemetry_hvvalue_convert_voltage(int value)
-{
-	// Take the reading of the HV value and convert it to an actual voltage
-	// 256 is 31 V
-	// 1000 hv_value is 125 volts
-	// 2000 is 250 volts
-	
-	return (float) value/8.0;
-}
-
-int telemetry_voltage_convert_hvvalue(float value)
-{
-	// Take an actual voltage value and convert it to an HV value to send
-	// as a command
-	
-	return (int) value*8;
 }

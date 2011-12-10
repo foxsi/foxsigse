@@ -21,6 +21,8 @@
 #include <FL/Fl_Choice.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
+#include <FL/Fl_Value_Slider.H>
+#include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_File_Input.H>
 
@@ -107,6 +109,10 @@ public:
   Fl_Value_Output *noiseValOut2;
   Fl_Value_Output *noiseValOut3;
   Fl_Value_Output *framenumOutput;
+private:
+  void cb_reset_i(Fl_Button*, void*);
+  static void cb_reset(Fl_Button*, void*);
+public:
   Fl_Output *pixelNum;
   Fl_Output *pixelCounts;
   Fl_Light_Button *subImageLockbut;
@@ -146,13 +152,6 @@ private:
   void cb_writeFileBut_i(Fl_Light_Button*, void*);
   static void cb_writeFileBut(Fl_Light_Button*, void*);
 public:
-  Fl_Value_Input *nEventsDone;
-private:
-  void cb_BREAK_i(Fl_Button*, void*);
-  static void cb_BREAK(Fl_Button*, void*);
-  void cb_CLEAR_i(Fl_Button*, void*);
-  static void cb_CLEAR(Fl_Button*, void*);
-public:
   Fl_Button *stopReadingDataButton;
 private:
   void cb_stopReadingDataButton_i(Fl_Button*, void*);
@@ -160,8 +159,27 @@ private:
   void cb_Clear_i(Fl_Button*, void*);
   static void cb_Clear(Fl_Button*, void*);
 public:
+  Fl_Button *setHoldBut;
+private:
+  void cb_setHoldBut_i(Fl_Button*, void*);
+  static void cb_setHoldBut(Fl_Button*, void*);
+public:
+  Fl_Button *setTrigBut;
+private:
+  void cb_setTrigBut_i(Fl_Button*, void*);
+  static void cb_setTrigBut(Fl_Button*, void*);
+public:
   Fl_Value_Output *testOutput;
-  Fl_Value_Output *HVOutput;
+  Fl_Value_Output *nEventsDone;
+  Fl_Button *mainImageMin_setBut;
+  Fl_Value_Slider *mainImageMin_slider;
+  Fl_Check_Button *detector1_checkbox;
+  Fl_Check_Button *detector2_checkbox;
+  Fl_Check_Button *detector3_checkbox;
+  Fl_Check_Button *detector4_checkbox;
+  Fl_Check_Button *detector5_checkbox;
+  Fl_Check_Button *detector6_checkbox;
+  Fl_Check_Button *detector7_checkbox;
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:
@@ -176,28 +194,71 @@ public:
 private:
   void cb_sendParamsWindow_asic_i(Fl_Value_Input*, void*);
   static void cb_sendParamsWindow_asic(Fl_Value_Input*, void*);
-public:
-  Fl_Value_Input *sendParamsWindow_holdTime;
-private:
-  void cb_Set_i(Fl_Button*, void*);
-  static void cb_Set(Fl_Button*, void*);
   void cb_set_i(Fl_Button*, void*);
   static void cb_set(Fl_Button*, void*);
   void cb_clear_i(Fl_Button*, void*);
   static void cb_clear(Fl_Button*, void*);
 public:
+  Fl_Light_Button *sendParamsWindow_test[64];
+private:
+  void cb_set1_i(Fl_Button*, void*);
+  static void cb_set1(Fl_Button*, void*);
+  void cb_clear1_i(Fl_Button*, void*);
+  static void cb_clear1(Fl_Button*, void*);
+public:
+  Fl_Double_Window *setHoldTimeWindow;
+  Fl_Value_Input *setHoldTimeWindow_holdTime;
+  Fl_Button *setHoldTimeWindow_setBut;
+private:
+  void cb_setHoldTimeWindow_setBut_i(Fl_Button*, void*);
+  static void cb_setHoldTimeWindow_setBut(Fl_Button*, void*);
+public:
+  Fl_Button *setHoldTimeWindow_autorunBut;
+private:
+  void cb_setHoldTimeWindow_autorunBut_i(Fl_Button*, void*);
+  static void cb_setHoldTimeWindow_autorunBut(Fl_Button*, void*);
+  void cb_Close1_i(Fl_Button*, void*);
+  static void cb_Close1(Fl_Button*, void*);
+public:
+  Fl_Double_Window *setTrigWindow;
+  Fl_Value_Input *setTrigWindow_delayTime;
+  Fl_Value_Input *setTrigWindow_timeoutTime;
+private:
+  void cb_Close2_i(Fl_Button*, void*);
+  static void cb_Close2(Fl_Button*, void*);
+public:
+  Fl_Button *setTrigWindow_setDelay;
+private:
+  void cb_setTrigWindow_setDelay_i(Fl_Button*, void*);
+  static void cb_setTrigWindow_setDelay(Fl_Button*, void*);
+public:
+  Fl_Button *setTrigWindow_setTimeout;
+private:
+  void cb_setTrigWindow_setTimeout_i(Fl_Button*, void*);
+  static void cb_setTrigWindow_setTimeout(Fl_Button*, void*);
+public:
+  Fl_Value_Input *setTrigWindow_useTimeout;
+private:
+  void cb_setTrigWindow_useTimeout_i(Fl_Value_Input*, void*);
+  static void cb_setTrigWindow_useTimeout(Fl_Value_Input*, void*);
+public:
+  Fl_Button *setTrigWindow_setTrigMode;
+private:
+  void cb_setTrigWindow_setTrigMode_i(Fl_Button*, void*);
+  static void cb_setTrigWindow_setTrigMode(Fl_Button*, void*);
+public:
   Fl_Double_Window *sendCommandsWindow;
 private:
   void cb_Send_i(Fl_Button*, void*);
   static void cb_Send(Fl_Button*, void*);
-  void cb_Close1_i(Fl_Button*, void*);
-  static void cb_Close1(Fl_Button*, void*);
+  void cb_Close3_i(Fl_Button*, void*);
+  static void cb_Close3(Fl_Button*, void*);
   void cb_Send1_i(Fl_Button*, void*);
   static void cb_Send1(Fl_Button*, void*);
-  void cb_Send2_i(Fl_Button*, void*);
-  static void cb_Send2(Fl_Button*, void*);
-  void cb_Send3_i(Fl_Button*, void*);
-  static void cb_Send3(Fl_Button*, void*);
+  void cb_Strobe_i(Fl_Button*, void*);
+  static void cb_Strobe(Fl_Button*, void*);
+  void cb_Strobe1_i(Fl_Button*, void*);
+  static void cb_Strobe1(Fl_Button*, void*);
 public:
   Fl_Value_Input *highVoltage_input;
   Fl_Value_Input *clockLow_input;

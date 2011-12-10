@@ -95,6 +95,13 @@ void Gui::cb_printFrame(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_printFrame_i(o,v);
 }
 
+void Gui::cb_reset_i(Fl_Button*, void*) {
+  app->reset_read_counter();
+}
+void Gui::cb_reset(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_reset_i(o,v);
+}
+
 Fl_Menu_Item Gui::menu_Detector[] = {
  {"All", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Detector 1", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -138,20 +145,6 @@ void Gui::cb_writeFileBut(Fl_Light_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_writeFileBut_i(o,v);
 }
 
-void Gui::cb_BREAK_i(Fl_Button*, void*) {
-  app->break_acq(193);
-}
-void Gui::cb_BREAK(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_BREAK_i(o,v);
-}
-
-void Gui::cb_CLEAR_i(Fl_Button*, void*) {
-  app->break_acq(192);
-}
-void Gui::cb_CLEAR(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_CLEAR_i(o,v);
-}
-
 void Gui::cb_stopReadingDataButton_i(Fl_Button*, void*) {
   app->stop_reading_data();
 }
@@ -164,6 +157,20 @@ void Gui::cb_Clear_i(Fl_Button*, void*) {
 }
 void Gui::cb_Clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Clear_i(o,v);
+}
+
+void Gui::cb_setHoldBut_i(Fl_Button*, void*) {
+  app->openSetHoldTimeWindow();
+}
+void Gui::cb_setHoldBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setHoldBut_i(o,v);
+}
+
+void Gui::cb_setTrigBut_i(Fl_Button*, void*) {
+  app->openSetTrigWindow();
+}
+void Gui::cb_setTrigBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigBut_i(o,v);
 }
 
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
@@ -189,13 +196,6 @@ void Gui::cb_sendParamsWindow_asic(Fl_Value_Input* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_sendParamsWindow_asic_i(o,v);
 }
 
-void Gui::cb_Set_i(Fl_Button*, void*) {
-  app->send_global_params();
-}
-void Gui::cb_Set(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Set_i(o,v);
-}
-
 void Gui::cb_set_i(Fl_Button*, void*) {
   for(int i=0; i<64; i++) 
   sendParamsWindow_chan[i]->set();
@@ -212,6 +212,84 @@ void Gui::cb_clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_clear_i(o,v);
 }
 
+void Gui::cb_set1_i(Fl_Button*, void*) {
+  for(int i=0; i<64; i++) 
+  sendParamsWindow_test[i]->set();
+}
+void Gui::cb_set1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_set1_i(o,v);
+}
+
+void Gui::cb_clear1_i(Fl_Button*, void*) {
+  for(int i=0; i<64; i++) 
+  sendParamsWindow_test[i]->clear();
+}
+void Gui::cb_clear1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_clear1_i(o,v);
+}
+
+void Gui::cb_setHoldTimeWindow_setBut_i(Fl_Button*, void*) {
+  app->send_global_params(0);
+}
+void Gui::cb_setHoldTimeWindow_setBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setHoldTimeWindow_setBut_i(o,v);
+}
+
+void Gui::cb_setHoldTimeWindow_autorunBut_i(Fl_Button*, void*) {
+  app->start_auto_run();
+}
+void Gui::cb_setHoldTimeWindow_autorunBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setHoldTimeWindow_autorunBut_i(o,v);
+}
+
+void Gui::cb_Close1_i(Fl_Button*, void*) {
+  setHoldTimeWindow->hide();
+}
+void Gui::cb_Close1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Close1_i(o,v);
+}
+
+void Gui::cb_Close2_i(Fl_Button*, void*) {
+  setTrigWindow->hide();
+}
+void Gui::cb_Close2(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Close2_i(o,v);
+}
+
+void Gui::cb_setTrigWindow_setDelay_i(Fl_Button*, void*) {
+  app->send_global_params(3);
+}
+void Gui::cb_setTrigWindow_setDelay(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigWindow_setDelay_i(o,v);
+}
+
+void Gui::cb_setTrigWindow_setTimeout_i(Fl_Button*, void*) {
+  app->send_global_params(1);
+}
+void Gui::cb_setTrigWindow_setTimeout(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigWindow_setTimeout_i(o,v);
+}
+
+void Gui::cb_setTrigWindow_useTimeout_i(Fl_Value_Input*, void*) {
+  if(setTrigWindow_useTimeout->value()){
+		setTrigWindow_setTimeout->activate();
+		setTrigWindow_timeoutTime->activate();
+		} else{
+		setTrigWindow_setTimeout->deactivate();
+		setTrigWindow_timeoutTime->deactivate();
+	  };
+}
+void Gui::cb_setTrigWindow_useTimeout(Fl_Value_Input* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigWindow_useTimeout_i(o,v);
+}
+
+void Gui::cb_setTrigWindow_setTrigMode_i(Fl_Button*, void*) {
+  app->send_global_params(2);
+}
+void Gui::cb_setTrigWindow_setTrigMode(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_setTrigWindow_setTrigMode_i(o,v);
+}
+
 void Gui::cb_Send_i(Fl_Button*, void*) {
   app->send_voltage_command();
 }
@@ -219,11 +297,11 @@ void Gui::cb_Send(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Send_i(o,v);
 }
 
-void Gui::cb_Close1_i(Fl_Button*, void*) {
+void Gui::cb_Close3_i(Fl_Button*, void*) {
   sendCommandsWindow->hide();
 }
-void Gui::cb_Close1(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Close1_i(o,v);
+void Gui::cb_Close3(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Close3_i(o,v);
 }
 
 void Gui::cb_Send1_i(Fl_Button*, void*) {
@@ -233,18 +311,18 @@ void Gui::cb_Send1(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Send1_i(o,v);
 }
 
-void Gui::cb_Send2_i(Fl_Button*, void*) {
+void Gui::cb_Strobe_i(Fl_Button*, void*) {
   app->send_atten_state(0);
 }
-void Gui::cb_Send2(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Send2_i(o,v);
+void Gui::cb_Strobe(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Strobe_i(o,v);
 }
 
-void Gui::cb_Send3_i(Fl_Button*, void*) {
+void Gui::cb_Strobe1_i(Fl_Button*, void*) {
   app->send_atten_state(1);
 }
-void Gui::cb_Send3(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Send3_i(o,v);
+void Gui::cb_Strobe1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Strobe1_i(o,v);
 }
 
 Fl_Menu_Item Gui::menu_fileTypeChoice[] = {
@@ -341,7 +419,7 @@ Gui::Gui() {
       } // Fl_Output* rateOutput6
       { rateOutput7 = new Fl_Output(760, 115, 45, 25);
       } // Fl_Output* rateOutput7
-      { shutterstateOutput = new Fl_Output(465, 65, 30, 25, "Shut state");
+      { shutterstateOutput = new Fl_Output(565, 65, 30, 25, "Shut state");
       } // Fl_Output* shutterstateOutput
       { TempOutput = new Fl_Output(375, 145, 30, 25, "Temp");
       } // Fl_Output* TempOutput
@@ -351,22 +429,22 @@ Gui::Gui() {
       } // Fl_Output* histCounts
       TopOutput->end();
     } // Fl_Group* TopOutput
-    { dataPlayback = new Fl_Group(630, 44, 599, 106);
+    { dataPlayback = new Fl_Group(420, 31, 809, 119);
       { nextFrameBut = new Fl_Button(745, 74, 80, 25, "Next Frame");
         nextFrameBut->callback((Fl_Callback*)cb_nextFrameBut);
       } // Fl_Button* nextFrameBut
       { prevFrameBut = new Fl_Button(630, 74, 110, 25, "Previous Frame");
         prevFrameBut->callback((Fl_Callback*)cb_prevFrameBut);
       } // Fl_Button* prevFrameBut
-      { syncLightBut = new Fl_Light_Button(835, 44, 70, 25, "Sync");
+      { syncLightBut = new Fl_Light_Button(835, 35, 70, 25, "Sync");
       } // Fl_Light_Button* syncLightBut
-      { flushBut = new Fl_Button(910, 44, 80, 25, "Flush");
+      { flushBut = new Fl_Button(910, 35, 80, 25, "Flush");
         flushBut->callback((Fl_Callback*)cb_flushBut);
       } // Fl_Button* flushBut
       { printFrame = new Fl_Button(830, 74, 80, 25, "Print Frame");
         printFrame->callback((Fl_Callback*)cb_printFrame);
       } // Fl_Button* printFrame
-      { frameTime = new Fl_Value_Output(793, 45, 33, 24, "frame time");
+      { frameTime = new Fl_Value_Output(793, 36, 33, 24, "frame time");
       } // Fl_Value_Output* frameTime
       { Fl_Group* o = new Fl_Group(1080, 45, 148, 24);
         { chipbitValOut0 = new Fl_Value_Output(1080, 45, 33, 24, "Chip bit");
@@ -428,8 +506,11 @@ Gui::Gui() {
         } // Fl_Value_Output* noiseValOut3
         o->end();
       } // Fl_Group* o
-      { framenumOutput = new Fl_Value_Output(665, 46, 55, 24, "Frame #:");
+      { framenumOutput = new Fl_Value_Output(665, 36, 55, 24, "Frame #:");
       } // Fl_Value_Output* framenumOutput
+      { Fl_Button* o = new Fl_Button(420, 65, 55, 25, "reset");
+        o->callback((Fl_Callback*)cb_reset);
+      } // Fl_Button* o
       dataPlayback->end();
     } // Fl_Group* dataPlayback
     { pixelNum = new Fl_Output(445, 495, 80, 25, "Pixel");
@@ -483,25 +564,16 @@ Gui::Gui() {
     } // mainLightcurve* mainLightcurveWindow
     { glitchBut = new Fl_Light_Button(90, 100, 75, 25, "Glitch");
     } // Fl_Light_Button* glitchBut
-    { sendParamsBut = new Fl_Button(190, 95, 100, 25, "Send Params");
+    { sendParamsBut = new Fl_Button(83, 140, 100, 25, "Send Params");
       sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
     } // Fl_Button* sendParamsBut
-    { testBut = new Fl_Button(15, 276, 75, 25, "Test");
+    { testBut = new Fl_Button(825, 195, 75, 25, "Test");
     } // Fl_Button* testBut
     { nEvents = new Fl_Value_Input(345, 35, 40, 24, "events");
     } // Fl_Value_Input* nEvents
-    { writeFileBut = new Fl_Light_Button(15, 160, 95, 25, "Write to file");
+    { writeFileBut = new Fl_Light_Button(85, 210, 95, 25, "Write to file");
       writeFileBut->callback((Fl_Callback*)cb_writeFileBut);
     } // Fl_Light_Button* writeFileBut
-    { nEventsDone = new Fl_Value_Input(345, 66, 40, 24, "counter");
-      nEventsDone->value(1);
-    } // Fl_Value_Input* nEventsDone
-    { Fl_Button* o = new Fl_Button(320, 245, 63, 20, "BREAK");
-      o->callback((Fl_Callback*)cb_BREAK);
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(320, 270, 63, 20, "CLEAR");
-      o->callback((Fl_Callback*)cb_CLEAR);
-    } // Fl_Button* o
     { stopReadingDataButton = new Fl_Button(455, 35, 75, 25, "Stop");
       stopReadingDataButton->labelcolor((Fl_Color)1);
       stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
@@ -511,10 +583,52 @@ Gui::Gui() {
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Clear);
     } // Fl_Button* o
-    { testOutput = new Fl_Value_Output(135, 276, 77, 24, "value:");
+    { setHoldBut = new Fl_Button(85, 175, 100, 25, "Set Hold Time");
+      setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
+    } // Fl_Button* setHoldBut
+    { setTrigBut = new Fl_Button(198, 175, 125, 25, "Set Trigger Options");
+      setTrigBut->callback((Fl_Callback*)cb_setTrigBut);
+    } // Fl_Button* setTrigBut
+    { testOutput = new Fl_Value_Output(825, 166, 77, 24, "value:");
     } // Fl_Value_Output* testOutput
-    { HVOutput = new Fl_Value_Output(940, 186, 65, 24, "HV");
-    } // Fl_Value_Output* HVOutput
+    { nEventsDone = new Fl_Value_Output(380, 66, 35, 24, "read counter:");
+    } // Fl_Value_Output* nEventsDone
+    { mainImageMin_setBut = new Fl_Button(465, 560, 45, 25, "set");
+      app->set_mainImage_min();
+    } // Fl_Button* mainImageMin_setBut
+    { mainImageMin_slider = new Fl_Value_Slider(420, 560, 40, 145, "min:");
+      mainImageMin_slider->maximum(1024);
+      mainImageMin_slider->step(1);
+      mainImageMin_slider->value(1);
+      mainImageMin_slider->textsize(14);
+      mainImageMin_slider->align(Fl_Align(290));
+    } // Fl_Value_Slider* mainImageMin_slider
+    { Fl_Group* o = new Fl_Group(155, 270, 220, 30, "Detectors to display");
+      o->box(FL_DOWN_BOX);
+      o->align(Fl_Align(FL_ALIGN_LEFT));
+      { detector1_checkbox = new Fl_Check_Button(160, 270, 35, 30, "1");
+        detector1_checkbox->down_box(FL_DOWN_BOX);
+      } // Fl_Check_Button* detector1_checkbox
+      { detector2_checkbox = new Fl_Check_Button(190, 270, 35, 30, "2");
+        detector2_checkbox->down_box(FL_DOWN_BOX);
+      } // Fl_Check_Button* detector2_checkbox
+      { detector3_checkbox = new Fl_Check_Button(220, 270, 35, 30, "3");
+        detector3_checkbox->down_box(FL_DOWN_BOX);
+      } // Fl_Check_Button* detector3_checkbox
+      { detector4_checkbox = new Fl_Check_Button(250, 270, 35, 30, "4");
+        detector4_checkbox->down_box(FL_DOWN_BOX);
+      } // Fl_Check_Button* detector4_checkbox
+      { detector5_checkbox = new Fl_Check_Button(280, 270, 35, 30, "5");
+        detector5_checkbox->down_box(FL_DOWN_BOX);
+      } // Fl_Check_Button* detector5_checkbox
+      { detector6_checkbox = new Fl_Check_Button(310, 270, 35, 30, "6");
+        detector6_checkbox->down_box(FL_DOWN_BOX);
+      } // Fl_Check_Button* detector6_checkbox
+      { detector7_checkbox = new Fl_Check_Button(340, 270, 35, 30, "7");
+        detector7_checkbox->down_box(FL_DOWN_BOX);
+      } // Fl_Check_Button* detector7_checkbox
+      o->end();
+    } // Fl_Group* o
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow
@@ -524,7 +638,7 @@ Gui::Gui() {
   buff=new Fl_Text_Buffer();
   consoleBuf->buffer(buff);
   prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");
-  { sendParamsWindow = new Fl_Double_Window(780, 531, "Send Parameters");
+  { sendParamsWindow = new Fl_Double_Window(1053, 524, "Send Parameters");
     sendParamsWindow->user_data((void*)(this));
     { sendParamsWindow_sendBut = new Fl_Button(415, 425, 70, 25, "Send");
       sendParamsWindow_sendBut->value(1);
@@ -845,19 +959,199 @@ Gui::Gui() {
       sendParamsWindow_asic->step(1);
       sendParamsWindow_asic->callback((Fl_Callback*)cb_sendParamsWindow_asic);
     } // Fl_Value_Input* sendParamsWindow_asic
-    { sendParamsWindow_holdTime = new Fl_Value_Input(205, 491, 35, 24, "Hold time setting (all ASICs)::");
-    } // Fl_Value_Input* sendParamsWindow_holdTime
-    { Fl_Button* o = new Fl_Button(249, 492, 63, 20, "Set");
-      o->callback((Fl_Callback*)cb_Set);
-    } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(555, 455, 63, 20, "set all");
       o->callback((Fl_Callback*)cb_set);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(619, 455, 63, 20, "clear all");
       o->callback((Fl_Callback*)cb_clear);
     } // Fl_Button* o
+    { Fl_Text_Display* o = new Fl_Text_Display(705, 5, 15, 20, "Channel disable");
+      o->align(Fl_Align(FL_ALIGN_LEFT));
+    } // Fl_Text_Display* o
+    { sendParamsWindow_test[0] = new Fl_Light_Button(790, 36, 67, 20, "0");
+    } // Fl_Light_Button* sendParamsWindow_test[0]
+    { sendParamsWindow_test[1] = new Fl_Light_Button(790, 56, 67, 20, "1");
+    } // Fl_Light_Button* sendParamsWindow_test[1]
+    { sendParamsWindow_test[2] = new Fl_Light_Button(790, 76, 67, 20, "2");
+    } // Fl_Light_Button* sendParamsWindow_test[2]
+    { sendParamsWindow_test[3] = new Fl_Light_Button(790, 96, 67, 20, "3");
+    } // Fl_Light_Button* sendParamsWindow_test[3]
+    { sendParamsWindow_test[4] = new Fl_Light_Button(790, 116, 67, 20, "4");
+    } // Fl_Light_Button* sendParamsWindow_test[4]
+    { sendParamsWindow_test[5] = new Fl_Light_Button(790, 136, 67, 20, "5");
+    } // Fl_Light_Button* sendParamsWindow_test[5]
+    { sendParamsWindow_test[6] = new Fl_Light_Button(790, 156, 67, 20, "6");
+    } // Fl_Light_Button* sendParamsWindow_test[6]
+    { sendParamsWindow_test[7] = new Fl_Light_Button(790, 176, 67, 20, "7");
+    } // Fl_Light_Button* sendParamsWindow_test[7]
+    { sendParamsWindow_test[8] = new Fl_Light_Button(790, 196, 67, 20, "8");
+    } // Fl_Light_Button* sendParamsWindow_test[8]
+    { sendParamsWindow_test[9] = new Fl_Light_Button(790, 216, 67, 20, "9");
+    } // Fl_Light_Button* sendParamsWindow_test[9]
+    { sendParamsWindow_test[10] = new Fl_Light_Button(790, 236, 67, 20, "10");
+    } // Fl_Light_Button* sendParamsWindow_test[10]
+    { sendParamsWindow_test[11] = new Fl_Light_Button(790, 256, 67, 20, "11");
+    } // Fl_Light_Button* sendParamsWindow_test[11]
+    { sendParamsWindow_test[12] = new Fl_Light_Button(790, 276, 67, 20, "12");
+    } // Fl_Light_Button* sendParamsWindow_test[12]
+    { sendParamsWindow_test[13] = new Fl_Light_Button(790, 296, 67, 20, "13");
+    } // Fl_Light_Button* sendParamsWindow_test[13]
+    { sendParamsWindow_test[14] = new Fl_Light_Button(790, 316, 67, 20, "14");
+    } // Fl_Light_Button* sendParamsWindow_test[14]
+    { sendParamsWindow_test[15] = new Fl_Light_Button(790, 336, 67, 20, "15");
+    } // Fl_Light_Button* sendParamsWindow_test[15]
+    { sendParamsWindow_test[16] = new Fl_Light_Button(790, 356, 67, 20, "16");
+    } // Fl_Light_Button* sendParamsWindow_test[16]
+    { sendParamsWindow_test[17] = new Fl_Light_Button(790, 376, 67, 20, "17");
+    } // Fl_Light_Button* sendParamsWindow_test[17]
+    { sendParamsWindow_test[18] = new Fl_Light_Button(790, 396, 67, 20, "18");
+    } // Fl_Light_Button* sendParamsWindow_test[18]
+    { sendParamsWindow_test[19] = new Fl_Light_Button(790, 416, 67, 20, "19");
+    } // Fl_Light_Button* sendParamsWindow_test[19]
+    { sendParamsWindow_test[20] = new Fl_Light_Button(790, 436, 67, 20, "20");
+    } // Fl_Light_Button* sendParamsWindow_test[20]
+    { sendParamsWindow_test[21] = new Fl_Light_Button(855, 36, 67, 20, "21");
+    } // Fl_Light_Button* sendParamsWindow_test[21]
+    { sendParamsWindow_test[22] = new Fl_Light_Button(855, 56, 67, 20, "22");
+    } // Fl_Light_Button* sendParamsWindow_test[22]
+    { sendParamsWindow_test[23] = new Fl_Light_Button(855, 76, 67, 20, "23");
+    } // Fl_Light_Button* sendParamsWindow_test[23]
+    { sendParamsWindow_test[24] = new Fl_Light_Button(855, 96, 67, 20, "24");
+    } // Fl_Light_Button* sendParamsWindow_test[24]
+    { sendParamsWindow_test[25] = new Fl_Light_Button(855, 116, 67, 20, "25");
+    } // Fl_Light_Button* sendParamsWindow_test[25]
+    { sendParamsWindow_test[26] = new Fl_Light_Button(855, 136, 67, 20, "26");
+    } // Fl_Light_Button* sendParamsWindow_test[26]
+    { sendParamsWindow_test[27] = new Fl_Light_Button(855, 156, 67, 20, "27");
+    } // Fl_Light_Button* sendParamsWindow_test[27]
+    { sendParamsWindow_test[28] = new Fl_Light_Button(855, 176, 67, 20, "28");
+    } // Fl_Light_Button* sendParamsWindow_test[28]
+    { sendParamsWindow_test[29] = new Fl_Light_Button(855, 196, 67, 20, "29");
+    } // Fl_Light_Button* sendParamsWindow_test[29]
+    { sendParamsWindow_test[30] = new Fl_Light_Button(855, 216, 67, 20, "30");
+    } // Fl_Light_Button* sendParamsWindow_test[30]
+    { sendParamsWindow_test[31] = new Fl_Light_Button(855, 236, 67, 20, "31");
+    } // Fl_Light_Button* sendParamsWindow_test[31]
+    { sendParamsWindow_test[32] = new Fl_Light_Button(855, 256, 67, 20, "32");
+    } // Fl_Light_Button* sendParamsWindow_test[32]
+    { sendParamsWindow_test[33] = new Fl_Light_Button(855, 276, 67, 20, "33");
+    } // Fl_Light_Button* sendParamsWindow_test[33]
+    { sendParamsWindow_test[34] = new Fl_Light_Button(855, 296, 67, 20, "34");
+    } // Fl_Light_Button* sendParamsWindow_test[34]
+    { sendParamsWindow_test[35] = new Fl_Light_Button(855, 316, 67, 20, "35");
+    } // Fl_Light_Button* sendParamsWindow_test[35]
+    { sendParamsWindow_test[36] = new Fl_Light_Button(855, 336, 67, 20, "36");
+    } // Fl_Light_Button* sendParamsWindow_test[36]
+    { sendParamsWindow_test[37] = new Fl_Light_Button(855, 356, 67, 20, "37");
+    } // Fl_Light_Button* sendParamsWindow_test[37]
+    { sendParamsWindow_test[38] = new Fl_Light_Button(855, 376, 67, 20, "38");
+    } // Fl_Light_Button* sendParamsWindow_test[38]
+    { sendParamsWindow_test[39] = new Fl_Light_Button(855, 396, 67, 20, "39");
+    } // Fl_Light_Button* sendParamsWindow_test[39]
+    { sendParamsWindow_test[40] = new Fl_Light_Button(855, 416, 67, 20, "40");
+    } // Fl_Light_Button* sendParamsWindow_test[40]
+    { sendParamsWindow_test[41] = new Fl_Light_Button(855, 436, 67, 20, "41");
+    } // Fl_Light_Button* sendParamsWindow_test[41]
+    { sendParamsWindow_test[42] = new Fl_Light_Button(920, 36, 67, 20, "42");
+    } // Fl_Light_Button* sendParamsWindow_test[42]
+    { sendParamsWindow_test[43] = new Fl_Light_Button(920, 56, 67, 20, "43");
+    } // Fl_Light_Button* sendParamsWindow_test[43]
+    { sendParamsWindow_test[44] = new Fl_Light_Button(920, 76, 67, 20, "44");
+    } // Fl_Light_Button* sendParamsWindow_test[44]
+    { sendParamsWindow_test[45] = new Fl_Light_Button(920, 96, 67, 20, "45");
+    } // Fl_Light_Button* sendParamsWindow_test[45]
+    { sendParamsWindow_test[46] = new Fl_Light_Button(920, 116, 67, 20, "46");
+    } // Fl_Light_Button* sendParamsWindow_test[46]
+    { sendParamsWindow_test[47] = new Fl_Light_Button(920, 136, 67, 20, "47");
+    } // Fl_Light_Button* sendParamsWindow_test[47]
+    { sendParamsWindow_test[48] = new Fl_Light_Button(920, 156, 67, 20, "48");
+    } // Fl_Light_Button* sendParamsWindow_test[48]
+    { sendParamsWindow_test[49] = new Fl_Light_Button(920, 176, 67, 20, "49");
+    } // Fl_Light_Button* sendParamsWindow_test[49]
+    { sendParamsWindow_test[50] = new Fl_Light_Button(920, 196, 67, 20, "50");
+    } // Fl_Light_Button* sendParamsWindow_test[50]
+    { sendParamsWindow_test[51] = new Fl_Light_Button(920, 216, 67, 20, "51");
+    } // Fl_Light_Button* sendParamsWindow_test[51]
+    { sendParamsWindow_test[52] = new Fl_Light_Button(920, 236, 67, 20, "52");
+    } // Fl_Light_Button* sendParamsWindow_test[52]
+    { sendParamsWindow_test[53] = new Fl_Light_Button(920, 256, 67, 20, "53");
+    } // Fl_Light_Button* sendParamsWindow_test[53]
+    { sendParamsWindow_test[54] = new Fl_Light_Button(920, 276, 67, 20, "54");
+    } // Fl_Light_Button* sendParamsWindow_test[54]
+    { sendParamsWindow_test[55] = new Fl_Light_Button(920, 296, 67, 20, "55");
+    } // Fl_Light_Button* sendParamsWindow_test[55]
+    { sendParamsWindow_test[56] = new Fl_Light_Button(920, 316, 67, 20, "56");
+    } // Fl_Light_Button* sendParamsWindow_test[56]
+    { sendParamsWindow_test[57] = new Fl_Light_Button(920, 336, 67, 20, "57");
+    } // Fl_Light_Button* sendParamsWindow_test[57]
+    { sendParamsWindow_test[58] = new Fl_Light_Button(920, 356, 67, 20, "58");
+    } // Fl_Light_Button* sendParamsWindow_test[58]
+    { sendParamsWindow_test[59] = new Fl_Light_Button(920, 376, 67, 20, "59");
+    } // Fl_Light_Button* sendParamsWindow_test[59]
+    { sendParamsWindow_test[60] = new Fl_Light_Button(920, 396, 67, 20, "60");
+    } // Fl_Light_Button* sendParamsWindow_test[60]
+    { sendParamsWindow_test[61] = new Fl_Light_Button(920, 416, 67, 20, "61");
+    } // Fl_Light_Button* sendParamsWindow_test[61]
+    { sendParamsWindow_test[62] = new Fl_Light_Button(920, 436, 67, 20, "62");
+    } // Fl_Light_Button* sendParamsWindow_test[62]
+    { sendParamsWindow_test[63] = new Fl_Light_Button(920, 456, 67, 20, "63");
+    } // Fl_Light_Button* sendParamsWindow_test[63]
+    { Fl_Button* o = new Fl_Button(790, 456, 63, 20, "set all");
+      o->callback((Fl_Callback*)cb_set1);
+    } // Fl_Button* o
+    { Fl_Button* o = new Fl_Button(854, 456, 63, 20, "clear all");
+      o->callback((Fl_Callback*)cb_clear1);
+    } // Fl_Button* o
+    { Fl_Text_Display* o = new Fl_Text_Display(940, 6, 15, 20, "Test enable");
+      o->align(Fl_Align(FL_ALIGN_LEFT));
+    } // Fl_Text_Display* o
     sendParamsWindow->end();
   } // Fl_Double_Window* sendParamsWindow
+  { setHoldTimeWindow = new Fl_Double_Window(312, 165, "Set hold time and take data");
+    setHoldTimeWindow->user_data((void*)(this));
+    { setHoldTimeWindow_holdTime = new Fl_Value_Input(235, 15, 25, 25, "Hold time setting (all ASICs)::");
+    } // Fl_Value_Input* setHoldTimeWindow_holdTime
+    { setHoldTimeWindow_setBut = new Fl_Button(70, 65, 80, 25, "Set");
+      setHoldTimeWindow_setBut->callback((Fl_Callback*)cb_setHoldTimeWindow_setBut);
+    } // Fl_Button* setHoldTimeWindow_setBut
+    { setHoldTimeWindow_autorunBut = new Fl_Button(175, 65, 80, 25, "Autorun");
+      setHoldTimeWindow_autorunBut->callback((Fl_Callback*)cb_setHoldTimeWindow_autorunBut);
+    } // Fl_Button* setHoldTimeWindow_autorunBut
+    { Fl_Button* o = new Fl_Button(125, 115, 80, 25, "Close");
+      o->callback((Fl_Callback*)cb_Close1);
+      o->deactivate();
+    } // Fl_Button* o
+    setHoldTimeWindow->end();
+  } // Fl_Double_Window* setHoldTimeWindow
+  { setTrigWindow = new Fl_Double_Window(357, 203, "Trigger Options");
+    setTrigWindow->user_data((void*)(this));
+    { setTrigWindow_delayTime = new Fl_Value_Input(210, 16, 25, 24, "Trigger delay (units of 3.2 us)");
+      setTrigWindow_delayTime->value(3);
+    } // Fl_Value_Input* setTrigWindow_delayTime
+    { setTrigWindow_timeoutTime = new Fl_Value_Input(211, 106, 25, 24, "Trigger timeout (units of 3.2 us)");
+      setTrigWindow_timeoutTime->value(31);
+      setTrigWindow_timeoutTime->deactivate();
+    } // Fl_Value_Input* setTrigWindow_timeoutTime
+    { Fl_Button* o = new Fl_Button(125, 155, 80, 25, "Close");
+      o->callback((Fl_Callback*)cb_Close2);
+      o->deactivate();
+    } // Fl_Button* o
+    { setTrigWindow_setDelay = new Fl_Button(255, 15, 80, 25, "Set");
+      setTrigWindow_setDelay->callback((Fl_Callback*)cb_setTrigWindow_setDelay);
+    } // Fl_Button* setTrigWindow_setDelay
+    { setTrigWindow_setTimeout = new Fl_Button(255, 105, 80, 25, "Set");
+      setTrigWindow_setTimeout->callback((Fl_Callback*)cb_setTrigWindow_setTimeout);
+      setTrigWindow_setTimeout->deactivate();
+    } // Fl_Button* setTrigWindow_setTimeout
+    { setTrigWindow_useTimeout = new Fl_Value_Input(211, 63, 25, 21, "Use timeout");
+      setTrigWindow_useTimeout->value(1);
+      setTrigWindow_useTimeout->callback((Fl_Callback*)cb_setTrigWindow_useTimeout);
+    } // Fl_Value_Input* setTrigWindow_useTimeout
+    { setTrigWindow_setTrigMode = new Fl_Button(255, 60, 80, 25, "Set");
+      setTrigWindow_setTrigMode->callback((Fl_Callback*)cb_setTrigWindow_setTrigMode);
+    } // Fl_Button* setTrigWindow_setTrigMode
+    setTrigWindow->end();
+  } // Fl_Double_Window* setTrigWindow
   { sendCommandsWindow = new Fl_Double_Window(364, 175, "Send Commands");
     sendCommandsWindow->user_data((void*)(this));
     { Fl_Button* o = new Fl_Button(265, 10, 70, 25, "Send");
@@ -866,24 +1160,24 @@ Gui::Gui() {
       o->callback((Fl_Callback*)cb_Send);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(265, 130, 70, 25, "Close");
-      o->callback((Fl_Callback*)cb_Close1);
+      o->callback((Fl_Callback*)cb_Close3);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(265, 70, 70, 25, "Send");
       o->value(1);
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Send1);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(70, 100, 180, 25, "Send Attenuator State 0");
+    { Fl_Button* o = new Fl_Button(70, 100, 180, 25, "Strobe Attenuator State 0");
       o->box(FL_THIN_UP_BOX);
       o->labelcolor((Fl_Color)1);
-      o->callback((Fl_Callback*)cb_Send2);
+      o->callback((Fl_Callback*)cb_Strobe);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(70, 130, 180, 25, "Send Attenuator State 1");
+    { Fl_Button* o = new Fl_Button(70, 130, 180, 25, "Strobe Attenuator State 1");
       o->box(FL_THIN_UP_BOX);
       o->labelcolor((Fl_Color)1);
-      o->callback((Fl_Callback*)cb_Send3);
+      o->callback((Fl_Callback*)cb_Strobe1);
     } // Fl_Button* o
-    { highVoltage_input = new Fl_Value_Input(175, 11, 75, 24, "HV Set (volts):");
+    { highVoltage_input = new Fl_Value_Input(175, 11, 75, 24, "HV Set (0-4095):");
     } // Fl_Value_Input* highVoltage_input
     { clockLow_input = new Fl_Value_Input(175, 40, 75, 24, "Clock Set Low:");
     } // Fl_Value_Input* clockLow_input

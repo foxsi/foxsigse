@@ -12,12 +12,11 @@
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <stdio.h>
+
 #include "gui.h"
 #include "usbd2xx.h"
-#include "telemetry.h"
-
-// for reading from the formatter board
-#include "okFrontPanelDLL.h"
+#include "Application.h"
 
 #define MAXPATH 128
 #define NUM_THREADS 8
@@ -28,11 +27,17 @@
 extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagetime[XSTRIPS][YSTRIPS];
+extern double detImagemask[XSTRIPS][YSTRIPS];
 
 // Note that an unsigned short int is 2 bytes
-#define FRAME_SIZE_IN_SHORTINTS 1024
-#define FRAME_SIZE_IN_BYTES 2048
-#define CONFIGURATION_FILE "/Users/schriste/Dropbox/foxsigse/gsesync.bit"
+// for formatter
+// #define FRAME_SIZE_IN_SHORTINTS 295
+// #define FRAME_SIZE_IN_BYTES 590
+
+// for ASIC
+#define FRAME_SIZE_IN_SHORTINTS 784
+#define FRAME_SIZE_IN_BYTES 1568
+
 
 extern Gui *gui;
 extern Application *app;
@@ -41,6 +46,7 @@ FILE *dataFile;
 
 int newdisplay;
 int stop_message;
+extern int data_source;
 unsigned short int buffer[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int buffer0[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int framecount;
@@ -49,8 +55,6 @@ int *taskids[NUM_THREADS];
 int fout;
 pthread_mutex_t mymutex;
 double nreads;
-
-okCFrontPanel *dev;
 
 extern char *data_file_save_dir;
 extern int file_type;
@@ -65,24 +69,18 @@ void* data_watch_buffer(void* p)
 	while(1)
 	{
 		if (newdisplay == 1){
-
 			// update the display
 			pthread_mutex_lock( &mymutex); /* wait on readgse */
-
 			Fl::lock();
-			//data_frame_print_to_file(buffer0);
-			//data_update_display(buffer0);
 			
-			printf("setting newdisplay\n");
+			data_frame_print_to_file(buffer0);
+			data_update_display(buffer0);
+			
 			newdisplay = 0;
-			printf("got here\n");
-
 			fflush(stdout);
-			printf("got here2\n");
-
+		
 			pthread_mutex_unlock(&mymutex);
-			printf("got here3\n");
-
+			
 			gui->mainHistogramWindow->redraw();
 			gui->mainImageWindow->redraw();
 			Fl::awake(); // Without this it may not redraw until next event (like a mouse movement)!
@@ -103,8 +101,6 @@ void* data_read_data(void *p)
 	 * by data_watch_buffer which uses it to update the displays.
 	 */
 	ssize_t wlen;
-	long len;
-	
 	int badSync = 0;
 	int badRead = 0;
 	int status = 0;
@@ -119,11 +115,13 @@ void* data_read_data(void *p)
 	gui->prefs->get("read_delay", read_delay, 0);
 	
 	// Read the data source from the preferences
-	int data_source;
 	gui->prefs->get("data_source", data_source, 0);
 	
-	if (data_source == 2) {
-		data_init_formatter();
+	// Check to see if a file is open and write header to it before starting
+	// to write data to it
+	if((dataFile != NULL) && (data_source == 1))
+	{
+		gui->usb->writeHeader(dataFile);
 	}
 	
 	// This function never stops unless told to do so by setting stop_message to 1
@@ -132,7 +130,7 @@ void* data_read_data(void *p)
 		// For the desired reading speed		
 		if (read_delay != 0) {usleep(read_delay);}
 		
-		// read the data from usb
+		// read the data
 		if (data_source == 0){
 			data_simulate_data();
 		}
@@ -149,11 +147,6 @@ void* data_read_data(void *p)
 				badRead++;
 				continue;
 			}
-		}
-		
-		if (data_source == 2){
-			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer);
-			// printf("%d", len);
 		}
 		
 		if(fout > 0)
@@ -186,26 +179,21 @@ void* data_read_data(void *p)
 				gui->consoleBuf->insert(buffer);						
 			}
 			gui->stopReadingDataButton->deactivate();
+			gui->startReadingDataButton->activate();
 
 			Fl::unlock();	
 			
-			app->printf_to_console("Closing file: %s.\n", dataFilename);
-			if (fout > 0)
+			if (fout > 0){
+				app->printf_to_console("Closing file: %s.\n", dataFilename, NULL);
 				close(fout);
-			if (dataFile != NULL)
+			}
+			if (dataFile != NULL){
+				app->printf_to_console("Closing file: %s.\n", dataFilename, NULL);
 				fclose(dataFile);
+			}
 			
 			pthread_mutex_destroy(&mymutex);
 			pthread_exit(NULL);
-			
-			if (data_source == 1)
-			{
-				//cleam up usb interface
-			}
-			if (data_source == 2) {
-				//clean up formatter interface
-			}
-			
 		}
 		nreads++;	
 	}
@@ -213,7 +201,7 @@ void* data_read_data(void *p)
 
 void data_simulate_data(void)
 {
-	// Add some delay to simulate the reading time
+	// Add some delay for the actual read
 	usleep(100);
 	
 	framecount++;
@@ -228,13 +216,7 @@ void data_simulate_data(void)
 		unsigned number : 6;
 	};
 	
-	struct voltage_data {
-		unsigned value: 12;
-		unsigned status: 4;
-	};
-	
 	strip_data strip;
-	voltage_data volt;
 	
 	buffer[0] = 60304; 	// Sync 1 - Hex EB90
 	buffer[1] = 63014;  // Sync 2 - Hex F626
@@ -251,9 +233,6 @@ void data_simulate_data(void)
 	// 12 Formatter Status
 	// 13 0
 	// 14 HV value/status
-	volt.value = telemetry_voltage_convert_hvvalue(250);
-	volt.status = 4;
-	memcpy(&buffer[14],&volt,2);
 	// 15 Housekeeping 2
 	// 16 Status 0
 	// 17 Status 1
@@ -289,39 +268,39 @@ void data_start_file(void)
 	 * 
 	 */
 
-	// Opens the data file for saving data
 	// the following variables holds the fully qualified filename (dir + filename)
 	// if directory NOT set then will create file inside of current working directory
 	// which is likely <foxsi gse dir>/build/Debug/
 	
 	if (gui->writeFileBut->value() == 1) {
 		data_set_datafilename();
-		app->printf_to_console("Trying to open file: %s\n", dataFilename);
+		app->printf_to_console("Trying to open file: %s\n", dataFilename, NULL);
 		if (gui->fileTypeChoice->value() == 0) {
 			dataFile = fopen(dataFilename, "w");
 			
 			if (dataFile == NULL)
-				app->printf_to_console("Cannot open file %s.\n", dataFilename); 
+				app->printf_to_console("Cannot open file %s.\n", dataFilename, NULL); 
 			else 
-				app->printf_to_console("Opened file %s.\n", dataFilename);
+				app->printf_to_console("Opened file %s.\n", dataFilename, NULL);
+			
+			//app->write_header(dataFile);
 			
 		}
 		if (gui->fileTypeChoice->value() == 1) {
 			if((fout = open(dataFilename,O_RDWR|O_CREAT,0600)) < 0){
-				app->printf_to_console("Cannot open file %s.\n", dataFilename);}
+				app->printf_to_console("Cannot open file %s.\n", dataFilename, NULL);}
 			else {
-				app->printf_to_console("Opened file %s.\n", dataFilename);
+				app->printf_to_console("Opened file %s.\n", dataFilename, NULL);
 			}
 			
 		}
 		
 	} else {
-		app->printf_to_console( "Closing file %s.\n", dataFilename);
+		app->printf_to_console( "Closing file %s.\n", dataFilename, NULL);
 		if (gui->fileTypeChoice->value() == 1){close(fout);}
 		if (gui->fileTypeChoice->value() == 0){fclose(dataFile);}
 		fout = 0;
 	}
-	
 }
 
 void data_start_reading(void)
@@ -356,12 +335,11 @@ void data_start_reading(void)
 	// start the watch_buffer thread
 	ret = pthread_create(&thread, NULL, data_watch_buffer, (void *) taskids[1]);	
 	
-	
 }
 
 void data_stop_reading(void)
 {
-	stop_message = 1;
+	stop_message = 1;	
 }
 
 void data_frame_print_to_file(unsigned short int *frame)
@@ -371,50 +349,121 @@ void data_frame_print_to_file(unsigned short int *frame)
 
 void data_update_display(unsigned short int *frame)
 {
-	unsigned short int tmp;
-	unsigned voltage_status;
-	unsigned voltage;
-	// parse the buffer variable and update the display
-	// some example code is below
-	
-	struct strip_data  // 2 bytes
-	{
-		unsigned data : 10;
-		unsigned number : 6;
-	};
-	
-	struct voltage_data {
-		unsigned value: 12;
-		unsigned status: 4;
-	};
-	
-	strip_data strip;
-	voltage_data volt;
+	// Parse the buffer variable and update the display
+	// reading from the ASIC one frame at a time
+	// reading from the Formater four frames at a time
+	unsigned short int strip_data;
+	unsigned short int strip_number;
 
-	printf("sync: %x\n", buffer[0]);
-	printf("counter: %x\n", buffer[4]);
-	
-	memcpy(&strip,&buffer[29],2);
-	memcpy(&volt,&buffer[13],2);
-	
-	voltage_status = buffer[13] & 0xF;
-	voltage = (buffer[13] >> 12) & 0xFFF;
+	int ymask[128] = {0};
+	int xmask[128] = {0};
+	int xstrips[128] = {0};
+	int ystrips[128] = {0};
 	
 	gui->nEventsDone->value(nreads); 
 	
-	gui->framenumOutput->value(frame[5]);
-	gui->testOutput->value(strip.number);
-	gui->HVOutput->value(voltage/8.0);
-	if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
-	if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
-	if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
+	// order for asics n n then p p
 	
-	HistogramFunction[strip.data]++;
-	tmp = arc4random() % 64 + 1;
-	detImage[tmp][strip.number] = 1;
-	detImagetime[tmp][strip.number] = clock();
-	// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);
+	if (data_source == 1){		
+		int index = 0;
+
+		
+		// Loop through the 4 ASICS
+		for( int j = 0; j < 4; j++)
+		{
+			printf("ASIC %d frame START ---------------------- \n", j);
+
+			// for the other ASICs, it's already in the data stream.
+			if(j==0){
+				printf( "eb90\n");
+			} else{
+				printf( "%x\n", frame[index]);	index++;
+			}
+						
+			printf( "frame counter: %u\n", frame[index]);	index++;	//frame counter
+			printf( "start bit: %x\n", frame[index]);	index++;	//start
+			printf( "chip bit: %x\n", frame[index]);	index++;	//chip
+			printf( "trigger bit: %x\n", frame[index]);	index++;	//trigger
+			printf( "seu bit: %x\n", frame[index]);	index++;	//seu
+			
+			// channel mask displayed in hex
+			// First two channel mask bits are stored as one word each.
+			printf("Channel Mask:\n");
+			
+			printf( "%x", frame[index]);	index++;	// dummy pedestal
+			printf( "%x", frame[index]);	index++;	// common mode bit
+			
+			for( int i = 0; i < 8; i++ ){ xmask[i] = getbits(frame[index], i, 1); }
+			for( int i = 8; i < 16; i++ ){ xmask[i] = getbits(frame[index], i, 1);}
+			for( int i = 16; i < 32; i++ ){ xmask[i] = getbits(frame[index], i, 1);}
+			for( int i = 32; i < 64; i++ ){ xmask[i] = getbits(frame[index], i, 1);}
+			
+			printf( "%x", frame[index]);	index++;
+			printf( "%x", frame[index]);	index++;
+			printf( "%x", frame[index]);	index++;
+			printf( "%x\n", frame[index]);	index++;
+			
+			printf( "Pedestal: %u\n", frame[index]);	index++;	//pedestal
+			
+			printf("Strip Data (%i%):\n", index);
+			printf( "\nCommon mode %i: %u\n", index+64, frame[index+64]);	//common mode
+
+			// strip data
+			
+			for(int i = 0; i < 64; i++){
+				// strip_data = frame[index] & 0x3ff;
+				// strip_number = (frame[index] << 10) & 0x3f;
+				strip_data = frame[index] - frame[index+64];
+				if (j == 3){if (strip_data > 0){ HistogramFunction[strip_data]++; }}
+				printf( "%u\t", frame[index]);	index++;
+				
+				if (strip_data != 0){
+					// if (j < 2){ xstrips[i + j*64] = strip_data; }
+					if (j < 2){ xstrips[i + j*64] = strip_data; }
+					if (j >= 2){ ystrips[i + (j-2)*64] = strip_data; }
+				}
+			}
+			
+			printf( "\nCommon mode %i: %u\n", index, frame[index]);	index++;	//common mode
+			
+			printf("Readout info:\n");
+			// 10 extra words of readout information
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\t", frame[index]);	index++;
+			printf( "%u\n", frame[index]);	index++;		
+			printf("ASIC %u frame END  -------------------------------- \n", j);
+			
+		}
+		
+		for(int i = 0; i<128; i++)
+		{
+			for(int j = 0; j<128; j++)
+			{
+				detImage[i][j] = xstrips[i] * ystrips[j];
+				detImagemask[i][j] = xmask[i] * ymask[j];
+				detImagetime[i][j] = clock();
+			}	
+		}
+	}
+
+	if (data_source == 0) {
+		// if parsing simulated data
 	
+		// gui->testOutput->value(strip.number);
+	 	
+		// HistogramFunction[strip_data]++;
+		//detImage[arc4random() % 64 + 1][strip_number] = 1;
+		// detImagetime[tmp][strip_number] = clock();
+		// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
+		
+	}
 }
 
 void data_set_datafilename(void)
@@ -425,7 +474,7 @@ void data_set_datafilename(void)
 	time_t ltime;
 	
 	// The directory the file will go in is set in the preferences
-	gui->prefs->get("data_file_save_dir", data_file_save_dir, "/Users/schriste/");
+	gui->prefs->get("data_file_save_dir", data_file_save_dir, "./");
 	
 	gui->prefs->get("file_type", file_type, 0);
 	
@@ -434,88 +483,15 @@ void data_set_datafilename(void)
 	times = localtime(&ltime);
 
 	if (file_type == 0) {
-		strftime(stringtemp,25,"data_%Y%m%d_%H%M%S.txt",times);
+		strftime(stringtemp,25,"data_%Y%m%d_%H%M%S.txt\0",times);
 	}
 	if (file_type == 1) {
-		strftime(stringtemp,25,"data_%Y%m%d_%H%M%S.dat",times);
+		strftime(stringtemp,25,"data_%Y%m%d_%H%M%S.dat\0",times);
 	}
 	
 	strncpy(dataFilename, data_file_save_dir, MAXPATH - 1);
 	strcat(dataFilename, stringtemp);
-	//dataFilename[MAXPATH - 1] = '\0';
+	dataFilename[MAXPATH - 1] = '\0';
 	printf("%s\n",dataFilename);
-}
 
-void data_init_formatter(void)
-{
-	bool bresult;
-	char dll_date[32], dll_time[32];
-	
-	if (FALSE == okFrontPanelDLL_LoadLib(NULL)) 
-	{
-		printf("FrontPanel DLL could not be loaded.\n");
-	}
-	okFrontPanelDLL_GetVersion(dll_date, dll_time);
-	printf(" FrontPanel DLL loaded.Built: %s %s\n", dll_date, dll_time);
-	
-	// Open the first XEM - try all board types.
-	dev = new okCFrontPanel;
-	if (okCFrontPanel::NoError != dev->OpenBySerial()) {
-		delete dev;
-		printf("Device could not be opened.  Is one connected?\n");
-		//return(NULL);
-	}
-	
-	switch (dev->GetBoardModel()) {
-		case okCFrontPanel::brdXEM3005:
-			printf("                                        Found a device: XEM3005\n");
-			break;
-		default:
-			printf("Unsupported device.\n");
-			delete dev;
-			//return(NULL);
-	}
-	
-	// Configure the PLL appropriately
-	okCPLL22150 *pll = new okCPLL22150 ;
-	pll->SetReference(48.0f, false);
-	bresult = pll->SetVCOParameters(574, 105); // output 32 x 8.2 MHz - close to 8.192 MHz
-	//cout << "Settin VCO Parameters " << bresult << endl;
-	pll->SetDiv1(okCPLL22150::DivSrc_VCO, 8);
-	// 32.8 approcimately 16 x 2.048 MHz
-	pll->SetDiv2(okCPLL22150::DivSrc_VCO, 127);
-	pll->SetOutputSource(0, okCPLL22150::ClkSrc_Div2By2); // Xilinx pin A8 = SYS_CLK1 (clk1)
-	pll->SetOutputEnable(0, true);
-	pll->SetOutputSource(1, okCPLL22150::ClkSrc_Div1ByN); // Xilinx pin A8 = SYS_CLK1 (clk1)
-	pll->SetOutputEnable(1, true);
-	pll->SetOutputSource(2, okCPLL22150::ClkSrc_Div1ByN); // Xilinx pin E9 = SYS_CLK2 (clk2)
-	pll->SetOutputEnable(2, true);
-	pll->SetOutputSource(3, okCPLL22150::ClkSrc_Div1ByN); // p71 = SYS_CLK4
-	pll->SetOutputEnable(3, true);
-	pll->SetOutputSource(4, okCPLL22150::ClkSrc_Div1ByN); // p69 = SYS_CLK5
-	pll->SetOutputEnable(4, true);
-	pll->SetOutputSource(5, okCPLL22150::ClkSrc_Div2ByN); //p67 = SYS_CLK6
-	pll->SetOutputEnable(5, true);
-	dev->SetPLL22150Configuration(*pll);
-	// Get some general information about the XEM.
-	printf("                                        Device firmware version: %d.%d\n", dev->GetDeviceMajorVersion(), dev->GetDeviceMinorVersion());
-	printf("                                        Device serial number: %s\n", dev->GetSerialNumber().c_str());
-	printf("                                        Device ID string: %s\n", dev->GetDeviceID().c_str());
-	
-	// Download the configuration file.
-	if (okCFrontPanel::NoError != dev->ConfigureFPGA(CONFIGURATION_FILE)) {
-		printf("FPGA configuration failed.\n");
-		delete dev;
-		//return(NULL);
-	}
-	
-	// Check for FrontPanel support in the FPGA configuration.
-	if (false == dev->IsFrontPanelEnabled()) {
-		printf("                              FrontPanel support is not enabled.\n");
-		delete dev;
-		//return(NULL);
-	}
-	
-	printf("                                        FrontPanel support is enabled.\n");
-	
 }

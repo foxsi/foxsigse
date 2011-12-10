@@ -55,51 +55,51 @@ struct asic_frame // 592 bytes
 };
 
 class Foxsidata
-	{
-		// Builder
-	public:
-		Foxsidata();
-		~Foxsidata();
-		//ListOfPhotons();
-		
-		//methods for reading an ASIC file
-		void readDatafile(char* filename);
-		void parseBuffer(void);
-		void nextFrame(void);
-		void previousFrame(void);
-		void printFrame(void);
-		void syncBuffer(void);
-		
-		void setChanneltoEnergy(double m, double b);
-		int ChanneltoEnergy(double channel);
-		int EnergytoChannel(double energy);
-		
-		void addPhoton(double channel, double time, int detector, int xstrip, int ystrip, int asic);
-		void Properties(void) const;
-		int getHistogram(void) const;
-		double getRate(void) const;
-		float getImage(void);
-		void FlushImage(void);
-		void FlushHistogram(void);
-		//void simulateData(void);
-	private:
-		double ChanneltoEnergySlope;
-		double ChanneltoEnergyIntercept;
-		int    histogram[XSTRIPS][NUMDETECTORS+1];   //
-		double	rate;  	// rate is in counts per second
-		float image[XSTRIPS][YSTRIPS];   // image is in counts
-		int tick;	// used to calculate rate, counter for number of photons
-		double t0;	//used to calculate rate, initial time
-		
-		FILE* file;
-		unsigned short int* ASICfile_wordbuffer;  // 16 bits
-		unsigned long currentPosition;
-		int currentFrame;
-		
-		//variables for USB file
-		strip_data current_strip;
-		asic_frame current_ASICframe;
-		
-	};
+{
+	// Builder
+public:
+	Foxsidata();
+	~Foxsidata();
+	//ListOfPhotons();
+	
+	//methods for reading an ASIC file
+	void readDatafile(char* filename);
+	void parseBuffer(void);
+	void nextFrame(void);
+	void previousFrame(void);
+	void printFrame(void);
+	void syncBuffer(void);
+	
+	void setChanneltoEnergy(double m, double b);
+	int ChanneltoEnergy(double channel);
+	int EnergytoChannel(double energy);
+	
+	void addPhoton(double channel, double time, int detector, int xstrip, int ystrip, int asic);
+	void Properties(void) const;
+	int getHistogram(void) const;
+	double getRate(void) const;
+	float getImage(void);
+	void FlushImage(void);
+	void FlushHistogram(void);
+	//void simulateData(void);
+private:
+	double ChanneltoEnergySlope;
+	double ChanneltoEnergyIntercept;
+	int    histogram[XSTRIPS][NUMDETECTORS+1];   //
+	double	rate;  	// rate is in counts per second
+	float image[XSTRIPS][YSTRIPS];   // image is in counts
+	int tick;	// used to calculate rate, counter for number of photons
+	double t0;	//used to calculate rate, initial time
+	
+	FILE* file;
+	unsigned short int* ASICfile_wordbuffer;  // 16 bits
+	unsigned long currentPosition;
+	int currentFrame;
+	
+	//variables for USB file
+	strip_data current_strip;
+	asic_frame current_ASICframe;
+	
+};
 
 #endif

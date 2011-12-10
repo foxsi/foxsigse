@@ -6,9 +6,9 @@ extern Gui *gui;
 
 // the constructor method
 mainLightcurve::mainLightcurve(int x,int y,int w,int h,const char *l)
-        : Fl_Gl_Window(x,y,w,h,l)
+: Fl_Gl_Window(x,y,w,h,l)
 {
-
+	
 }
 
 // the drawing method: draws the histFunc into the window

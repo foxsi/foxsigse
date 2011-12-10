@@ -19,13 +19,13 @@
 
 
 class mainHistogram : public Fl_Gl_Window {
-   public:
+public:
 	mainHistogram(int x,int y,int w,int h,const char *l=0);
  	void draw();
 	int handle(int eventType);
 	void glPrint(float x, float y, char *string );
 	int maximumValue(int *array);
-
+	
 };
 
 #endif

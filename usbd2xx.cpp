@@ -19,25 +19,32 @@
 #include "ftd2xx.h"
 #include "usbd2xx.h"
 #include <pthread.h>
+#include "Application.h"
 
 using namespace std;
 
 #include "gui.h"
 extern Gui *gui;
+extern Application *app;
 
 #define XSTRIPS 128
 #define YSTRIPS 128
 #define CHANNELS 1024
+#define FRAME_SIZE_IN_SHORTINTS 784
+#define FRAME_SIZE_IN_BYTES 1568
 
 extern int HistogramFunction[CHANNELS];
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagemask[XSTRIPS][YSTRIPS];
 
+extern unsigned short int buffer0[FRAME_SIZE_IN_SHORTINTS];
+
 // default constructor method
 USB_d2xx::USB_d2xx()
 {
 	nBytesFrame = 624;
-	frameData = new unsigned short int [nBytesFrame];
+	nBytesFrame = FRAME_SIZE_IN_SHORTINTS;
+	frameData = new unsigned short int [FRAME_SIZE_IN_SHORTINTS];
 	ftStatus = FT_OK;
 	ftHandle = NULL;
 	loadDefaultSettings();
@@ -74,21 +81,19 @@ int USB_d2xx::open(void)
 	ftStatus = FT_ListDevices(pcBufLD, &iNumDevs, FT_LIST_ALL | FT_OPEN_BY_SERIAL_NUMBER);	
 	//check if status is okay, if not display an error message
 	if(ftStatus != FT_OK or iNumDevs < 1) {
-		sprintf(buffer, "Error: FT_ListDevices(%d)\n", ftStatus);
-		gui->consoleBuf->insert(buffer);
+		app->printf_to_console("Error: FT_ListDevices(%d)\n", NULL, ftStatus);
 		return -1;
 	}
 	//if status okay then print out list of found devices
 	for(int i = 0; i < iNumDevs; i++) {
-		sprintf(buffer, "Found Device %d Serial Number - %s\n", i, cBufLD[i]);
-		gui->consoleBuf->insert(buffer);
+		app->printf_to_console("Found Device %d.", NULL, i);
+		app->printf_to_console("Serial Number - %s\n", cBufLD[i], 0);
 	}
 	
 	//status is okay; now open the device
 	ftStatus = FT_OpenEx(cBufLD, FT_OPEN_BY_SERIAL_NUMBER, &ftHandle);
 	if(ftStatus != FT_OK){
-		sprintf(buffer, "Error FT_OpenEx(%d), device\n", ftStatus);
-		gui->consoleBuf->insert(buffer);
+		app->printf_to_console("Error FT_OpenEx(%d), device\n", NULL, ftStatus);
 		return -1;
 	}
 	
@@ -110,15 +115,14 @@ int USB_d2xx::open(void)
 	// Set read and write timeouts, in millisec.  (for now, arbitrary value of 1 second)
 	ftStatus = FT_SetTimeouts(ftHandle, 1000, 1000);
 	if(ftStatus != FT_OK){
-		sprintf(buffer, "Error FT_SetTimeouts(%d)\n", ftStatus);
+		sprintf(buffer, "Error FT_SetTimeouts(%d)\n", NULL, ftStatus);
 		gui->consoleBuf->insert(buffer);
 		return -1;
 	}
 
 	ftStatus = FT_Purge(ftHandle, 3);	// Purge write and read buffers
 	if(ftStatus != FT_OK){
-		sprintf(buffer, "Error FT_Purge(%d)\n", ftStatus);
-		gui->consoleBuf->insert(buffer);
+		app->printf_to_console("Error FT_Purge(%d)\n", NULL, ftStatus);
 		return -1;
 	}
 	
@@ -136,8 +140,7 @@ int USB_d2xx::open(void)
 	// set buffer size for transfer in function.
 	ftStatus = FT_SetUSBParameters(ftHandle, 704, 0);
 	if(ftStatus != FT_OK){
-		sprintf(buffer, "Error FT_SetUSBParameters(%d)\n", ftStatus);
-		gui->consoleBuf->insert(buffer);
+		app->printf_to_console("Error FT_SetUSBParameters(%d)\n", NULL, ftStatus);
 		return -1;
 	}
 	
@@ -164,26 +167,27 @@ int USB_d2xx::findSync(void)
 	ftStatus = FT_GetQueueStatus(ftHandle, &nBytesRead);
 	ftStatus = FT_SetTimeouts(ftHandle, 500, 500);
 
-	if( nBytesRead < nBytesToRead )	return -1;
+//	if( nBytesRead < nBytesToRead )	return -1;
 	
 	while (1) {
-		if (i == iMax){
+		if (i == iMax){	
 			return -1;
 		}			
 		i++;
-		ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
+		
+		ftStatus = FT_GetQueueStatus(ftHandle, &nBytesRead);
 		//cout << "Attempt " << i << " value " << dataWord << " nBytesRead " << nBytesRead << endl;
-		if (ftStatus != FT_OK) {
-			cout << "Error FT_Read(" << ftStatus << ")" << endl;
+		if (nBytesRead == 0 or ftStatus != FT_OK) {
+			//app->printf_to_console("Error FT_Read(%i).", NULL, ftStatus);
 			return -1;
 		}
+		ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
 		// if the sync word is found, read again to see if the sync word is repeated.
 		if (dataWord == 0xEB90){
 			ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
 			if (dataWord == 0xEB90) break;
 		}
 	}
-		
 		return 1;
 }
 
@@ -208,10 +212,10 @@ int USB_d2xx::readFrame(void)
 		return -1;
 	}
 	
-//	for(int i=0; i<nBytesToRead; i++){  
-//		frameData[i] = 0;	// initialize buffer
+	for(int i=0; i<nBytesToRead; i++){  
+		frameData[i] = 0;	// initialize buffer
 //		cout << frameData[i] << endl;
-//	}
+	}
 	
 	if(ftStatus == FT_OK) {
 
@@ -220,20 +224,19 @@ int USB_d2xx::readFrame(void)
 //		gui->consoleBuf->insert(buffer);
 
 		ftStatus = FT_Read(ftHandle, frameData, nBytesToRead, &nBytesRead);
+		
+		memcpy((void *) buffer0,(void *) frameData, FRAME_SIZE_IN_BYTES);
+
 		if((ftStatus) != FT_OK || nBytesRead != nBytesToRead){
-			sprintf(buffer, "Error FT_Read(%d)\n", ftStatus);
-			gui->consoleBuf->insert(buffer);
-			cout << buffer << endl;
+			//app->printf_to_console("Error FT_Read(%d)\n", NULL, ftStatus);
+			//cout << buffer << endl;
 			return -1;
 		}
 		else {			
-			sprintf(buffer, "Read %d bytes.\n", nBytesRead);
-			//gui->consoleBuf->insert(buffer);
-			//cout << buffer << endl;
+			//app->printf_to_console("Read %d bytes.\n", NULL, nBytesRead);
 		}
 	} else {
-		gui->consoleBuf->insert("Could not get USB queue status.\n");
-				cout << "Could not get USB queue status." << endl;
+		app->print_to_console("Could not get USB queue status.\n");
 	}
 	
 	//for(int i=0; i<nBytesToRead; i++){  
@@ -252,11 +255,8 @@ void USB_d2xx::close(void)
 	if(ftHandle != NULL) {
 		FT_Close(ftHandle);
 		ftHandle = NULL;
-		cout << "Closed device." << endl;
-		//fclose(dataFile);
-		
-		gui->consoleBuf->insert("Closing connection.\n");
-
+		//fclose(dataFile);		
+		app->print_to_console("Closing connection.\n");
 	}
 	//gui->usbReadBut->deactivate();
 	//gui->usbCloseBut->deactivate();
@@ -266,8 +266,8 @@ void USB_d2xx::printFrame(void)
 {
 	// Data are stored as 16-bit words (short int)
 	
-	//	unsigned short int data[2];
-	int nData = 78; // n bytes per frame.
+//	unsigned short int data[2];
+	int nData = 98; // n bytes per frame.
 	int pixel_value = 0;
 	int ydata[YSTRIPS];
 	int xdata[XSTRIPS];
@@ -444,13 +444,47 @@ void USB_d2xx::printFrame(void)
 //	}
 }
 
+void USB_d2xx::writeHeader(FILE *dataFile)
+{
+	int i=0;
+	// If first event, write data file header 
+	// Header: Nevents and hold time
+	fprintf( dataFile, "%u\n", (unsigned int)gui->nEvents->value());
+	fprintf( dataFile, "%u\n", (unsigned int)gui->setHoldTimeWindow_holdTime->value());
+	// Header: slow control values for all ASICs.
+	for(i=0; i<45; i++)	fprintf( dataFile, "%u\t", asic0settings[i]);
+	fprintf( dataFile, "\n");
+	for(i=0; i<64; i++)	fprintf( dataFile, "%u\t", disable0[i]);
+	fprintf( dataFile, "\n");
+	for(i=0; i<64; i++)	fprintf( dataFile, "%u\t", test0[i]);
+	fprintf( dataFile, "\n\n");
+	for(i=0; i<45; i++)	fprintf( dataFile, "%u\t", asic1settings[i]);
+	fprintf( dataFile, "\n");
+	for(i=0; i<64; i++)	fprintf( dataFile, "%u\t", disable1[i]);
+	fprintf( dataFile, "\n");
+	for(i=0; i<64; i++)	fprintf( dataFile, "%u\t", test1[i]);
+	fprintf( dataFile, "\n\n");
+	for(i=0; i<45; i++)	fprintf( dataFile, "%u\t", asic2settings[i]);
+	fprintf( dataFile, "\n");
+	for(i=0; i<64; i++)	fprintf( dataFile, "%u\t", disable2[i]);
+	fprintf( dataFile, "\n");
+	for(i=0; i<64; i++)	fprintf( dataFile, "%u\t", test2[i]);
+	fprintf( dataFile, "\n\n");
+	for(i=0; i<45; i++)	fprintf( dataFile, "%u\t", asic3settings[i]);
+	fprintf( dataFile, "\n");
+	for(i=0; i<64; i++)	fprintf( dataFile, "%u\t", disable3[i]);
+	fprintf( dataFile, "\n");
+	for(i=0; i<64; i++)	fprintf( dataFile, "%u\t", test3[i]);
+	fprintf( dataFile, "\n");
+}
+
 void USB_d2xx::writeFrame(FILE *dataFile)
 {
 	// This function is very close to the last one except that data is printed to file instead of screen.
 	// Also identifiers like "start bit", "strip 1 data", etc are not written.	
 	// Data are stored as 16-bit words (short int)
 	
-	int nData = 77; // n bytes per frame.
+	int nData = 97; // n bytes per frame.
 	int pixel_value = 0;
 	int ydata[YSTRIPS];
 	int xdata[XSTRIPS];
@@ -458,7 +492,7 @@ void USB_d2xx::writeFrame(FILE *dataFile)
 	unsigned int ymask[YSTRIPS];
 	int good = 0;
 	int index = 0;
-	
+		
 	// Loop through the 4 ASICS
 	for(int j=0; j<4; j++)
 	{
@@ -474,7 +508,7 @@ void USB_d2xx::writeFrame(FILE *dataFile)
 			fprintf( dataFile, "%x\t", frameData[index]);	index++;
 		}
 		
-		fprintf( dataFile, "%x\t", frameData[index]);	index++;	//time
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;	//frame counter
 		fprintf( dataFile, "%x\t", frameData[index]);	index++;	//start
 		fprintf( dataFile, "%x\t", frameData[index]);	index++;	//chip
 		fprintf( dataFile, "%x\t", frameData[index]);	index++;	//trigger
@@ -489,14 +523,26 @@ void USB_d2xx::writeFrame(FILE *dataFile)
 		fprintf( dataFile, "%x", frameData[index]);	index++;
 		fprintf( dataFile, "%x\t", frameData[index]);	index++;
 
-		fprintf( dataFile, "%u\t", frameData[index]);	index++;	//common mode
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;	//pedestal
 		
 		// strip data
 		for(int i=0; i<64; i++){
 			fprintf( dataFile, "%u\t", frameData[index]);	index++;
 		}
 		
-		fprintf( dataFile, "%u\t", frameData[index]);	index++;	//pedestal
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;	//common mode
+		
+		// 10 extra words of readout information
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;
+		fprintf( dataFile, "%u\t", frameData[index]);	index++;		
 					
 	}	
 	
@@ -506,7 +552,7 @@ void USB_d2xx::writeFrame(FILE *dataFile)
 // Set individual ASIC slow control parameters
 void USB_d2xx::setConfig(void)
 {
-	const int n=39;		// number of components in write array
+	const int n=52;		// number of components in write array
 	const int nV=45;	// number of values in sendParamsWindow
 	char cBufWrite[n];	// write array
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
@@ -514,11 +560,13 @@ void USB_d2xx::setConfig(void)
 	// load user input configuration settings from sendParamsWindow.
 	int value[nV];
 	int chan[64];
+	int test[64];
 	int asic = gui->sendParamsWindow_asic->value();
 	
 	// initialize configuration arrays
 	for(int i=0; i<nV; i++)	value[i] = 0;
 	for(int i=0; i<64; i++)	chan[i] = 0;
+	for(int i=0; i<64; i++)	test[i] = 0;
 	
 	// initialize write buffer.
 	for(int i=0; i<n; i++) cBufWrite[i] = 0;
@@ -527,6 +575,7 @@ void USB_d2xx::setConfig(void)
 	// CHAN values are from the channel disable buttons.
 	for(int i=0; i<nV; i++)	value[i] = gui->sendParamsWindow_value[i]->value();
 	for(int i=0; i<64; i++)	chan[i]  = gui->sendParamsWindow_chan[i]->value();
+	for(int i=0; i<64; i++)	test[i]  = gui->sendParamsWindow_test[i]->value();
 	
 	// logic to assemble configuration settings into write array.
 	// Note the pattern is not the same for each register and some bits are intentionally unused!
@@ -534,10 +583,10 @@ void USB_d2xx::setConfig(void)
 	cBufWrite[1] = value[5]*16 + value[6]*8 + value[7]*4 + value[8]*2 + value[9] + 32*asic;
 	cBufWrite[2] = value[10]*16 + value[11]*8 + value[12]*4 + value[13]*2 + value[14] + 32*asic;
 	cBufWrite[3] = value[15]*16 + value[16]*8 + value[17]*4 + value[18]*2 + value[19] + 32*asic;
-	cBufWrite[4] = value[20]*16 + value[21]*8 + value[22]*4 + value[23]*2 + getbits(value[24],5,1) + 32*asic; // 4 single bits + LSB of dummy digital delay.
-	cBufWrite[5] = getbits(value[24], 4, 5) + 32*asic; // 5 MSB of dummy digital delay.
-	cBufWrite[6] = getbits(value[25], 9, 5) + 32*asic;  // 5 LSB of digital threshold.
-	cBufWrite[7] = getbits(value[25], 4, 5) + 32*asic;  // 5 MSB of digital threshold.
+	cBufWrite[4] = value[20]*16 + value[21]*8 + value[22]*4 + value[23]*2 + getbits(value[24],4,1) + 32*asic; // 4 single bits + LSB of dummy digital delay.
+	cBufWrite[5] = getbits(value[24], 9, 5) + 32*asic; // 5 MSB of dummy digital delay.
+	cBufWrite[6] = getbits(value[25], 4, 5) + 32*asic;  // 5 LSB of digital threshold.
+	cBufWrite[7] = getbits(value[25], 9, 5) + 32*asic;  // 5 MSB of digital threshold.
 	cBufWrite[8] = chan[0]*16 + chan[1]*8 + chan[2]*4 + chan[3]*2 + chan[4] + 32*asic;
 	cBufWrite[9] = chan[5]*16 + chan[6]*8 + chan[7]*4 + chan[8]*2 + chan[9] + 32*asic;
 	cBufWrite[10] = chan[10]*16 + chan[11]*8 + chan[12]*4 + chan[13]*2 + chan[14] + 32*asic;
@@ -551,24 +600,37 @@ void USB_d2xx::setConfig(void)
 	cBufWrite[18] = chan[50]*16 + chan[51]*8 + chan[52]*4 + chan[53]*2 + chan[54] + 32*asic;
 	cBufWrite[19] = chan[55]*16 + chan[56]*8 + chan[57]*4 + chan[58]*2 + chan[59] + 32*asic;
 	cBufWrite[20] = chan[60]*8 + chan[61]*4 + chan[62]*2 + chan[63]*1 + 32*asic;  // No MSB for the last disable register.
-	cBufWrite[21] = value[26]*4 + value[27]*2 + value[28] + 32*asic;
-	cBufWrite[22] = getbits(value[29], 4, 5) + 32*asic; // digital threshold
-	cBufWrite[23] = getbits(value[30], 3, 4) + 32*asic;
-	cBufWrite[24] = getbits(value[31], 3, 4) + 32*asic;
-	cBufWrite[25] = getbits(value[32], 3, 4) + 32*asic;
-	cBufWrite[26] = getbits(value[33], 3, 4) + 32*asic;
-	cBufWrite[27] = getbits(value[34], 2, 3) + 32*asic;
-	cBufWrite[28] = getbits(value[35], 2, 3) + 32*asic;
-	cBufWrite[29] = getbits(value[36], 2, 3) + 32*asic;
-	cBufWrite[30] = getbits(value[37], 2, 3) + 32*asic;
-	cBufWrite[31] = getbits(value[38], 2, 3) + 32*asic;
-	cBufWrite[32] = getbits(value[39], 2, 3) + 32*asic;
-	cBufWrite[33] = getbits(value[40], 2, 3) + 32*asic;
-	cBufWrite[34] = getbits(value[41], 2, 3) + 32*asic;
-	cBufWrite[35] = getbits(value[42], 2, 3) + 32*asic;
-	cBufWrite[36] = getbits(value[43], 2, 3) + 32*asic;
-	cBufWrite[37] = getbits(value[44], 2, 3) + 32*asic;
-	cBufWrite[38] = 0;
+	cBufWrite[21] = test[0]*16 + test[1]*8 + test[2]*4 + test[3]*2 + test[4] + 32*asic;
+	cBufWrite[22] = test[5]*16 + test[6]*8 + test[7]*4 + test[8]*2 + test[9] + 32*asic;
+	cBufWrite[23] = test[10]*16 + test[11]*8 + test[12]*4 + test[13]*2 + test[14] + 32*asic;
+	cBufWrite[24] = test[15]*16 + test[16]*8 + test[17]*4 + test[18]*2 + test[19] + 32*asic;
+	cBufWrite[25] = test[20]*16 + test[21]*8 + test[22]*4 + test[23]*2 + test[24] + 32*asic;
+	cBufWrite[26] = test[25]*16 + test[26]*8 + test[27]*4 + test[28]*2 + test[29] + 32*asic;
+	cBufWrite[27] = test[30]*16 + test[31]*8 + test[32]*4 + test[33]*2 + test[34] + 32*asic;
+	cBufWrite[28] = test[35]*16 + test[36]*8 + test[37]*4 + test[38]*2 + test[39] + 32*asic;
+	cBufWrite[29] = test[40]*16 + test[41]*8 + test[42]*4 + test[43]*2 + test[44] + 32*asic;
+	cBufWrite[30] = test[45]*16 + test[46]*8 + test[47]*4 + test[48]*2 + test[49] + 32*asic;
+	cBufWrite[31] = test[50]*16 + test[51]*8 + test[52]*4 + test[53]*2 + test[54] + 32*asic;
+	cBufWrite[32] = test[55]*16 + test[56]*8 + test[57]*4 + test[58]*2 + test[59] + 32*asic;
+	cBufWrite[33] = test[60]*8 + test[61]*4 + test[62]*2 + test[63]*1 + 32*asic;  // No MSB for the last disable register.
+	cBufWrite[34] = value[26]*4 + value[27]*2 + value[28] + 32*asic;
+	cBufWrite[35] = getbits(value[29], 4, 5) + 32*asic; // digital threshold
+	cBufWrite[36] = getbits(value[30], 3, 4) + 32*asic;
+	cBufWrite[37] = getbits(value[31], 3, 4) + 32*asic;
+	cBufWrite[38] = getbits(value[32], 3, 4) + 32*asic;
+	cBufWrite[39] = getbits(value[33], 3, 4) + 32*asic;
+	cBufWrite[40] = getbits(value[34], 2, 3) + 32*asic;
+	cBufWrite[41] = getbits(value[35], 2, 3) + 32*asic;
+	cBufWrite[42] = getbits(value[36], 2, 3) + 32*asic;
+	cBufWrite[43] = getbits(value[37], 2, 3) + 32*asic;
+	cBufWrite[44] = getbits(value[38], 2, 3) + 32*asic;
+	cBufWrite[45] = getbits(value[39], 2, 3) + 32*asic;
+	cBufWrite[46] = getbits(value[40], 2, 3) + 32*asic;
+	cBufWrite[47] = getbits(value[41], 2, 3) + 32*asic;
+	cBufWrite[48] = getbits(value[42], 2, 3) + 32*asic;
+	cBufWrite[49] = getbits(value[43], 2, 3) + 32*asic;
+	cBufWrite[50] = getbits(value[44], 2, 3) + 32*asic;
+	cBufWrite[51] = 0;
 
 	// Testing purposes
 //	for(int i=0; i<39; i++)
@@ -576,7 +638,7 @@ void USB_d2xx::setConfig(void)
 	
 	/* Write */
 	dwBytesWritten = 0;
-	if((ftStatus = FT_Write(ftHandle, cBufWrite, 39, &dwBytesWritten)) != FT_OK) {
+	if((ftStatus = FT_Write(ftHandle, cBufWrite, n, &dwBytesWritten)) != FT_OK) {
 		printf("Error FT_Write(%d)\n", ftStatus);
 		return;
 	}
@@ -586,19 +648,40 @@ void USB_d2xx::setConfig(void)
 }
 
 // Added July 2011
-// Set global configuration (for now, just hold time adjustment)
-void USB_d2xx::setGlobalConfig(void)
+// Set global configuration
+void USB_d2xx::setGlobalConfig(int option)
 {
 	const int n = 1;	// number bytes to send
+	int value = 0;	
 	char cBufWrite[n];	// write array
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
 
 	// initialize write buffer.
 	for(int i=0; i<n; i++) cBufWrite[i] = 0;
 
-	cBufWrite[0] = gui->sendParamsWindow_holdTime->value();		// get hold time value from user input
-	cBufWrite[0] = cBufWrite[0] + 128;							// put '1' in MSB as flag that this is a global setting.
+	switch (option) {
+		case 0:
+			value = gui->setHoldTimeWindow_holdTime->value();
+			break;
+		case 1:
+			value = gui->setTrigWindow_timeoutTime->value();
+			break;
+		case 2:
+			value = gui->setTrigWindow_useTimeout->value();
+			break;
+		case 3:
+			value = gui->setTrigWindow_delayTime->value();
+			break;
+		default:
+			value = 0;
+			break;
+	}
 
+//	cBufWrite[0] = gui->sendParamsWindow_holdTime->value();		// get hold time value from user input
+	value = value + 128;							// put '1' in MSB as flag that this is a global setting.
+	value = value + option*32;						// put indicator in bits [6:5] to tell FPGA which kind of setting it is.
+	cBufWrite[0] = value;
+	
 	/* Write */
 	dwBytesWritten = 0;
 	if((ftStatus = FT_Write(ftHandle, cBufWrite, 1, &dwBytesWritten)) != FT_OK) {
@@ -606,10 +689,11 @@ void USB_d2xx::setGlobalConfig(void)
 		return;
 	}
 	
-	cout << "Wrote " << dwBytesWritten << " bytes, value: " << dec << cBufWrite[0] << endl << endl;	
+	cout << "Wrote " << dwBytesWritten << " bytes, value: " << dec << cBufWrite[0] << " value is " << value << endl << endl;	
 	printf("Wrote %d bytes, value %d\n\n", dwBytesWritten, cBufWrite[0]);
 }
 
+/*
 // Added August 2011
 // Break acquisition loop.
 void USB_d2xx::breakAcq(int data)
@@ -621,7 +705,7 @@ void USB_d2xx::breakAcq(int data)
 	// initialize write buffer.
 	cBufWrite[0] = data;
 	
-	/* Write */
+	// Write
 	dwBytesWritten = 0;
 	if((ftStatus = FT_Write(ftHandle, cBufWrite, n, &dwBytesWritten)) != FT_OK) {
 		printf("Error FT_Write(%d)\n", ftStatus);
@@ -631,6 +715,7 @@ void USB_d2xx::breakAcq(int data)
 	cout << "Wrote " << dwBytesWritten << " bytes, value: " << dec << cBufWrite[0] << endl << endl;	
 	printf("Wrote %d bytes, value %d\n\n", dwBytesWritten, cBufWrite[0]);
 }
+*/
 
 // Added August 2011
 // Save configuration settings for the selected ASIC.
@@ -645,18 +730,22 @@ void USB_d2xx::saveSettings()
 		case 0:
 			for(int i=0; i<nVal; i++)	asic0settings[i] = gui->sendParamsWindow_value[i]->value();
 			for(int i=0; i<nChan; i++)	disable0[i] = gui->sendParamsWindow_chan[i]->value();
+			for(int i=0; i<nChan; i++)	test0[i] = gui->sendParamsWindow_test[i]->value();
 			break;
 		case 1:
 			for(int i=0; i<nVal; i++)	asic1settings[i] = gui->sendParamsWindow_value[i]->value();
 			for(int i=0; i<nChan; i++)	disable1[i] = gui->sendParamsWindow_chan[i]->value();
+			for(int i=0; i<nChan; i++)	test1[i] = gui->sendParamsWindow_test[i]->value();
 			break;
 		case 2:
 			for(int i=0; i<nVal; i++)	asic2settings[i] = gui->sendParamsWindow_value[i]->value();
 			for(int i=0; i<nChan; i++)	disable2[i] = gui->sendParamsWindow_chan[i]->value();
+			for(int i=0; i<nChan; i++)	test2[i] = gui->sendParamsWindow_test[i]->value();
 			break;
 		case 3:
 			for(int i=0; i<nVal; i++)	asic3settings[i] = gui->sendParamsWindow_value[i]->value();
 			for(int i=0; i<nChan; i++)	disable3[i] = gui->sendParamsWindow_chan[i]->value();
+			for(int i=0; i<nChan; i++)	test3[i] = gui->sendParamsWindow_test[i]->value();
 			break;
 		default:
 			break;
@@ -680,18 +769,22 @@ void USB_d2xx::restoreSettings()
 		case 0:
 			for(int i=0; i<nVal; i++)	gui->sendParamsWindow_value[i]->value(asic0settings[i]);
 			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_chan[i]->value(disable0[i]);
+			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_test[i]->value(test0[i]);
 			break;
 		case 1:
 			for(int i=0; i<nVal; i++)	gui->sendParamsWindow_value[i]->value(asic1settings[i]);
 			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_chan[i]->value(disable1[i]);
+			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_test[i]->value(test1[i]);
 			break;
 		case 2:
 			for(int i=0; i<nVal; i++)	gui->sendParamsWindow_value[i]->value(asic2settings[i]);
 			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_chan[i]->value(disable2[i]);
+			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_test[i]->value(test2[i]);
 			break;
 		case 3:
 			for(int i=0; i<nVal; i++)	gui->sendParamsWindow_value[i]->value(asic3settings[i]);
 			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_chan[i]->value(disable3[i]);
+			for(int i=0; i<nChan; i++)	gui->sendParamsWindow_test[i]->value(test3[i]);
 			break;
 		default:
 			break;
@@ -702,23 +795,25 @@ void USB_d2xx::restoreSettings()
 // This function sets the default configuration settings.  For now, these are hardcoded.
 void USB_d2xx::loadDefaultSettings()
 {
+	
+	
 	asic0settings[0] = 0;	asic1settings[0] = 0;	asic2settings[0] = 0;	asic3settings[0] = 0;
 	asic0settings[1] = 0;	asic1settings[1] = 0;	asic2settings[1] = 0;	asic3settings[1] = 0;
 	asic0settings[2] = 0;	asic1settings[2] = 0;	asic2settings[2] = 0;	asic3settings[2] = 0;
-	asic0settings[3] = 0;	asic1settings[3] = 0;	asic2settings[3] = 0;	asic3settings[3] = 0;
+	asic0settings[3] = 1;	asic1settings[3] = 1;	asic2settings[3] = 1;	asic3settings[3] = 1;  // sbi_hp2
 	asic0settings[4] = 1;	asic1settings[4] = 1;	asic2settings[4] = 0;	asic3settings[4] = 0;
 	asic0settings[5] = 0;	asic1settings[5] = 0;	asic2settings[5] = 0;	asic3settings[5] = 0;
 	asic0settings[6] = 0;	asic1settings[6] = 0;	asic2settings[6] = 0;	asic3settings[6] = 0;
-	asic0settings[7] = 1;	asic1settings[7] = 1;	asic2settings[7] = 1;	asic3settings[7] = 1;
+	asic0settings[7] = 1;	asic1settings[7] = 1;	asic2settings[7] = 1;	asic3settings[7] = 1;	// ro_all
 	asic0settings[8] = 0;	asic1settings[8] = 0;	asic2settings[8] = 0;	asic3settings[8] = 0;
-	asic0settings[9] = 1;	asic1settings[9] = 1;	asic2settings[9] = 1;	asic3settings[9] = 1;
+	asic0settings[9] = 1;	asic1settings[9] = 1;	asic2settings[9] = 1;	asic3settings[9] = 1;	// preb_hp
 	asic0settings[10] = 0;	asic1settings[10] = 0;	asic2settings[10] = 0;	asic3settings[10] = 0;
-	asic0settings[11] = 1;	asic1settings[11] = 1;	asic2settings[11] = 1;	asic3settings[11] = 1;
-	asic0settings[12] = 1;	asic1settings[12] = 1;	asic2settings[12] = 0;	asic3settings[12] = 0;
+	asic0settings[11] = 0;	asic1settings[11] = 0;	asic2settings[11] = 0;	asic3settings[11] = 0;
+	asic0settings[12] = 1;	asic1settings[12] = 1;	asic2settings[12] = 0;	asic3settings[12] = 0;	// nside
 	asic0settings[13] = 0;	asic1settings[13] = 0;	asic2settings[13] = 0;	asic3settings[13] = 0;
 	asic0settings[14] = 0;	asic1settings[14] = 0;	asic2settings[14] = 0;	asic3settings[14] = 0;
 	asic0settings[15] = 0;	asic1settings[15] = 0;	asic2settings[15] = 0;	asic3settings[15] = 0;
-	asic0settings[16] = 1;	asic1settings[16] = 1;	asic2settings[16] = 0;	asic3settings[16] = 0;
+	asic0settings[16] = 1;	asic1settings[16] = 1;	asic2settings[16] = 0;	asic3settings[16] = 0;	// negQ
 	asic0settings[17] = 0;	asic1settings[17] = 0;	asic2settings[17] = 0;	asic3settings[17] = 0;
 	asic0settings[18] = 0;	asic1settings[18] = 0;	asic2settings[18] = 0;	asic3settings[18] = 0;
 	asic0settings[19] = 0;	asic1settings[19] = 0;	asic2settings[19] = 0;	asic3settings[19] = 0;
@@ -731,21 +826,21 @@ void USB_d2xx::loadDefaultSettings()
 	asic0settings[26] = 0;	asic1settings[26] = 0;	asic2settings[26] = 0;	asic3settings[26] = 0;
 	asic0settings[27] = 0;	asic1settings[27] = 0;	asic2settings[27] = 0;	asic3settings[27] = 0;
 	asic0settings[28] = 0;	asic1settings[28] = 0;	asic2settings[28] = 0;	asic3settings[28] = 0;
-	asic0settings[29] = 31;	asic1settings[29] = 31;	asic2settings[29] = 31;	asic3settings[29] = 31;
-	asic0settings[30] = 3;	asic1settings[30] = 3;	asic2settings[30] = 6;	asic3settings[30] = 6;
-	asic0settings[31] = 6;	asic1settings[31] = 6;	asic2settings[31] = 3;	asic3settings[31] = 3;
+	asic0settings[29] = 31;	asic1settings[29] = 31;	asic2settings[29] = 15;	asic3settings[29] = 15;	// vthr
+	asic0settings[30] = 10;	asic1settings[30] = 10;	asic2settings[30] = 6;	asic3settings[30] = 6;	// ifp
+	asic0settings[31] = 0;	asic1settings[31] = 0;	asic2settings[31] = 9;	asic3settings[31] = 9;	// iramp
 	asic0settings[32] = 0;	asic1settings[32] = 0;	asic2settings[32] = 0;	asic3settings[32] = 0;
 	asic0settings[33] = 0;	asic1settings[33] = 0;	asic2settings[33] = 0;	asic3settings[33] = 0;
 	asic0settings[34] = 0;	asic1settings[34] = 0;	asic2settings[34] = 0;	asic3settings[34] = 0;
-	asic0settings[35] = 7;	asic1settings[35] = 7;	asic2settings[35] = 7;	asic3settings[35] = 7;
-	asic0settings[36] = 1;	asic1settings[36] = 1;	asic2settings[36] = 0;	asic3settings[36] = 0;
-	asic0settings[37] = 0;	asic1settings[37] = 0;	asic2settings[37] = 3;	asic3settings[37] = 3;
+	asic0settings[35] = 7;	asic1settings[35] = 7;	asic2settings[35] = 7;	asic3settings[35] = 7;	// shabias
+	asic0settings[36] = 1;	asic1settings[36] = 1;	asic2settings[36] = 0;	asic3settings[36] = 0;	// ifss
+	asic0settings[37] = 0;	asic1settings[37] = 0;	asic2settings[37] = 0;	asic3settings[37] = 0;
 	asic0settings[38] = 0;	asic1settings[38] = 0;	asic2settings[38] = 0;	asic3settings[38] = 0;
 	asic0settings[39] = 0;	asic1settings[39] = 0;	asic2settings[39] = 0;	asic3settings[39] = 0;
-	asic0settings[40] = 7;	asic1settings[40] = 7;	asic2settings[40] = 7;	asic3settings[40] = 7;
+	asic0settings[40] = 7;	asic1settings[40] = 7;	asic2settings[40] = 7;	asic3settings[40] = 7;	// prebias
 	asic0settings[41] = 0;	asic1settings[41] = 0;	asic2settings[41] = 0;	asic3settings[41] = 0;
 	asic0settings[42] = 0;	asic1settings[42] = 0;	asic2settings[42] = 0;	asic3settings[42] = 0;
-	asic0settings[43] = 6;	asic1settings[43] = 6;	asic2settings[43] = 1;	asic3settings[43] = 1;
+	asic0settings[43] = 5;	asic1settings[43] = 5;	asic2settings[43] = 2;	asic3settings[43] = 1;	// ioffset
 	asic0settings[44] = 0;	asic1settings[44] = 0;	asic2settings[44] = 0;	asic3settings[44] = 0;
 	
 	for(int i=0; i<64; i++){
@@ -753,5 +848,11 @@ void USB_d2xx::loadDefaultSettings()
 		disable1[i] = 1;
 		disable2[i] = 0;
 		disable3[i] = 0;
+		test0[i] = 0;
+		test1[i] = 0;
+		test2[i] = 0;
+		test3[i] = 0;
 	}
+	
 }
+

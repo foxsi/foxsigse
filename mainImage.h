@@ -5,7 +5,7 @@
 #include <FL/Fl_Gl_Window.H>
 
 class mainImage : public Fl_Gl_Window {
-   public:
+public:
 	mainImage(int x,int y,int w,int h,const char *l=0);
 	void draw();
 	int handle(int eventType);

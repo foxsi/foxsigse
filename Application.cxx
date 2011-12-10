@@ -2,10 +2,17 @@
 
 #include "Application.h"
 #include <FL/Fl_File_Chooser.H>
-
 #include "data.h"
 #include "commands.h"
 #include "gui.h"
+#include "Foxsidata.h"
+#include "usbd2xx.h"
+#include <pthread.h>
+#include <sched.h>
+
+#include <sys/time.h>
+#include <time.h>
+
 
 #define XSTRIPS 128
 #define YSTRIPS 128
@@ -20,6 +27,7 @@ extern double detImage[XSTRIPS][YSTRIPS];
 extern int stop_message;
 extern FILE *dataFile;
 extern int fout;
+extern int nreads;
 
 // filename is set automatically with local time
 extern char dataFilename[MAXPATH];
@@ -41,14 +49,16 @@ extern char dataFileDir[MAXPATH];
 int file_type;
 char *data_file_save_dir;
 int read_delay;
-int data_source;
+int data_source;	// 0 means simulation, 1 means ASIC, 2 means Formatter
 float pixel_half_life;
+int mainImage_minimum;
+int detector_display[7];
 
 Application::Application()
 {
 	// Constructor method for the Application class
 	// Add initialization here:
-
+	
 }
 
 void Application::FlushData(void)
@@ -66,6 +76,7 @@ void Application::save_preferences(void)
 	gui->prefs->set("data_file_save_dir", gui->datafilesavedir_fileInput->value());
 	gui->prefs->set("read_delay", gui->readdelay_value->value());
 	gui->prefs->set("data_source", gui->DataSource_choice->value());
+	gui->prefs->set("mainImage_minimum", gui->mainImageMin_slider->value());
 }
 
 void Application::read_preferences(void)
@@ -76,6 +87,8 @@ void Application::read_preferences(void)
 	gui->prefs->get("data_file_save_dir", data_file_save_dir, "/Users/schriste/");
 	gui->prefs->get("read_delay", read_delay, 10000);
 	gui->prefs->get("data_source", data_source, 0);
+	
+	gui->prefs->get("mainImage_minimum", mainImage_minimum, 0);
 }
 
 void Application::update_preferencewindow(void)
@@ -88,17 +101,30 @@ void Application::update_preferencewindow(void)
 	gui->DataSource_choice->value(data_source);	
 }
 
+void Application::set_mainImage_min(void)
+{
+	// gui->prefs->set("mainImage_minimum", (int) gui->mainImageMin_slider->value());
+	//	
+	// gui->mainImageMin_input->value(5);
+	//printf("value = %i", gui->mainImageMin_slider->value(5));
+}
+
 void Application::set_datafile_dir(void)
 {
 	char *temp = fl_dir_chooser("Pick a directory:", "", 0);
 	strcpy(data_file_save_dir, temp);
 	gui->datafilesavedir_fileInput->value(data_file_save_dir);
-	printf_to_console("Output directory set to %s.\n", data_file_save_dir);	
+	printf_to_console("Output directory set to %s.\n", data_file_save_dir, NULL);	
 }
 
 void Application::start_file()
 {
 	data_start_file();
+}
+
+void Application::write_header(FILE *file)
+{
+	gui->usb->writeHeader(file);
 }
 
 // the method that gets executed when the readFile callback is called
@@ -117,34 +143,7 @@ void Application::readFile()
 	
 	//gui->data->readDatafile(file);
 }
-
-// add application routines here:
-
-//void Application::readUSBStream(void)
-//{
-	//opens a new window
-	//Fl_Double_Window *subWindow = new Fl_Double_Window(400,200, "subWindow");
-	//Fl_Text_Display *textDisplay = new Fl_Text_Display(0,0,400,200, 0);
-	//Fl_Text_Buffer *textBuffer = new Fl_Text_Buffer;
-	//textDisplay->buffer(textBuffer);
-
-	//subWindow->begin();
-	//Fl_Widget *box = new Fl_Widget(20, 40, 260, 100, "Hello, World!");
-	//box->box(UP_BOX);
-	//box->labelfont(HELVETICA_BOLD_ITALIC);
-	//box->labelsize(36);
-	//box->labeltype(SHADOW_LABEL);
-	//subWindow->end();
-	//subWindow->show();
-	
-//	if (gui->usb->open() < 0) {
-//		cout << "Could not open device.\n\n";
-//	}
-//	gui->usb->readFrame();
-//	gui->usb->printFrame();
-//	gui->usb->close();
-//}
-
+ 
 void Application::initialize_data(void)
 {
 	// Initialize a connection to a data stream
@@ -177,6 +176,8 @@ void Application::initialize_data(void)
 	
 	gui->startReadingDataButton->activate();
 	gui->sendParamsWindow_sendBut->activate();
+	gui->setHoldTimeWindow_setBut->activate();
+	gui->setHoldTimeWindow_autorunBut->activate();
 	FlushData();
 }
 
@@ -191,36 +192,45 @@ void Application::close_data(void)
 
 void Application::start_reading_data(void)
 {
-	print_to_console("Reading begun...\n");
+	print_to_console("Reading started.\n");
 	gui->stopReadingDataButton->activate();
 	gui->startReadingDataButton->deactivate();
-
+	
 	data_start_reading();	
 }
 
-void Application::printf_to_console(const char *text, char *string1)
+void Application::printf_to_console(const char *text, char *string1, int number)
 {
 	char buffer[200];
 	sprintf(buffer, text, string1);
 	gui->consoleBuf->insert(buffer);
+	gui->consoleBuf->show_insert_position();
 }
-
+								   
 void Application::print_to_console(const char *text)
 {
 	gui->consoleBuf->insert(text);
+	gui->consoleBuf->show_insert_position();
 }
 
+/*
 void* Application::read_data(void* variable)
 {
 	char buffer[50];
 	int badSync = 0;
 	int badRead = 0;
 	int status = 0;
-	char *tmp[1];
+	
+	Fl::lock();
+	gui->stopReadingDataButton->activate();
+//	gui->stopReadingDataButton->value(0);
+	gui->startReadingDataButton->deactivate();
+	Fl::unlock();
+	
 	// data file should be open as long as the "Write to file" has been clicked
 	//if (gui->writeFileBut->value() == 1){
-		// Open data file
-		//dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
+	// Open data file
+	//dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
 	//	if(dataFile == NULL){
 	//		Fl::lock();
 	//		sprintf(buffer, "Invalid filename.\n");
@@ -229,33 +239,35 @@ void* Application::read_data(void* variable)
 	//		return NULL;
 	//	}
 	//}
-
+	
 	Fl::lock();
 	print_to_console("Reading...\n");
 	Fl::unlock();
 	
-	for (int i = 0; i<gui->nEvents->value(); i++) {
-		// get the read delay from the preferences
-		int read_delay;
-		gui->prefs->get("read_delay", read_delay, 10000);
-
-		usleep(read_delay);		// adjust this to achieve desired reading speed
+	int i = 0;
+	int nEnd = gui->nEvents->value(); 
+	while ( i<nEnd ){
+//	for (int i = 0; i<gui->nEvents->value(); i++) {
+		usleep(20000);		// adjust this to achieve desired reading speed
 				
 		// check to see if the Stop button was pushed, if so then clean up 
 		// and stop this thread
-		if (stop_message == 1){
+		if (stop_message){
 			// clean up code goes here then exit
+			Fl::lock();
+			sprintf(buffer, "Read Stopped.\n");
+			gui->consoleBuf->insert(buffer);
+			sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
+			gui->consoleBuf->insert(buffer);
+			gui->stopReadingDataButton->deactivate();
+//			gui->stopReadingDataButton->value(0);
+			gui->startReadingDataButton->activate();
 			if (gui->writeFileBut->value() == 1){
 				fclose(dataFile);
-				
-				Fl::lock();
-				print_to_console("Read force stopped!\n");
-				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-				gui->consoleBuf->insert(buffer);
-				gui->stopReadingDataButton->deactivate();
-				Fl::unlock();	
+				gui->writeFileBut->activate();
 				
 			}
+			Fl::unlock();	
             pthread_exit(NULL);
 		}
 
@@ -275,10 +287,12 @@ void* Application::read_data(void* variable)
 		// print frame to XCode console (unless nEvents is large, then skip it to save time).
 		if(gui->nEvents->value() < 5)  gui->usb->printFrame();
 		// write to file if the write button is enabled
-		if (gui->writeFileBut->value() == 1)  gui->usb->writeFrame(dataFile);
+		if (gui->writeFileBut->value() == 1)  gui->usb->writeFrame(dataFile, i);
 		gui->nEventsDone->value(i);
 		Fl::unlock();
+		Fl::awake();
 		
+		i++;
 	}
 	
 	Fl::lock();
@@ -288,19 +302,30 @@ void* Application::read_data(void* variable)
 	gui->consoleBuf->insert(buffer);		
 	if (gui->writeFileBut->value() == 1){
 		fclose(dataFile);
+		gui->writeFileBut->value(0);
 	}
 	gui->stopReadingDataButton->deactivate();
+//	gui->stopReadingDataButton->value(0);
+	gui->startReadingDataButton->activate();
 	Fl::unlock();	
 
 	return 0;
 }
+ */
 
 void Application::openSendParamsWindow(void)
 {
 	gui->sendParamsWindow->show();
-	if (gui->initializeBut->value() == 0) {
-//		gui->sendParamsWindow_sendBut->deactivate();
-	}
+}
+
+void Application::openSetHoldTimeWindow(void)
+{
+	gui->setHoldTimeWindow->show();
+}
+
+void Application::openSetTrigWindow(void)
+{
+	gui->setTrigWindow->show();
 }
 
 void Application::send_params(void)
@@ -309,17 +334,76 @@ void Application::send_params(void)
 	gui->consoleBuf->insert("Sending Params to controller.\n");
 }
 
-void Application::send_global_params(void)
+void Application::send_global_params(int option)
 {
-	gui->usb->setGlobalConfig();
+	gui->usb->setGlobalConfig(option);
 	gui->consoleBuf->insert("Sending global Params to controller.\n");
 }
 
-void Application::break_acq(int data)
+void Application::start_auto_run(void)
 {
-	gui->usb->breakAcq(data);
+	print_to_console("Can't autorun; disabled.\n");
 
+	/*
+	pthread_t thread;
+    struct sched_param param;
+    pthread_attr_t tattr;
+	
+	int *variable;
+	int ret;
+	
+	stop_message = 0;
+	
+	variable = (int *) malloc(sizeof(int));
+	*variable = 6;
+	
+	// define the custom priority for one of the threads
+    int newprio = -10;
+	param.sched_priority = newprio;
+	ret = pthread_attr_init(&tattr);
+	ret = pthread_attr_setschedparam (&tattr, &param);
+	
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	
+	ret = pthread_create(&thread, &tattr, auto_run_sequence, (void *) variable);
+	*/
 }
+
+void* Application::auto_run_sequence(void* variable)
+{
+	/*
+	for(int i=1; i<32; i++){
+		Fl::lock();
+		gui->nEventsDone->value(0);
+		gui->setHoldTimeWindow_holdTime->value(i);
+		Fl::unlock();
+		gui->app->send_global_params(0);
+		gui->app->send_global_params(0);
+		gui->writeFileBut->value(1);
+		gui->app->start_file();
+		gui->app->start_reading_data();
+		
+		while(1){
+
+			Fl::lock();
+			int nCtr  = gui->nEventsDone->value();
+			int nEvts = gui->nEvents->value();
+			Fl::unlock();
+
+			if(nCtr == (nEvts-1) ) break;
+			sleep(1);			
+		}
+		
+	}	
+	return 0;
+	*/	
+}
+
+
+//void Application::break_acq(int data)
+//{
+//	gui->usb->breakAcq(data);
+//}
 
 void Application::save_settings(void)
 {
@@ -361,8 +445,17 @@ void Application::send_clockset_command(void)
 void Application::stop_reading_data(void)
 {
 	data_stop_reading();
+	
+	Fl::lock();
 	gui->stopReadingDataButton->deactivate();
 	gui->startReadingDataButton->activate();
-
+	Fl::unlock();
+	
 	// send the thread the message to stop itself	
+}
+
+void Application::reset_read_counter(void)
+{
+	nreads = 0;
+	gui->nEventsDone->value(0);
 }

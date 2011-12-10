@@ -12,7 +12,7 @@
 #define NUM_DETECTORS 7
 #define XMIN 1
 
-int HistogramFunction[XSTRIPS];
+int HistogramFunction[1024];
 
 int chosenHistPixel;
 int mouseHistPixel;

@@ -16,7 +16,7 @@
 #include "Application.h"
 
 class mainLightcurve : public Fl_Gl_Window {
-   public:
+public:
 	mainLightcurve(int x,int y,int w,int h,const char *l=0);
 	void draw();   
 };
