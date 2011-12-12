@@ -69,6 +69,9 @@ void mainHistogram::draw()
 	glOrtho(0,MAX_CHANNEL+2*XBORDER,0,MAX_CHANNEL+2*YBORDER,0,-1);
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	glPushMatrix();
 	glLoadIdentity();
 	glClearColor(0.0,0.0,0.0,0.0);
@@ -95,6 +98,9 @@ void mainHistogram::draw()
 	glEnd();
 	
 	// draw the line showing the low energy cutoff
+	glColor4f(0.0, 0.0, 1.0, 0.5);
+	glRectf(XBORDER, 0, low_threshold, MAX_CHANNEL);
+	
 	glColor3f(0.0, 0.0, 1.0);
 	glBegin(GL_LINE_LOOP);
 	glVertex2f(low_threshold, YBORDER);
