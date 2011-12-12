@@ -67,47 +67,39 @@ Fl_Menu_Item* Gui::WritePicScreen = Gui::menu_menuBar + 9;
 Fl_Menu_Item* Gui::WriteLightcurve = Gui::menu_menuBar + 10;
 Fl_Menu_Item* Gui::menuProc = Gui::menu_menuBar + 12;
 
-void Gui::cb_nextFrameBut_i(Fl_Button*, void*) {
-  data->nextFrame();
+void Gui::cb_Flush_i(Fl_Button*, void*) {
+  app->flush_image();
 }
-void Gui::cb_nextFrameBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_nextFrameBut_i(o,v);
-}
-
-void Gui::cb_prevFrameBut_i(Fl_Button*, void*) {
-  data->previousFrame();
-}
-void Gui::cb_prevFrameBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_prevFrameBut_i(o,v);
+void Gui::cb_Flush(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_Flush_i(o,v);
 }
 
-void Gui::cb_flushBut_i(Fl_Button*, void*) {
-  app->FlushData();
+void Gui::cb_mainImageMin_slider_i(Fl_Value_Slider*, void*) {
+  app->test();
 }
-void Gui::cb_flushBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_flushBut_i(o,v);
+void Gui::cb_mainImageMin_slider(Fl_Value_Slider* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_mainImageMin_slider_i(o,v);
 }
 
-void Gui::cb_printFrame_i(Fl_Button*, void*) {
-  data->printFrame();
+Fl_Menu_Item Gui::menu_choice[] = {
+ {"Channel", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Energy", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0}
+};
+
+void Gui::cb_Flush1_i(Fl_Button*, void*) {
+  app->flush_histogram();
 }
-void Gui::cb_printFrame(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_printFrame_i(o,v);
+void Gui::cb_Flush1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_Flush1_i(o,v);
 }
 
 void Gui::cb_reset_i(Fl_Button*, void*) {
   app->reset_read_counter();
 }
 void Gui::cb_reset(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_reset_i(o,v);
+  ((Gui*)(o->parent()->user_data()))->cb_reset_i(o,v);
 }
-
-Fl_Menu_Item Gui::menu_Detector[] = {
- {"All", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 1", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Detector 2", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {0,0,0,0,0,0,0,0,0}
-};
 
 void Gui::cb_initializeBut_i(Fl_Light_Button*, void*) {
   app->initialize_data();
@@ -369,186 +361,122 @@ Gui::Gui() {
       menuBar->color((Fl_Color)29);
       menuBar->menu(menu_menuBar);
     } // Fl_Menu_Bar* menuBar
-    { mainHistogramWindow = new mainHistogram(625, 460, 265, 240, "Histogram");
-      mainHistogramWindow->box(FL_GTK_UP_BOX);
-      mainHistogramWindow->color(FL_BACKGROUND_COLOR);
-      mainHistogramWindow->selection_color(FL_BACKGROUND_COLOR);
-      mainHistogramWindow->labeltype(FL_NORMAL_LABEL);
-      mainHistogramWindow->labelfont(0);
-      mainHistogramWindow->labelsize(14);
-      mainHistogramWindow->labelcolor(FL_FOREGROUND_COLOR);
-      mainHistogramWindow->align(Fl_Align(FL_ALIGN_CENTER));
-      mainHistogramWindow->when(FL_WHEN_RELEASE);
-    } // mainHistogram* mainHistogramWindow
-    { mainImageWindow = new mainImage(3, 313, 402, 397, "Image");
-      mainImageWindow->box(FL_GTK_UP_BOX);
-      mainImageWindow->color(FL_BACKGROUND_COLOR);
-      mainImageWindow->selection_color(FL_BACKGROUND_COLOR);
-      mainImageWindow->labeltype(FL_NORMAL_LABEL);
-      mainImageWindow->labelfont(0);
-      mainImageWindow->labelsize(14);
-      mainImageWindow->labelcolor(FL_FOREGROUND_COLOR);
-      mainImageWindow->align(Fl_Align(FL_ALIGN_CENTER));
-      mainImageWindow->when(FL_WHEN_RELEASE);
-    } // mainImage* mainImageWindow
-    { subImageWindow = new subImage(415, 315, 145, 140, "Image Zoom");
-      subImageWindow->box(FL_GTK_UP_BOX);
-      subImageWindow->color(FL_BACKGROUND_COLOR);
-      subImageWindow->selection_color(FL_BACKGROUND_COLOR);
-      subImageWindow->labeltype(FL_NORMAL_LABEL);
-      subImageWindow->labelfont(0);
-      subImageWindow->labelsize(14);
-      subImageWindow->labelcolor(FL_FOREGROUND_COLOR);
-      subImageWindow->align(Fl_Align(FL_ALIGN_CENTER));
-      subImageWindow->when(FL_WHEN_RELEASE);
-    } // subImage* subImageWindow
-    { TopOutput = new Fl_Group(325, 35, 695, 520);
-      { rateOutput0 = new Fl_Output(375, 115, 80, 25, "Rate [cts/s]");
-      } // Fl_Output* rateOutput0
-      { rateOutput1 = new Fl_Output(460, 115, 45, 25);
-      } // Fl_Output* rateOutput1
-      { rateOutput2 = new Fl_Output(510, 115, 45, 25);
-      } // Fl_Output* rateOutput2
-      { rateOutput3 = new Fl_Output(560, 115, 45, 25);
-      } // Fl_Output* rateOutput3
-      { rateOutput4 = new Fl_Output(610, 115, 45, 25);
-      } // Fl_Output* rateOutput4
-      { rateOutput5 = new Fl_Output(660, 115, 45, 25);
-      } // Fl_Output* rateOutput5
-      { rateOutput6 = new Fl_Output(710, 115, 45, 25);
-      } // Fl_Output* rateOutput6
-      { rateOutput7 = new Fl_Output(760, 115, 45, 25);
-      } // Fl_Output* rateOutput7
-      { shutterstateOutput = new Fl_Output(565, 65, 30, 25, "Shut state");
-      } // Fl_Output* shutterstateOutput
-      { TempOutput = new Fl_Output(375, 145, 30, 25, "Temp");
-      } // Fl_Output* TempOutput
-      { histEnergy = new Fl_Output(940, 500, 80, 25, "Energy");
-      } // Fl_Output* histEnergy
-      { histCounts = new Fl_Output(940, 530, 80, 25, "Counts");
-      } // Fl_Output* histCounts
-      TopOutput->end();
-    } // Fl_Group* TopOutput
-    { dataPlayback = new Fl_Group(420, 31, 809, 119);
-      { nextFrameBut = new Fl_Button(745, 74, 80, 25, "Next Frame");
-        nextFrameBut->callback((Fl_Callback*)cb_nextFrameBut);
-      } // Fl_Button* nextFrameBut
-      { prevFrameBut = new Fl_Button(630, 74, 110, 25, "Previous Frame");
-        prevFrameBut->callback((Fl_Callback*)cb_prevFrameBut);
-      } // Fl_Button* prevFrameBut
-      { syncLightBut = new Fl_Light_Button(835, 35, 70, 25, "Sync");
-      } // Fl_Light_Button* syncLightBut
-      { flushBut = new Fl_Button(910, 35, 80, 25, "Flush");
-        flushBut->callback((Fl_Callback*)cb_flushBut);
-      } // Fl_Button* flushBut
-      { printFrame = new Fl_Button(830, 74, 80, 25, "Print Frame");
-        printFrame->callback((Fl_Callback*)cb_printFrame);
-      } // Fl_Button* printFrame
-      { frameTime = new Fl_Value_Output(793, 36, 33, 24, "frame time");
-      } // Fl_Value_Output* frameTime
-      { Fl_Group* o = new Fl_Group(1080, 45, 148, 24);
-        { chipbitValOut0 = new Fl_Value_Output(1080, 45, 33, 24, "Chip bit");
-          chipbitValOut0->deactivate();
-        } // Fl_Value_Output* chipbitValOut0
-        { chipbitValOut1 = new Fl_Value_Output(1116, 45, 33, 24);
-          chipbitValOut1->deactivate();
-        } // Fl_Value_Output* chipbitValOut1
-        { chipbitValOut2 = new Fl_Value_Output(1155, 45, 33, 24);
-          chipbitValOut2->deactivate();
-        } // Fl_Value_Output* chipbitValOut2
-        { chipbitValOut3 = new Fl_Value_Output(1195, 45, 33, 24);
-          chipbitValOut3->deactivate();
-        } // Fl_Value_Output* chipbitValOut3
-        o->end();
-      } // Fl_Group* o
-      { Fl_Group* o = new Fl_Group(1080, 72, 148, 24);
-        { trigbitValOut0 = new Fl_Value_Output(1080, 72, 33, 24, "Trig bit");
-          trigbitValOut0->deactivate();
-        } // Fl_Value_Output* trigbitValOut0
-        { trigbitValOut1 = new Fl_Value_Output(1116, 72, 33, 24);
-          trigbitValOut1->deactivate();
-        } // Fl_Value_Output* trigbitValOut1
-        { trigbitValOut2 = new Fl_Value_Output(1155, 72, 33, 24);
-          trigbitValOut2->deactivate();
-        } // Fl_Value_Output* trigbitValOut2
-        { trigbitValOut3 = new Fl_Value_Output(1195, 72, 33, 24);
-          trigbitValOut3->deactivate();
-        } // Fl_Value_Output* trigbitValOut3
-        o->end();
-      } // Fl_Group* o
-      { Fl_Group* o = new Fl_Group(1080, 99, 148, 24);
-        { seubitValOut0 = new Fl_Value_Output(1080, 99, 33, 24, "SEU bit");
-          seubitValOut0->deactivate();
-        } // Fl_Value_Output* seubitValOut0
-        { seubitValOut1 = new Fl_Value_Output(1116, 99, 33, 24);
-          seubitValOut1->deactivate();
-        } // Fl_Value_Output* seubitValOut1
-        { seubitValOut2 = new Fl_Value_Output(1155, 99, 33, 24);
-          seubitValOut2->deactivate();
-        } // Fl_Value_Output* seubitValOut2
-        { seubitValOut3 = new Fl_Value_Output(1195, 99, 33, 24);
-          seubitValOut3->deactivate();
-        } // Fl_Value_Output* seubitValOut3
-        o->end();
-      } // Fl_Group* o
-      { Fl_Group* o = new Fl_Group(1081, 126, 148, 24);
-        { noiseValOut0 = new Fl_Value_Output(1081, 126, 33, 24, "Noise");
-          noiseValOut0->deactivate();
-        } // Fl_Value_Output* noiseValOut0
-        { noiseValOut1 = new Fl_Value_Output(1117, 126, 33, 24);
-          noiseValOut1->deactivate();
-        } // Fl_Value_Output* noiseValOut1
-        { noiseValOut2 = new Fl_Value_Output(1156, 126, 33, 24);
-          noiseValOut2->deactivate();
-        } // Fl_Value_Output* noiseValOut2
-        { noiseValOut3 = new Fl_Value_Output(1196, 126, 33, 24);
-          noiseValOut3->deactivate();
-        } // Fl_Value_Output* noiseValOut3
-        o->end();
-      } // Fl_Group* o
-      { framenumOutput = new Fl_Value_Output(665, 36, 55, 24, "Frame #:");
-      } // Fl_Value_Output* framenumOutput
-      { Fl_Button* o = new Fl_Button(420, 65, 55, 25, "reset");
-        o->callback((Fl_Callback*)cb_reset);
+    { Fl_Group* o = new Fl_Group(15, 328, 555, 404, "Image");
+      o->box(FL_DOWN_FRAME);
+      { mainImageWindow = new mainImage(15, 328, 400, 400, "Image");
+        mainImageWindow->box(FL_GTK_UP_BOX);
+        mainImageWindow->color(FL_BACKGROUND_COLOR);
+        mainImageWindow->selection_color(FL_BACKGROUND_COLOR);
+        mainImageWindow->labeltype(FL_NORMAL_LABEL);
+        mainImageWindow->labelfont(0);
+        mainImageWindow->labelsize(14);
+        mainImageWindow->labelcolor(FL_FOREGROUND_COLOR);
+        mainImageWindow->align(Fl_Align(FL_ALIGN_CENTER));
+        mainImageWindow->when(FL_WHEN_RELEASE);
+      } // mainImage* mainImageWindow
+      { subImageWindow = new subImage(422, 330, 145, 140, "Image Zoom");
+        subImageWindow->box(FL_GTK_UP_BOX);
+        subImageWindow->color(FL_BACKGROUND_COLOR);
+        subImageWindow->selection_color(FL_BACKGROUND_COLOR);
+        subImageWindow->labeltype(FL_NORMAL_LABEL);
+        subImageWindow->labelfont(0);
+        subImageWindow->labelsize(14);
+        subImageWindow->labelcolor(FL_FOREGROUND_COLOR);
+        subImageWindow->align(Fl_Align(FL_ALIGN_CENTER));
+        subImageWindow->when(FL_WHEN_RELEASE);
+      } // subImage* subImageWindow
+      { pixelNum = new Fl_Output(457, 510, 80, 25, "Pixel");
+      } // Fl_Output* pixelNum
+      { pixelCounts = new Fl_Output(457, 480, 80, 25, "Cts");
+      } // Fl_Output* pixelCounts
+      { subImageLockbut = new Fl_Light_Button(432, 540, 105, 25, "Unlock View");
+        subImageLockbut->selection_color((Fl_Color)1);
+      } // Fl_Light_Button* subImageLockbut
+      { Fl_Button* o = new Fl_Button(481, 569, 80, 25, "Flush");
+        o->callback((Fl_Callback*)cb_Flush);
       } // Fl_Button* o
-      dataPlayback->end();
-    } // Fl_Group* dataPlayback
-    { pixelNum = new Fl_Output(445, 495, 80, 25, "Pixel");
-    } // Fl_Output* pixelNum
-    { pixelCounts = new Fl_Output(445, 465, 80, 25, "Cts");
-    } // Fl_Output* pixelCounts
-    { subImageLockbut = new Fl_Light_Button(420, 525, 105, 25, "Unlock View");
-      subImageLockbut->selection_color((Fl_Color)1);
-    } // Fl_Light_Button* subImageLockbut
-    { mainHistogramLockbut = new Fl_Light_Button(900, 465, 65, 25, "Unlock");
-      mainHistogramLockbut->selection_color((Fl_Color)1);
-    } // Fl_Light_Button* mainHistogramLockbut
-    { mainHistogramXlabelmid = new Fl_Value_Output(735, 707, 35, 23, "Energy:");
-      mainHistogramXlabelmid->box(FL_THIN_UP_BOX);
-    } // Fl_Value_Output* mainHistogramXlabelmid
-    { mainHistogramXlabelmax = new Fl_Value_Output(865, 707, 35, 23);
-      mainHistogramXlabelmax->box(FL_THIN_UP_BOX);
-    } // Fl_Value_Output* mainHistogramXlabelmax
-    { mainHistogramYlabelmax = new Fl_Value_Output(585, 457, 35, 23);
-      mainHistogramYlabelmax->box(FL_THIN_UP_BOX);
-    } // Fl_Value_Output* mainHistogramYlabelmax
-    { mainHistogramYlabelmid = new Fl_Value_Output(585, 577, 35, 23);
-      mainHistogramYlabelmid->box(FL_THIN_UP_BOX);
-    } // Fl_Value_Output* mainHistogramYlabelmid
+      { mainImageMin_slider = new Fl_Value_Slider(431, 568, 40, 145, "min:");
+        mainImageMin_slider->maximum(1024);
+        mainImageMin_slider->step(1);
+        mainImageMin_slider->value(1);
+        mainImageMin_slider->textsize(14);
+        mainImageMin_slider->callback((Fl_Callback*)cb_mainImageMin_slider);
+        mainImageMin_slider->align(Fl_Align(290));
+      } // Fl_Value_Slider* mainImageMin_slider
+      o->end();
+    } // Fl_Group* o
+    { rateOutput0 = new Fl_Output(375, 115, 80, 25, "Rate [cts/s]");
+    } // Fl_Output* rateOutput0
+    { rateOutput1 = new Fl_Output(460, 115, 45, 25);
+    } // Fl_Output* rateOutput1
+    { rateOutput2 = new Fl_Output(510, 115, 45, 25);
+    } // Fl_Output* rateOutput2
+    { rateOutput3 = new Fl_Output(560, 115, 45, 25);
+    } // Fl_Output* rateOutput3
+    { rateOutput4 = new Fl_Output(610, 115, 45, 25);
+    } // Fl_Output* rateOutput4
+    { rateOutput5 = new Fl_Output(660, 115, 45, 25);
+    } // Fl_Output* rateOutput5
+    { rateOutput6 = new Fl_Output(710, 115, 45, 25);
+    } // Fl_Output* rateOutput6
+    { rateOutput7 = new Fl_Output(760, 115, 45, 25);
+    } // Fl_Output* rateOutput7
+    { shutterstateOutput = new Fl_Output(700, 40, 30, 25, "Shut state");
+    } // Fl_Output* shutterstateOutput
+    { TempOutput = new Fl_Output(700, 70, 30, 25, "Temp");
+    } // Fl_Output* TempOutput
+    { Fl_Group* o = new Fl_Group(585, 477, 480, 243, "Histogram");
+      o->box(FL_THIN_UP_FRAME);
+      o->color((Fl_Color)41);
+      { mainHistogramWindow = new mainHistogram(625, 480, 265, 240, "Histogram");
+        mainHistogramWindow->box(FL_GTK_UP_BOX);
+        mainHistogramWindow->color(FL_BACKGROUND_COLOR);
+        mainHistogramWindow->selection_color(FL_BACKGROUND_COLOR);
+        mainHistogramWindow->labeltype(FL_NORMAL_LABEL);
+        mainHistogramWindow->labelfont(0);
+        mainHistogramWindow->labelsize(14);
+        mainHistogramWindow->labelcolor(FL_FOREGROUND_COLOR);
+        mainHistogramWindow->align(Fl_Align(FL_ALIGN_CENTER));
+        mainHistogramWindow->when(FL_WHEN_RELEASE);
+      } // mainHistogram* mainHistogramWindow
+      { mainHistogramYlabelmid = new Fl_Value_Output(585, 597, 35, 23);
+        mainHistogramYlabelmid->box(FL_THIN_UP_BOX);
+      } // Fl_Value_Output* mainHistogramYlabelmid
+      { mainHistogramYlabelmax = new Fl_Value_Output(585, 477, 35, 23);
+        mainHistogramYlabelmax->box(FL_THIN_UP_BOX);
+      } // Fl_Value_Output* mainHistogramYlabelmax
+      { Fl_Choice* o = new Fl_Choice(965, 585, 85, 25, "choice:");
+        o->down_box(FL_BORDER_BOX);
+        o->menu(menu_choice);
+      } // Fl_Choice* o
+      { histLow = new Fl_Value_Output(995, 546, 55, 24, "low threshold:");
+      } // Fl_Value_Output* histLow
+      { histCounts = new Fl_Value_Output(995, 516, 55, 24, "Counts:");
+      } // Fl_Value_Output* histCounts
+      { histEnergy = new Fl_Value_Output(995, 486, 55, 24, "Chan/Energy:");
+      } // Fl_Value_Output* histEnergy
+      { Fl_Button* o = new Fl_Button(970, 625, 80, 25, "Flush");
+        o->callback((Fl_Callback*)cb_Flush1);
+      } // Fl_Button* o
+      o->end();
+    } // Fl_Group* o
+    { frameTime = new Fl_Value_Output(535, 36, 33, 24, "frame time");
+    } // Fl_Value_Output* frameTime
+    { framenumOutput = new Fl_Value_Output(400, 36, 55, 24, "Frame #:");
+    } // Fl_Value_Output* framenumOutput
+    { Fl_Button* o = new Fl_Button(400, 65, 55, 25, "reset");
+      o->callback((Fl_Callback*)cb_reset);
+    } // Fl_Button* o
     { consoleBuf = new Fl_Text_Display(590, 320, 520, 130);
     } // Fl_Text_Display* consoleBuf
-    { Fl_Choice* o = new Fl_Choice(90, 65, 95, 25, "Detector:");
-      o->down_box(FL_BORDER_BOX);
-      o->menu(menu_Detector);
-    } // Fl_Choice* o
-    { initializeBut = new Fl_Light_Button(209, 35, 80, 25, "Initialize");
+    { initializeBut = new Fl_Light_Button(10, 35, 80, 25, "Initialize");
       initializeBut->box(FL_THIN_UP_BOX);
       initializeBut->callback((Fl_Callback*)cb_initializeBut);
     } // Fl_Light_Button* initializeBut
-    { startReadingDataButton = new Fl_Button(390, 35, 60, 25, "Read");
+    { startReadingDataButton = new Fl_Button(95, 35, 60, 25, "Read");
       startReadingDataButton->callback((Fl_Callback*)cb_startReadingDataButton);
     } // Fl_Button* startReadingDataButton
-    { closeBut = new Fl_Light_Button(209, 65, 80, 25, "Close");
+    { closeBut = new Fl_Light_Button(10, 65, 80, 25, "Close");
       closeBut->callback((Fl_Callback*)cb_closeBut);
     } // Fl_Light_Button* closeBut
     { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 125, "Light curve");
@@ -562,19 +490,19 @@ Gui::Gui() {
       mainLightcurveWindow->align(Fl_Align(FL_ALIGN_CENTER));
       mainLightcurveWindow->when(FL_WHEN_RELEASE);
     } // mainLightcurve* mainLightcurveWindow
-    { glitchBut = new Fl_Light_Button(90, 100, 75, 25, "Glitch");
+    { glitchBut = new Fl_Light_Button(195, 210, 75, 25, "Glitch");
     } // Fl_Light_Button* glitchBut
-    { sendParamsBut = new Fl_Button(83, 140, 100, 25, "Send Params");
+    { sendParamsBut = new Fl_Button(10, 155, 100, 25, "Send Params");
       sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
     } // Fl_Button* sendParamsBut
     { testBut = new Fl_Button(825, 195, 75, 25, "Test");
     } // Fl_Button* testBut
-    { nEvents = new Fl_Value_Input(345, 35, 40, 24, "events");
+    { nEvents = new Fl_Value_Input(295, 35, 40, 24, "events");
     } // Fl_Value_Input* nEvents
-    { writeFileBut = new Fl_Light_Button(85, 210, 95, 25, "Write to file");
+    { writeFileBut = new Fl_Light_Button(10, 95, 95, 25, "Write to file");
       writeFileBut->callback((Fl_Callback*)cb_writeFileBut);
     } // Fl_Light_Button* writeFileBut
-    { stopReadingDataButton = new Fl_Button(455, 35, 75, 25, "Stop");
+    { stopReadingDataButton = new Fl_Button(160, 35, 75, 25, "Stop");
       stopReadingDataButton->labelcolor((Fl_Color)1);
       stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
       stopReadingDataButton->deactivate();
@@ -583,26 +511,16 @@ Gui::Gui() {
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Clear);
     } // Fl_Button* o
-    { setHoldBut = new Fl_Button(85, 175, 100, 25, "Set Hold Time");
+    { setHoldBut = new Fl_Button(10, 190, 100, 25, "Set Hold Time");
       setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
     } // Fl_Button* setHoldBut
-    { setTrigBut = new Fl_Button(198, 175, 125, 25, "Set Trigger Options");
+    { setTrigBut = new Fl_Button(115, 155, 125, 25, "Set Trigger Options");
       setTrigBut->callback((Fl_Callback*)cb_setTrigBut);
     } // Fl_Button* setTrigBut
     { testOutput = new Fl_Value_Output(825, 166, 77, 24, "value:");
     } // Fl_Value_Output* testOutput
-    { nEventsDone = new Fl_Value_Output(380, 66, 35, 24, "read counter:");
+    { nEventsDone = new Fl_Value_Output(295, 66, 40, 24, "read counter:");
     } // Fl_Value_Output* nEventsDone
-    { mainImageMin_setBut = new Fl_Button(465, 560, 45, 25, "set");
-      app->set_mainImage_min();
-    } // Fl_Button* mainImageMin_setBut
-    { mainImageMin_slider = new Fl_Value_Slider(420, 560, 40, 145, "min:");
-      mainImageMin_slider->maximum(1024);
-      mainImageMin_slider->step(1);
-      mainImageMin_slider->value(1);
-      mainImageMin_slider->textsize(14);
-      mainImageMin_slider->align(Fl_Align(290));
-    } // Fl_Value_Slider* mainImageMin_slider
     { Fl_Group* o = new Fl_Group(155, 270, 220, 30, "Detectors to display");
       o->box(FL_DOWN_BOX);
       o->align(Fl_Align(FL_ALIGN_LEFT));

@@ -367,7 +367,6 @@ void data_update_display(unsigned short int *frame)
 	if (data_source == 1){		
 		int index = 0;
 
-		
 		// Loop through the 4 ASICS
 		for( int j = 0; j < 4; j++)
 		{
@@ -454,13 +453,18 @@ void data_update_display(unsigned short int *frame)
 	}
 
 	if (data_source == 0) {
+		int x, y, z;
 		// if parsing simulated data
 	
 		// gui->testOutput->value(strip.number);
 	 	
 		// HistogramFunction[strip_data]++;
-		//detImage[arc4random() % 64 + 1][strip_number] = 1;
-		// detImagetime[tmp][strip_number] = clock();
+		x = arc4random() % 128 + 1;
+		y = arc4random() % 128 + 1;
+		z = arc4random() % 1024 + 1;
+		HistogramFunction[z] += 1;
+		detImage[x][y] = z;
+		detImagetime[x][y] = clock();
 		// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
 		
 	}

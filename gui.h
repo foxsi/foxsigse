@@ -9,19 +9,19 @@
 #include "Foxsidata.h"
 #include "usbd2xx.h"
 #include <FL/Fl_Menu_Bar.H>
-#include "mainHistogram.h"
+#include <FL/Fl_Group.H>
 #include "mainImage.h"
 #include "subImage.h"
-#include <FL/Fl_Group.H>
 #include <FL/Fl_Output.H>
-#include <FL/Fl_Button.H>
 #include <FL/Fl_Light_Button.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Value_Slider.H>
+#include "mainHistogram.h"
 #include <FL/Fl_Value_Output.H>
-#include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Choice.H>
+#include <FL/Fl_Text_Display.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
-#include <FL/Fl_Value_Slider.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_File_Input.H>
@@ -53,10 +53,20 @@ private:
   void cb_ACTEL_i(Fl_Menu_*, void*);
   static void cb_ACTEL(Fl_Menu_*, void*);
 public:
-  mainHistogram *mainHistogramWindow;
   mainImage *mainImageWindow;
   subImage *subImageWindow;
-  Fl_Group *TopOutput;
+  Fl_Output *pixelNum;
+  Fl_Output *pixelCounts;
+  Fl_Light_Button *subImageLockbut;
+private:
+  void cb_Flush_i(Fl_Button*, void*);
+  static void cb_Flush(Fl_Button*, void*);
+public:
+  Fl_Value_Slider *mainImageMin_slider;
+private:
+  void cb_mainImageMin_slider_i(Fl_Value_Slider*, void*);
+  static void cb_mainImageMin_slider(Fl_Value_Slider*, void*);
+public:
   Fl_Output *rateOutput0;
   Fl_Output *rateOutput1;
   Fl_Output *rateOutput2;
@@ -67,62 +77,24 @@ public:
   Fl_Output *rateOutput7;
   Fl_Output *shutterstateOutput;
   Fl_Output *TempOutput;
-  Fl_Output *histEnergy;
-  Fl_Output *histCounts;
-  Fl_Group *dataPlayback;
-  Fl_Button *nextFrameBut;
+  mainHistogram *mainHistogramWindow;
+  Fl_Value_Output *mainHistogramYlabelmid;
+  Fl_Value_Output *mainHistogramYlabelmax;
+  static Fl_Menu_Item menu_choice[];
+  Fl_Value_Output *histLow;
+  Fl_Value_Output *histCounts;
+  Fl_Value_Output *histEnergy;
 private:
-  void cb_nextFrameBut_i(Fl_Button*, void*);
-  static void cb_nextFrameBut(Fl_Button*, void*);
-public:
-  Fl_Button *prevFrameBut;
-private:
-  void cb_prevFrameBut_i(Fl_Button*, void*);
-  static void cb_prevFrameBut(Fl_Button*, void*);
-public:
-  Fl_Light_Button *syncLightBut;
-  Fl_Button *flushBut;
-private:
-  void cb_flushBut_i(Fl_Button*, void*);
-  static void cb_flushBut(Fl_Button*, void*);
-public:
-  Fl_Button *printFrame;
-private:
-  void cb_printFrame_i(Fl_Button*, void*);
-  static void cb_printFrame(Fl_Button*, void*);
+  void cb_Flush1_i(Fl_Button*, void*);
+  static void cb_Flush1(Fl_Button*, void*);
 public:
   Fl_Value_Output *frameTime;
-  Fl_Value_Output *chipbitValOut0;
-  Fl_Value_Output *chipbitValOut1;
-  Fl_Value_Output *chipbitValOut2;
-  Fl_Value_Output *chipbitValOut3;
-  Fl_Value_Output *trigbitValOut0;
-  Fl_Value_Output *trigbitValOut1;
-  Fl_Value_Output *trigbitValOut2;
-  Fl_Value_Output *trigbitValOut3;
-  Fl_Value_Output *seubitValOut0;
-  Fl_Value_Output *seubitValOut1;
-  Fl_Value_Output *seubitValOut2;
-  Fl_Value_Output *seubitValOut3;
-  Fl_Value_Output *noiseValOut0;
-  Fl_Value_Output *noiseValOut1;
-  Fl_Value_Output *noiseValOut2;
-  Fl_Value_Output *noiseValOut3;
   Fl_Value_Output *framenumOutput;
 private:
   void cb_reset_i(Fl_Button*, void*);
   static void cb_reset(Fl_Button*, void*);
 public:
-  Fl_Output *pixelNum;
-  Fl_Output *pixelCounts;
-  Fl_Light_Button *subImageLockbut;
-  Fl_Light_Button *mainHistogramLockbut;
-  Fl_Value_Output *mainHistogramXlabelmid;
-  Fl_Value_Output *mainHistogramXlabelmax;
-  Fl_Value_Output *mainHistogramYlabelmax;
-  Fl_Value_Output *mainHistogramYlabelmid;
   Fl_Text_Display *consoleBuf;
-  static Fl_Menu_Item menu_Detector[];
   Fl_Light_Button *initializeBut;
 private:
   void cb_initializeBut_i(Fl_Light_Button*, void*);
@@ -171,8 +143,6 @@ private:
 public:
   Fl_Value_Output *testOutput;
   Fl_Value_Output *nEventsDone;
-  Fl_Button *mainImageMin_setBut;
-  Fl_Value_Slider *mainImageMin_slider;
   Fl_Check_Button *detector1_checkbox;
   Fl_Check_Button *detector2_checkbox;
   Fl_Check_Button *detector3_checkbox;
