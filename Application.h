@@ -83,7 +83,9 @@ public:
 	float get_pixel_half_life(void);
 	void reset_read_counter(void);
 	void set_mainImage_min(void);
-
+	void flush_histogram(void);
+	void flush_image(void);
+	
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream

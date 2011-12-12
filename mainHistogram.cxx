@@ -11,11 +11,14 @@
 #define XTICKINTERVALM 10
 #define NUM_DETECTORS 7
 #define XMIN 1
+#define MAX_CHANNEL 1024
 
-int HistogramFunction[1024];
+int HistogramFunction[MAX_CHANNEL];
 
 int chosenHistPixel;
 int mouseHistPixel;
+int low_threshold = 0;
+
 float FLHistcursorX[2], FLHistcursorY[2];
 
 float xmid = 50;
@@ -33,22 +36,21 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 	//srand ( time(NULL) );
 	
 	//initialize the histogram
-	for(int i=0;i<XSTRIPS;i++)
+	for(int i=0; i < MAX_CHANNEL; i++)
 	{
-		//HistogramFunction[i] = (rand() % YSTRIPS);
-		HistogramFunction[i] = i*10;
+		HistogramFunction[i] = i*1;
 	}
-	
+	FLHistcursorX[0] = 500;
+	mouseHistPixel = FLHistcursorX[0] - XBORDER;
 }
 
-// the drawing method: draws the histFunc into the window
 void mainHistogram::draw()
 {
+	// the drawing method: draws the histFunc into the window
 	int ymax;
 	int ymin = 0;
 	YTICKINTERVALM = (ymax-ymin)/YNUMTICKS;
 	YTICKINTERVAL = YTICKINTERVALM/2;
-	//char text[8];
 	ymax = maximumValue(HistogramFunction);
 	
 	if (!valid()) {
@@ -58,13 +60,13 @@ void mainHistogram::draw()
 	//The following line causes the display to not refresh after being moved
 	//gui->mainChartWindow->bounds(0.0, ymax);
 	
-	float FL_Yconv =(float) (YSTRIPS)/(ymax - ymin);
+	float FL_Yconv = (float) (MAX_CHANNEL)/(ymax - ymin);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
 	glViewport(0,0,w(),h());
-	glOrtho(0,XSTRIPS+2*XBORDER,0,YSTRIPS+2*YBORDER,0,-1);
+	glOrtho(0,MAX_CHANNEL+2*XBORDER,0,MAX_CHANNEL+2*YBORDER,0,-1);
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_DEPTH_TEST);
 	glPushMatrix();
@@ -77,12 +79,26 @@ void mainHistogram::draw()
 	glBegin(GL_LINE_LOOP);
 	glVertex2f(XBORDER, YBORDER);
 	
-	for(int i=0;i<XSTRIPS;i++)
+	for(int i=0; i<MAX_CHANNEL; i++)
 	{
-		glVertex2f(i+XBORDER, YBORDER + HistogramFunction[i]*FL_Yconv);
+		glVertex2f(i+XBORDER, (YBORDER + HistogramFunction[i])*FL_Yconv);
 	}
-	glVertex2f(XSTRIPS+XBORDER, YBORDER);
+	glVertex2f(MAX_CHANNEL+XBORDER, YBORDER);
 	glVertex2f(XBORDER, YBORDER);
+	glEnd();
+	
+	// draw vertival select line from mouse click
+	glColor3f(0.0, 1.0, 0.0);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(FLHistcursorX[0], YBORDER);
+	glVertex2f(FLHistcursorX[0], MAX_CHANNEL);
+	glEnd();
+	
+	// draw the line showing the low energy cutoff
+	glColor3f(0.0, 0.0, 1.0);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(low_threshold, YBORDER);
+	glVertex2f(low_threshold, MAX_CHANNEL);
 	glEnd();
 	
 	glPopMatrix();
@@ -93,8 +109,8 @@ void mainHistogram::draw()
 	gui->mainHistogramYlabelmid->value(ymax/2.0);
 	
 	//Should not make this update everytime
-	gui->mainHistogramXlabelmid->value(xmid);
-	gui->mainHistogramXlabelmax->value(xmax);
+	//gui->mainHistogramXlabelmid->value(xmid);
+	//gui->mainHistogramXlabelmax->value(xmax);
 	
 	//if(gui->mainHistogramLockbut->value() == 0)
 	//      {
@@ -114,19 +130,26 @@ void mainHistogram::draw()
 
 int mainHistogram::handle(int eventType)
 {
-	//      int button;
-	//      button=Fl::event_button();
-	//      if(eventType == FL_PUSH)
-	//      {
-	//              //convert between fltk coordinates and opengl coordinates
-	//      //      FLHistcursorX[0]=floor(Fl::event_x()*(XSTRIPS + 2*XBORDER)/w());
-	//      //      FLHistcursorY[0]=floor((h()-Fl::event_y())*(YSTRIPS + 2*YBORDER)/h());
-	//
-	//      //      mouseHistPixel = FLHistcursorX[0] - XBORDER;
-	//              //printf("pixel: (%4.2f,%4.2f)\n", FLHistcursorX[0] - XBORDER, FLHistcursorY[0]-YBORDER);
-	//      }
-	//      //if((eventType==FL_PUSH)&&(button==1))
-	//      //{
+	char text[8];
+	int button;
+	button=Fl::event_button();
+	if(eventType == FL_PUSH)
+	{
+		//convert between fltk coordinates and opengl coordinates
+		FLHistcursorX[0] = floor(Fl::event_x()*(MAX_CHANNEL + 2*XBORDER)/w());
+		FLHistcursorY[0] = floor((h()-Fl::event_y())*(YSTRIPS + 2*YBORDER)/h());
+
+		mouseHistPixel = FLHistcursorX[0] - XBORDER;
+	}
+	
+	// now update the value displayed
+	gui->histEnergy->value(mouseHistPixel);	
+	gui->histCounts->value(HistogramFunction[mouseHistPixel]);
+	
+	redraw();
+	
+	      //if((eventType==FL_PUSH)&&(button==1))
+	      //{
 	//      //      FLHistcursorX[1]=FLHistcursorX[0];
 	//      //      FLHistcursorY[1]=FLHistcursorY[0];
 	//      //      gui->mainHistogramLockbut->set();
@@ -162,7 +185,7 @@ int mainHistogram::maximumValue(int *array)
 	//cout << "size of array " << length << endl;
 	//do not consider below xmin
 	int max = array[XMIN];       // start with max = first element
-	for(int i = XMIN + 1; i<XSTRIPS; i++)
+	for(int i = XMIN + 1; i < MAX_CHANNEL; i++)
 	{
 		if(array[i] > max){
 			max = array[i];}

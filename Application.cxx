@@ -16,13 +16,14 @@
 
 #define XSTRIPS 128
 #define YSTRIPS 128
-#define CHANNELS 1024
+#define MAX_CHANNEL 1024
 #define MAXPATH 128
 
 extern Gui *gui;
 
-extern int HistogramFunction[CHANNELS];
+extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
+extern double detImagemask[XSTRIPS][YSTRIPS];
 
 extern int stop_message;
 extern FILE *dataFile;
@@ -54,6 +55,8 @@ float pixel_half_life;
 int mainImage_minimum;
 int detector_display[7];
 
+extern int low_threshold;
+
 Application::Application()
 {
 	// Constructor method for the Application class
@@ -61,12 +64,30 @@ Application::Application()
 	
 }
 
-void Application::FlushData(void)
+void Application::flush_histogram(void)
 {	
-	// Zeros all the data displays
-	//
-	gui->data->FlushHistogram();
-	gui->data->FlushImage();
+	// Zero the Histogram
+
+	for(int i = 0;i < MAX_CHANNEL; i++)
+	{
+		HistogramFunction[i] = 0;
+	}
+	gui->mainHistogramWindow->redraw();
+	
+}
+
+void Application::flush_image(void)
+{
+	for(int i=0;i<XSTRIPS;i++)
+	{
+		for(int j=0;j<YSTRIPS;j++)
+		{
+			detImage[i][j] = 0;
+			detImagemask[i][j] = 0;
+		}
+	}
+	gui->mainImageWindow->redraw();
+	gui->subImageWindow->redraw();
 }
 
 void Application::save_preferences(void)
@@ -139,7 +160,8 @@ void Application::readFile()
 
 	//store image name
 	//strcpy(filename,file);
-	FlushData();
+	flush_image();
+	flush_histogram();
 	
 	//gui->data->readDatafile(file);
 }
@@ -150,35 +172,16 @@ void Application::initialize_data(void)
 	if (gui->usb->open() < 0)	cout << "Could not open device.\n\n";
 //		else	gui->usb->findSync();
 	
-	gui->syncLightBut->value(1);
+	//gui->syncLightBut->value(1);
 	gui->initializeBut->value(1);
 	gui->closeBut->value(0);
-	
-	gui->chipbitValOut0->activate();
-	gui->chipbitValOut1->activate();
-	gui->chipbitValOut2->activate();
-	gui->chipbitValOut3->activate();
-	
-	gui->trigbitValOut0->activate();
-	gui->trigbitValOut1->activate();
-	gui->trigbitValOut2->activate();
-	gui->trigbitValOut3->activate();
-	
-	gui->seubitValOut0->activate();
-	gui->seubitValOut1->activate();
-	gui->seubitValOut2->activate();
-	gui->seubitValOut3->activate();
-	
-	gui->noiseValOut0->activate();
-	gui->noiseValOut1->activate();
-	gui->noiseValOut2->activate();
-	gui->noiseValOut3->activate();
 	
 	gui->startReadingDataButton->activate();
 	gui->sendParamsWindow_sendBut->activate();
 	gui->setHoldTimeWindow_setBut->activate();
 	gui->setHoldTimeWindow_autorunBut->activate();
-	FlushData();
+	flush_image();
+	flush_histogram();
 }
 
 void Application::close_data(void)
@@ -397,6 +400,7 @@ void* Application::auto_run_sequence(void* variable)
 	}	
 	return 0;
 	*/	
+	return 0;
 }
 
 
@@ -424,7 +428,10 @@ void Application::clear_console(void)
 	
 void Application::test(void)
 {
-
+	low_threshold = gui->mainImageMin_slider->value();
+	gui->histLow->value(low_threshold);
+	gui->mainHistogramWindow->redraw();
+	gui->histLow->redraw();
 }
 
 void Application::send_atten_state(bool value)

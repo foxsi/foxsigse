@@ -47,6 +47,7 @@ extern Foxsidata *data;
 
 // preference variable
 extern int mainImage_minimum;
+extern int low_threshold;
 
 mainImage::mainImage(int x,int y,int w,int h,const char *l)
 : Fl_Gl_Window(x,y,w,h,l)
@@ -105,7 +106,7 @@ void mainImage::draw()
 	{
 		for(int i=0;i<YSTRIPS;i++)
 	   	{
-			if(detImage[i][j] > mainImage_minimum){
+			if(detImage[i][j] > low_threshold){
 				grey = detImage[i][j]/ymax;
 				alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
 

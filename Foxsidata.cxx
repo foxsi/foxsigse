@@ -296,14 +296,14 @@ void Foxsidata::parseBuffer()
 	strip_data strip;
 	
 	//check for data sync, if synced light the sync button and read the frame
-	if ((ASICfile_wordbuffer[0 + currentPosition] == 0xeb90) && (ASICfile_wordbuffer[1 + currentPosition] == 0xeb90))
-	{gui->syncLightBut->value(1);} 
-	else 
-	{
+	//if ((ASICfile_wordbuffer[0 + currentPosition] == 0xeb90) && (ASICfile_wordbuffer[1 + currentPosition] == 0xeb90))
+	//{gui->syncLightBut->value(1);} 
+	//else 
+	//{
 		//if not sync then try to sync
-		gui->syncLightBut->value(0); 
-		syncBuffer();
-	}
+		//gui->syncLightBut->value(0); 
+	//	syncBuffer();
+	//}
 	
 	cout << "Beginning of frame at position " << currentPosition << endl;
 	cout << "Parsing..." << endl;
@@ -314,83 +314,58 @@ void Foxsidata::parseBuffer()
 	
 	gui->frameTime->value(current_ASICframe.det_time);
 	
-	//asic data
-	for(int i = 0; i<NUM_ASICS; i++)
-	{
-		current_ASICframe.adata[i].chip_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 3 + currentPosition];
-		current_ASICframe.adata[i].trig_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 4 + currentPosition];
-		current_ASICframe.adata[i].seu_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 5 + currentPosition];
-		
-		current_ASICframe.adata[i].asic_mask0 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 6 + currentPosition];
-		current_ASICframe.adata[i].asic_mask1 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 7 + currentPosition];
-		current_ASICframe.adata[i].asic_mask2 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 8 + currentPosition];
-		current_ASICframe.adata[i].asic_mask3 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 9 + currentPosition];
-		
-		current_ASICframe.adata[i].noise = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 10 + currentPosition];
-		for(int j = 0; j<NUM_STRIPS; j++)
+	/* //asic data
+		for(int i = 0; i<NUM_ASICS; i++)
 		{
-			strip = * (strip_data*) (&ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 11 + j + currentPosition]);
+			current_ASICframe.adata[i].chip_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 3 + currentPosition];
+			current_ASICframe.adata[i].trig_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 4 + currentPosition];
+			current_ASICframe.adata[i].seu_bit = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 5 + currentPosition];
 			
-			current_ASICframe.adata[i].sdata[j].number = strip.number;
-			current_ASICframe.adata[i].sdata[j].data = strip.data;
+			current_ASICframe.adata[i].asic_mask0 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 6 + currentPosition];
+			current_ASICframe.adata[i].asic_mask1 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 7 + currentPosition];
+			current_ASICframe.adata[i].asic_mask2 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 8 + currentPosition];
+			current_ASICframe.adata[i].asic_mask3 = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 9 + currentPosition];
 			
-			//now update the functions
-			HistogramFunction[strip.data]++;
-		}
-		current_ASICframe.adata[i].pedestal = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 11 + NUM_STRIPS + currentPosition];
-	}
-	
-	
-	for(int i=0;i<XSTRIPS;i++){
-		if( i==0 ){ xmask = current_ASICframe.adata[i / (XSTRIPS/2)].asic_mask0;
-			gui->chipbitValOut0->value(current_ASICframe.adata[i].chip_bit);
-			gui->trigbitValOut0->value(current_ASICframe.adata[i].trig_bit);
-			gui->seubitValOut0->value(current_ASICframe.adata[i].seu_bit);
-			gui->noiseValOut0->value(current_ASICframe.adata[i].noise);
-		}
-		if( i==1 ){ xmask = current_ASICframe.adata[i / (XSTRIPS/2)].asic_mask1;
-			gui->chipbitValOut1->value(current_ASICframe.adata[i].chip_bit);
-			gui->trigbitValOut1->value(current_ASICframe.adata[i].trig_bit);
-			gui->seubitValOut1->value(current_ASICframe.adata[i].seu_bit);
-			gui->noiseValOut1->value(current_ASICframe.adata[i].noise);
-		}
-		if( i==2 ){ xmask = current_ASICframe.adata[i / (XSTRIPS/2)].asic_mask2;
-			gui->chipbitValOut2->value(current_ASICframe.adata[i].chip_bit);
-			gui->trigbitValOut2->value(current_ASICframe.adata[i].trig_bit);
-			gui->seubitValOut2->value(current_ASICframe.adata[i].seu_bit);
-			gui->noiseValOut2->value(current_ASICframe.adata[i].noise);
-		}
-		if( i==3 ){ xmask = current_ASICframe.adata[i / (XSTRIPS/2)].asic_mask3;
-			gui->chipbitValOut3->value(current_ASICframe.adata[i].chip_bit);
-			gui->trigbitValOut3->value(current_ASICframe.adata[i].trig_bit);
-			gui->seubitValOut3->value(current_ASICframe.adata[i].seu_bit);
-			gui->noiseValOut3->value(current_ASICframe.adata[i].noise);
+			current_ASICframe.adata[i].noise = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 10 + currentPosition];
+			for(int j = 0; j<NUM_STRIPS; j++)
+			{
+				strip = * (strip_data*) (&ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 11 + j + currentPosition]);
+				
+				current_ASICframe.adata[i].sdata[j].number = strip.number;
+				current_ASICframe.adata[i].sdata[j].data = strip.data;
+				
+				//now update the functions
+				HistogramFunction[strip.data]++;
+			}
+			current_ASICframe.adata[i].pedestal = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 11 + NUM_STRIPS + currentPosition];
 		}
 		
-		for(int j=0;j<YSTRIPS;j++){
-			if( j==0 ){ ymask = current_ASICframe.adata[j / (YSTRIPS/2)+2].asic_mask0;}
-			if( j==1 ){ ymask = current_ASICframe.adata[j / (YSTRIPS/2)+2].asic_mask1;}
-			if( j==2 ){ ymask = current_ASICframe.adata[j / (YSTRIPS/2)+2].asic_mask2;}
-			if( j==3 ){ ymask = current_ASICframe.adata[j / (YSTRIPS/2)+2].asic_mask3;}
+		
 			
-			// update the Image Mask
-			detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);
-			
-			//update the Image
-			detImage[i][j] += sqrt(current_ASICframe.adata[i / (XSTRIPS/2)].sdata[i % (XSTRIPS/2)].data * current_ASICframe.adata[(j / (YSTRIPS/2))+2].sdata[j % (YSTRIPS/2)].data);
-			//detImage[i][j] = exp(-(pow((float) i-XSTRIPS/2,2) + pow((float) j-YSTRIPS/2,2))/(0.5*XSTRIPS));
+			for(int j=0;j<YSTRIPS;j++){
+				if( j==0 ){ ymask = current_ASICframe.adata[j / (YSTRIPS/2)+2].asic_mask0;}
+				if( j==1 ){ ymask = current_ASICframe.adata[j / (YSTRIPS/2)+2].asic_mask1;}
+				if( j==2 ){ ymask = current_ASICframe.adata[j / (YSTRIPS/2)+2].asic_mask2;}
+				if( j==3 ){ ymask = current_ASICframe.adata[j / (YSTRIPS/2)+2].asic_mask3;}
+				
+				// update the Image Mask
+				detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);
+				
+				//update the Image
+				detImage[i][j] += sqrt(current_ASICframe.adata[i / (XSTRIPS/2)].sdata[i % (XSTRIPS/2)].data * current_ASICframe.adata[(j / (YSTRIPS/2))+2].sdata[j % (YSTRIPS/2)].data);
+				//detImage[i][j] = exp(-(pow((float) i-XSTRIPS/2,2) + pow((float) j-YSTRIPS/2,2))/(0.5*XSTRIPS));
+			}
 		}
-	}
-	
-	currentPosition = ASIC_FRAMESIZE*(NUM_ASICS-1) + 11 + NUM_STRIPS + currentPosition;
-	
-	//done loading the one frame
-	//printFrame();
-	cout << "End of frame at position " << currentPosition << endl;
-	//now update the windows
-	gui->subImageWindow->redraw();
-	gui->mainImageWindow->redraw();
-	gui->mainHistogramWindow->redraw();
+		
+		currentPosition = ASIC_FRAMESIZE*(NUM_ASICS-1) + 11 + NUM_STRIPS + currentPosition;
+		
+		//done loading the one frame
+		//printFrame();
+		cout << "End of frame at position " << currentPosition << endl;
+		//now update the windows
+		gui->subImageWindow->redraw();
+		gui->mainImageWindow->redraw();
+		gui->mainHistogramWindow->redraw(); */
 }
 
 void Foxsidata::syncBuffer(void)
@@ -398,7 +373,7 @@ void Foxsidata::syncBuffer(void)
 	//need to add code to deal with reaching the end of the file!
 	
 	//try to sync with data again
-	gui->syncLightBut->value(0);
+	// gui->syncLightBut->value(0);
 	cout << "Seeking sync..." << endl;
 	while ((ASICfile_wordbuffer[0 + currentPosition] != 0xeb90) && (ASICfile_wordbuffer[1 + currentPosition] != 0xeb90))
 	{
@@ -407,7 +382,7 @@ void Foxsidata::syncBuffer(void)
 		currentPosition++;
 	} 
 	currentPosition++;
-	gui->syncLightBut->value(1);
+	// gui->syncLightBut->value(1);
 }
 
 void Foxsidata::printFrame(void)
