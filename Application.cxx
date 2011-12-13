@@ -158,22 +158,9 @@ void Application::readFile()
 	//gui->data->readDatafile(file);
 }
  
-void Application::initialize_data(void)
+void Application::initialize(void)
 {
-	// Initialize a connection to a data stream
-	if (gui->usb->open() < 0)	cout << "Could not open device.\n\n";
-//		else	gui->usb->findSync();
-	
-	//gui->syncLightBut->value(1);
-	gui->initializeBut->value(1);
-	gui->closeBut->value(0);
-	
-	gui->startReadingDataButton->activate();
-	gui->sendParamsWindow_sendBut->activate();
-	gui->setHoldTimeWindow_setBut->activate();
-	gui->setHoldTimeWindow_autorunBut->activate();
-	flush_image();
-	flush_histogram();
+	data_initialize();
 }
 
 void Application::close_data(void)
@@ -189,6 +176,7 @@ void Application::start_reading_data(void)
 {
 	print_to_console("Reading started.\n");
 	gui->stopReadingDataButton->activate();
+	gui->closeBut->deactivate();
 	gui->startReadingDataButton->deactivate();
 	
 	data_start_reading();	
@@ -452,6 +440,7 @@ void Application::stop_reading_data(void)
 	Fl::lock();
 	gui->stopReadingDataButton->deactivate();
 	gui->startReadingDataButton->activate();
+	gui->closeBut->activate();
 	Fl::unlock();
 	
 	// send the thread the message to stop itself	

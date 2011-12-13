@@ -146,13 +146,22 @@ exit(1);}
       Fl_Output rateOutput7 {
         xywh {760 115 45 25}
       }
-      Fl_Output shutterstateOutput {
-        label {Shut state}
-        xywh {700 40 30 25}
-      }
-      Fl_Output TempOutput {
-        label Temp
-        xywh {700 70 30 25}
+      Fl_Group {} {
+        label {Telemetry Info} open
+        xywh {700 40 255 55} box THIN_UP_FRAME
+      } {
+        Fl_Value_Output shutterstateOutput {
+          label {Shutter state}
+          xywh {873 41 37 27}
+        }
+        Fl_Value_Output tempOutput {
+          label Temp
+          xywh {743 41 40 24}
+        }
+        Fl_Value_Output HVOutput {
+          label HV
+          xywh {743 70 40 24}
+        }
       }
       Fl_Group {} {
         label Histogram open
@@ -216,19 +225,19 @@ exit(1);}
       }
       Fl_Light_Button initializeBut {
         label Initialize
-        callback {app->initialize_data()}
+        callback {app->initialize()}
         xywh {10 35 80 25} box THIN_UP_BOX
       }
       Fl_Button startReadingDataButton {
-        label Read
+        label Start
         callback {app->read_preferences();
 app->start_reading_data();}
-        xywh {95 35 60 25}
+        xywh {95 35 60 25} deactivate
       }
       Fl_Light_Button closeBut {
         label Close
         callback {app->close_data()}
-        xywh {10 65 80 25}
+        xywh {10 65 80 25} deactivate
       }
       Fl_Box mainLightcurveWindow {
         label {Light curve}

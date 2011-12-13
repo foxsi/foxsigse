@@ -11,9 +11,10 @@
  *  Functions to read the data from the telemetry stream.
  *
  */
-
 #ifndef _data_h_     // prevent multiple includes
 #define _data_h_
+
+#include "okFrontPanelDLL.h"
 
 void* data_testfunction(void *p);
 void* data_watch_buffer(void *p);
@@ -25,6 +26,7 @@ void data_stop_reading(void);
 void data_update_display(unsigned short int *frame);
 void data_frame_print_to_file(unsigned short int *frame);
 void data_set_datafilename(void);
-
+void data_initialize(void);
+okCFrontPanel *data_initialize_formatter_FPGA(void);
 
 #endif

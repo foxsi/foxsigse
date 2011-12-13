@@ -20,10 +20,10 @@
 #include "usbd2xx.h"
 #include <pthread.h>
 #include "Application.h"
+#include "gui.h"
 
 using namespace std;
 
-#include "gui.h"
 extern Gui *gui;
 extern Application *app;
 

@@ -75,7 +75,7 @@ void Gui::cb_Flush(Fl_Button* o, void* v) {
 }
 
 void Gui::cb_mainImageMin_slider_i(Fl_Value_Slider*, void*) {
-  app->test();
+  app->set_lowthreshold();
 }
 void Gui::cb_mainImageMin_slider(Fl_Value_Slider* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_mainImageMin_slider_i(o,v);
@@ -102,7 +102,7 @@ void Gui::cb_reset(Fl_Button* o, void* v) {
 }
 
 void Gui::cb_initializeBut_i(Fl_Light_Button*, void*) {
-  app->initialize_data();
+  app->initialize();
 }
 void Gui::cb_initializeBut(Fl_Light_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_initializeBut_i(o,v);
@@ -148,7 +148,7 @@ void Gui::cb_Clear_i(Fl_Button*, void*) {
   app->clear_console();
 }
 void Gui::cb_Clear(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_Clear_i(o,v);
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_Clear_i(o,v);
 }
 
 void Gui::cb_setHoldBut_i(Fl_Button*, void*) {
@@ -362,7 +362,7 @@ Gui::Gui() {
       menuBar->menu(menu_menuBar);
     } // Fl_Menu_Bar* menuBar
     { Fl_Group* o = new Fl_Group(15, 328, 555, 404, "Image");
-      o->box(FL_DOWN_FRAME);
+      o->box(FL_THIN_UP_FRAME);
       { mainImageWindow = new mainImage(15, 328, 400, 400, "Image");
         mainImageWindow->box(FL_GTK_UP_BOX);
         mainImageWindow->color(FL_BACKGROUND_COLOR);
@@ -405,7 +405,7 @@ Gui::Gui() {
       } // Fl_Value_Slider* mainImageMin_slider
       o->end();
     } // Fl_Group* o
-    { rateOutput0 = new Fl_Output(375, 115, 80, 25, "Rate [cts/s]");
+    { rateOutput0 = new Fl_Output(405, 115, 50, 25, "Rate [cts/s]");
     } // Fl_Output* rateOutput0
     { rateOutput1 = new Fl_Output(460, 115, 45, 25);
     } // Fl_Output* rateOutput1
@@ -421,10 +421,16 @@ Gui::Gui() {
     } // Fl_Output* rateOutput6
     { rateOutput7 = new Fl_Output(760, 115, 45, 25);
     } // Fl_Output* rateOutput7
-    { shutterstateOutput = new Fl_Output(700, 40, 30, 25, "Shut state");
-    } // Fl_Output* shutterstateOutput
-    { TempOutput = new Fl_Output(700, 70, 30, 25, "Temp");
-    } // Fl_Output* TempOutput
+    { Fl_Group* o = new Fl_Group(700, 40, 255, 55, "Telemetry Info");
+      o->box(FL_THIN_UP_FRAME);
+      { shutterstateOutput = new Fl_Value_Output(873, 41, 37, 27, "Shutter state");
+      } // Fl_Value_Output* shutterstateOutput
+      { tempOutput = new Fl_Value_Output(743, 41, 40, 24, "Temp");
+      } // Fl_Value_Output* tempOutput
+      { HVOutput = new Fl_Value_Output(743, 70, 40, 24, "HV");
+      } // Fl_Value_Output* HVOutput
+      o->end();
+    } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(585, 477, 480, 243, "Histogram");
       o->box(FL_THIN_UP_FRAME);
       o->color((Fl_Color)41);
@@ -467,17 +473,17 @@ Gui::Gui() {
     { Fl_Button* o = new Fl_Button(400, 65, 55, 25, "reset");
       o->callback((Fl_Callback*)cb_reset);
     } // Fl_Button* o
-    { consoleBuf = new Fl_Text_Display(590, 320, 520, 130);
-    } // Fl_Text_Display* consoleBuf
     { initializeBut = new Fl_Light_Button(10, 35, 80, 25, "Initialize");
       initializeBut->box(FL_THIN_UP_BOX);
       initializeBut->callback((Fl_Callback*)cb_initializeBut);
     } // Fl_Light_Button* initializeBut
-    { startReadingDataButton = new Fl_Button(95, 35, 60, 25, "Read");
+    { startReadingDataButton = new Fl_Button(95, 35, 60, 25, "Start");
       startReadingDataButton->callback((Fl_Callback*)cb_startReadingDataButton);
+      startReadingDataButton->deactivate();
     } // Fl_Button* startReadingDataButton
     { closeBut = new Fl_Light_Button(10, 65, 80, 25, "Close");
       closeBut->callback((Fl_Callback*)cb_closeBut);
+      closeBut->deactivate();
     } // Fl_Light_Button* closeBut
     { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 125, "Light curve");
       mainLightcurveWindow->box(FL_GTK_UP_BOX);
@@ -507,10 +513,15 @@ Gui::Gui() {
       stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
       stopReadingDataButton->deactivate();
     } // Fl_Button* stopReadingDataButton
-    { Fl_Button* o = new Fl_Button(1115, 320, 63, 20, "Clear");
-      o->labelcolor((Fl_Color)1);
-      o->callback((Fl_Callback*)cb_Clear);
-    } // Fl_Button* o
+    { Fl_Group* o = new Fl_Group(585, 327, 600, 130, "Console");
+      o->box(FL_THIN_UP_FRAME);
+      { consoleBuf = new Fl_Text_Display(585, 327, 520, 130);
+      } // Fl_Text_Display* consoleBuf
+      { Fl_Button* o = new Fl_Button(1110, 327, 75, 25, "Clear");
+        o->callback((Fl_Callback*)cb_Clear);
+      } // Fl_Button* o
+      o->end();
+    } // Fl_Group* o
     { setHoldBut = new Fl_Button(10, 190, 100, 25, "Set Hold Time");
       setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
     } // Fl_Button* setHoldBut
