@@ -421,10 +421,16 @@ Gui::Gui() {
     } // Fl_Output* rateOutput6
     { rateOutput7 = new Fl_Output(760, 115, 45, 25);
     } // Fl_Output* rateOutput7
-    { shutterstateOutput = new Fl_Output(700, 40, 30, 25, "Shut state");
-    } // Fl_Output* shutterstateOutput
-    { TempOutput = new Fl_Output(700, 70, 30, 25, "Temp");
-    } // Fl_Output* TempOutput
+    { Fl_Group* o = new Fl_Group(700, 40, 255, 55, "Telemetry Info");
+      o->box(FL_THIN_UP_FRAME);
+      { shutterstateOutput = new Fl_Value_Output(873, 41, 37, 27, "Shutter state");
+      } // Fl_Value_Output* shutterstateOutput
+      { tempOutput = new Fl_Value_Output(743, 41, 40, 24, "Temp");
+      } // Fl_Value_Output* tempOutput
+      { HVOutput = new Fl_Value_Output(743, 70, 40, 24, "HV");
+      } // Fl_Value_Output* HVOutput
+      o->end();
+    } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(585, 477, 480, 243, "Histogram");
       o->box(FL_THIN_UP_FRAME);
       o->color((Fl_Color)41);
@@ -471,11 +477,13 @@ Gui::Gui() {
       initializeBut->box(FL_THIN_UP_BOX);
       initializeBut->callback((Fl_Callback*)cb_initializeBut);
     } // Fl_Light_Button* initializeBut
-    { startReadingDataButton = new Fl_Button(95, 35, 60, 25, "Read");
+    { startReadingDataButton = new Fl_Button(95, 35, 60, 25, "Start");
       startReadingDataButton->callback((Fl_Callback*)cb_startReadingDataButton);
+      startReadingDataButton->deactivate();
     } // Fl_Button* startReadingDataButton
     { closeBut = new Fl_Light_Button(10, 65, 80, 25, "Close");
       closeBut->callback((Fl_Callback*)cb_closeBut);
+      closeBut->deactivate();
     } // Fl_Light_Button* closeBut
     { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 125, "Light curve");
       mainLightcurveWindow->box(FL_GTK_UP_BOX);

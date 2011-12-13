@@ -18,6 +18,7 @@
 #include "gui.h"
 #include "usbd2xx.h"
 #include "okFrontPanelDLL.h"
+#include "telemetry.h"
 
 #define MAXPATH 128
 #define NUM_THREADS 8
@@ -68,11 +69,44 @@ void data_initialize(void)
 	
 	if (data_source == 0)
 	{
+		gui->app->print_to_console("Initializing Simulated data.\n");
+		gui->startReadingDataButton->activate();
+		gui->closeBut->activate();
+		gui->app->flush_image();
+		gui->app->flush_histogram();
+		gui->app->print_to_console("Done initializing.\n");
+		
+	}
+	
+	if (data_source == 1)
+	{
+		gui->app->print_to_console("Initializing USB/ASIC connection.\n");
+		if (gui->usb->open() < 0)
+		{
+			gui->app->print_to_console("Could not open device.\n");
+			gui->app->print_to_console("Initialization Failed!\n");
+		}
+		else
+		{		
+			gui->startReadingDataButton->activate();
+			gui->closeBut->activate();
+			gui->sendParamsWindow_sendBut->activate();
+			gui->setHoldTimeWindow_setBut->activate();
+			gui->setHoldTimeWindow_autorunBut->activate();
+			gui->app->flush_image();
+			gui->app->flush_histogram();
+			gui->app->print_to_console("Done initializing.\n");
+		}
+
+	}
+	
+	if (data_source == 2)
+	{
 		char dll_date[32], dll_time[32];
 		int init_state = 1;
 		
-		gui->app->print_to_console("Initializing Simulated data.\n");
-		
+		gui->app->print_to_console("Initializing USB/Formatter connection.\n");
+
 		if (FALSE == okFrontPanelDLL_LoadLib(NULL)) 
 		{
 			gui->app->print_to_console("FrontPanel DLL could not be loaded.\n");
@@ -85,44 +119,17 @@ void data_initialize(void)
 		if (NULL == devi) 
 		{
 			gui->app->print_to_console("FPGA could not be initialized.\n");
+			gui->app->print_to_console("Initialization Failed!\n");
 			init_state = 0;
 		}
 		
 		if (init_state == 1){
 			gui->startReadingDataButton->activate();
+			gui->closeBut->activate();
 			gui->app->print_to_console("Done initializing.\n");
-		} else gui->app->print_to_console("Initialization failed.\n");
+		} else gui->app->print_to_console("Initialization failed!\n");
 	}
-	
-	if (data_source == 1)
-	{
-		gui->app->print_to_console("Initializing USB/ASIC connection.\n");
-		if (gui->usb->open() < 0)
-		{
-			gui->app->print_to_console("Could not open device.");
-		}
-		else
-		{		
-			gui->startReadingDataButton->activate();
-			gui->sendParamsWindow_sendBut->activate();
-			gui->setHoldTimeWindow_setBut->activate();
-			gui->setHoldTimeWindow_autorunBut->activate();
-			gui->app->print_to_console("Done initializing.");
-		}
-	}
-	
-	if (data_source == 2)
-	{
-		gui->app->print_to_console("Initializing USB/Formatter connection");
-		gui->startReadingDataButton->activate();
-		gui->app->print_to_console("Done initializing.");
-	}
-		
-	gui->initializeBut->value(1);
-	gui->closeBut->value(0);
-		
-	gui->app->flush_image();
-	gui->app->flush_histogram();
+
 }
 
 void* data_watch_buffer(void* p)
@@ -169,7 +176,7 @@ void* data_read_data(void *p)
 	 * by data_watch_buffer which uses it to update the displays.
 	 */
 	ssize_t wlen;
-	int len;
+	long len;
 	int badSync = 0;
 	int badRead = 0;
 	int status = 0;
@@ -222,7 +229,7 @@ void* data_read_data(void *p)
 		
 		if (data_source == 2){
 			// read from the USB/Formatter, reads 4 frames at a time.
-			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer0);
+			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer);
 		}
 		
 		if(fout > 0)
@@ -268,6 +275,14 @@ void* data_read_data(void *p)
 				fclose(dataFile);
 			}
 			
+			if (data_source == 1)
+			{
+				//cleam up usb interface
+			}
+			if (data_source == 2) {
+				//clean up formatter interface
+			}
+			
 			pthread_mutex_destroy(&mymutex);
 			pthread_exit(NULL);
 		}
@@ -286,21 +301,27 @@ void data_simulate_data(void)
 	unsigned short int tempy;
 	unsigned short int tempenergy;
 
+	struct voltage_data {
+		unsigned value: 12;
+		unsigned status: 4;
+	};
+	
+	strip_data strip;
+	voltage_data volt;
+	
 	struct strip_data  // 2 bytes
 	{
 		unsigned data : 10;
 		unsigned number : 6;
 	};
-	
-	strip_data strip;
-	
-	buffer[0] = 60304; 	// Sync 1 - Hex EB90
-	buffer[1] = 63014;  // Sync 2 - Hex F626
-	buffer[2] = (unsigned short int) (arc4random() % 100); 	// Time 1 (MSB)
-	buffer[3] = (unsigned short int) (arc4random() % 100); 	// Time 2 (MSB)
-	buffer[4] = (unsigned short int) (arc4random() % 100); 	// Time 3 (LSB)
-	buffer[5] = framecount; 	// Frame Counter 1
-	buffer[6] = framecount;		// Frame Counter 2
+		
+	buffer[0] = 60304; 	// Sync 1 - Hex EB90 - missing in formatter data
+	buffer[0] = 63014;  // Sync 2 - Hex F626
+	buffer[1] = (unsigned short int) (arc4random() % 100); 	// Time 1 (MSB)
+	buffer[2] = (unsigned short int) (arc4random() % 100); 	// Time 2 (MSB)
+	buffer[3] = (unsigned short int) (arc4random() % 100); 	// Time 3 (LSB)
+	buffer[4] = framecount; 	// Frame Counter 1
+	buffer[5] = framecount;		// Frame Counter 2
 	// 7 Housekeeping 0
 	// 8 Cmd Count
 	// 9 Command 1
@@ -308,6 +329,10 @@ void data_simulate_data(void)
 	// 11 Housekeeping 1
 	// 12 Formatter Status
 	// 13 0
+	volt.value = telemetry_voltage_convert_hvvalue(250);
+	volt.status = 4;
+	memcpy(&buffer[13],&volt,2);
+	
 	// 14 HV value/status
 	// 15 Housekeeping 2
 	// 16 Status 0
@@ -441,10 +466,41 @@ void data_update_display(unsigned short int *frame)
 	
 	gui->nEventsDone->value(nreads); 
 	
-	// order for asics n n then p p
+	if (data_source == 0) {
+		int x, y, z;
+		// if parsing simulated data
+		unsigned voltage_status;
+		unsigned voltage;
+
+		voltage_status = buffer[13] & 0xF;
+		voltage = (buffer[13] >> 12) & 0xFFF;
+		
+		gui->nEventsDone->value(nreads); 
+		
+		gui->framenumOutput->value(frame[5]);
+		// gui->testOutput->value(strip.number);
+		gui->HVOutput->value(voltage);
+		printf("voltage: %i status: %i", voltage, voltage_status);
+		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
+		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
+		if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
+	
+		
+		// gui->testOutput->value(strip.number);
+	 	
+		// HistogramFunction[strip_data]++;
+		x = arc4random() % 128 + 1;
+		y = arc4random() % 128 + 1;
+		z = arc4random() % 1024 + 1;
+		HistogramFunction[z] += 1;
+		detImage[x][y] = z;
+		detImagetime[x][y] = clock();
+		// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
+	}
 	
 	if (data_source == 1){
 		// parse and display the data from the USB/ASIC connection
+		// order for asics n n then p p
 		int index = 0;
 
 		// Loop through the 4 ASICS
@@ -530,23 +586,54 @@ void data_update_display(unsigned short int *frame)
 			}	
 		}
 	}
-
-	if (data_source == 0) {
-		int x, y, z;
-		// if parsing simulated data
 	
-		// gui->testOutput->value(strip.number);
-	 	
-		// HistogramFunction[strip_data]++;
-		x = arc4random() % 128 + 1;
-		y = arc4random() % 128 + 1;
-		z = arc4random() % 1024 + 1;
-		HistogramFunction[z] += 1;
-		detImage[x][y] = z;
-		detImagetime[x][y] = clock();
-		// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
+	if (data_source == 2) {
+		// parse and display the data from the USB/ASIC connection
+		unsigned short int tmp;
+		unsigned voltage_status;
+		unsigned voltage;
+		// parse the buffer variable and update the display
+		// some example code is below
 		
+		struct strip_data  // 2 bytes
+		{
+			unsigned data : 10;
+			unsigned number : 6;
+		};
+		
+		struct voltage_data {
+			unsigned value: 12;
+			unsigned status: 4;
+		};
+		
+		strip_data strip;
+		voltage_data volt;
+		
+		printf("sync: %x\n", buffer[0]);
+		printf("counter: %x\n", buffer[4]);
+		
+		memcpy(&strip,&buffer[29],2);
+		memcpy(&volt,&buffer[13],2);
+		
+		voltage_status = buffer[13] & 0xF;
+		voltage = (buffer[13] >> 12) & 0xFFF;
+		
+		gui->nEventsDone->value(nreads); 
+		
+		gui->framenumOutput->value(frame[5]);
+		gui->testOutput->value(strip.number);
+		gui->HVOutput->value(voltage);
+		printf("voltage: %i status: %i", voltage, voltage_status);
+		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
+		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
+		if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
+		
+		HistogramFunction[strip.data]++;
+		tmp = arc4random() % 64 + 1;
+		detImage[tmp][strip.number] = 1;
+		detImagetime[tmp][strip.number] = clock();
 	}
+
 }
 
 void data_set_datafilename(void)

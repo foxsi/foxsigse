@@ -16,8 +16,8 @@
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Value_Slider.H>
-#include "mainHistogram.h"
 #include <FL/Fl_Value_Output.H>
+#include "mainHistogram.h"
 #include <FL/Fl_Choice.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
@@ -75,8 +75,9 @@ public:
   Fl_Output *rateOutput5;
   Fl_Output *rateOutput6;
   Fl_Output *rateOutput7;
-  Fl_Output *shutterstateOutput;
-  Fl_Output *TempOutput;
+  Fl_Value_Output *shutterstateOutput;
+  Fl_Value_Output *tempOutput;
+  Fl_Value_Output *HVOutput;
   mainHistogram *mainHistogramWindow;
   Fl_Value_Output *mainHistogramYlabelmid;
   Fl_Value_Output *mainHistogramYlabelmax;

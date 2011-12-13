@@ -176,6 +176,7 @@ void Application::start_reading_data(void)
 {
 	print_to_console("Reading started.\n");
 	gui->stopReadingDataButton->activate();
+	gui->closeBut->deactivate();
 	gui->startReadingDataButton->deactivate();
 	
 	data_start_reading();	
@@ -439,6 +440,7 @@ void Application::stop_reading_data(void)
 	Fl::lock();
 	gui->stopReadingDataButton->deactivate();
 	gui->startReadingDataButton->activate();
+	gui->closeBut->activate();
 	Fl::unlock();
 	
 	// send the thread the message to stop itself	
