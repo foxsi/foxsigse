@@ -122,14 +122,6 @@ void Application::update_preferencewindow(void)
 	gui->DataSource_choice->value(data_source);	
 }
 
-void Application::set_mainImage_min(void)
-{
-	// gui->prefs->set("mainImage_minimum", (int) gui->mainImageMin_slider->value());
-	//	
-	// gui->mainImageMin_input->value(5);
-	//printf("value = %i", gui->mainImageMin_slider->value(5));
-}
-
 void Application::set_datafile_dir(void)
 {
 	char *temp = fl_dir_chooser("Pick a directory:", "", 0);
@@ -426,12 +418,16 @@ void Application::clear_console(void)
 	gui->buff->remove_selection();
 }
 	
-void Application::test(void)
+void Application::set_lowthreshold(void)
 {
 	low_threshold = gui->mainImageMin_slider->value();
 	gui->histLow->value(low_threshold);
 	gui->mainHistogramWindow->redraw();
 	gui->histLow->redraw();
+}
+
+void Application::test(void)
+{
 }
 
 void Application::send_atten_state(bool value)

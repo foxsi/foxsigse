@@ -354,34 +354,6 @@ void USB_d2xx::printFrame(void)
 		
 		cout << "Pedestal:\t\t" << frameData[index] << endl; index++;
 
-		switch (j) {
-			case 0:
-				gui->chipbitValOut0->value(chipBit);
-				gui->trigbitValOut0->value(trigBit);
-				gui->seubitValOut0->value(seuBit);
-				gui->noiseValOut0->value(commonMode);
-				break;
-			case 1:
-				gui->chipbitValOut1->value(chipBit);
-				gui->trigbitValOut1->value(trigBit);
-				gui->seubitValOut1->value(seuBit);
-				gui->noiseValOut1->value(commonMode);
-				break;
-			case 2:
-				gui->chipbitValOut2->value(chipBit);
-				gui->trigbitValOut2->value(trigBit);
-				gui->seubitValOut2->value(seuBit);
-				gui->noiseValOut2->value(commonMode);
-				break;
-			case 3:
-				gui->chipbitValOut3->value(chipBit);
-				gui->trigbitValOut3->value(trigBit);
-				gui->seubitValOut3->value(seuBit);
-				gui->noiseValOut3->value(commonMode);
-				break;
-			default:
-				break;
-		}
 
 		frame[j] = * (asic_dataframe*) (&frameData[ j*nData ]);
 		cout << "start bit:" << frame[j].start_bit << endl;

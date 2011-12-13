@@ -84,7 +84,7 @@ exit(1);}
       }
       Fl_Group {} {
         label Image open
-        xywh {15 328 555 404} box DOWN_FRAME
+        xywh {15 328 555 404} box THIN_UP_FRAME
       } {
         Fl_Box mainImageWindow {
           label Image
@@ -117,13 +117,13 @@ exit(1);}
         }
         Fl_Value_Slider mainImageMin_slider {
           label {min:}
-          callback {app->test();}
+          callback {app->set_lowthreshold();}
           xywh {431 568 40 145} align 290 maximum 1024 step 1 value 1 textsize 14
         }
       }
       Fl_Output rateOutput0 {
         label {Rate [cts/s]}
-        xywh {375 115 80 25}
+        xywh {405 115 50 25}
       }
       Fl_Output rateOutput1 {
         xywh {460 115 45 25}
@@ -214,9 +214,6 @@ exit(1);}
         callback {app->reset_read_counter();}
         xywh {400 65 55 25}
       }
-      Fl_Text_Display consoleBuf {
-        xywh {590 320 520 130}
-      }
       Fl_Light_Button initializeBut {
         label Initialize
         callback {app->initialize_data()}
@@ -266,10 +263,18 @@ app->start_reading_data();}
         callback {app->stop_reading_data();}
         xywh {160 35 75 25} labelcolor 1 deactivate
       }
-      Fl_Button {} {
-        label Clear
-        callback {app->clear_console();}
-        xywh {1115 320 63 20} labelcolor 1
+      Fl_Group {} {
+        label Console open
+        xywh {585 327 600 130} box THIN_UP_FRAME
+      } {
+        Fl_Text_Display consoleBuf {
+          xywh {585 327 520 130}
+        }
+        Fl_Button {} {
+          label Clear
+          callback {app->clear_console();}
+          xywh {1110 327 75 25}
+        }
       }
       Fl_Button setHoldBut {
         label {Set Hold Time}
