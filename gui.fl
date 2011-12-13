@@ -7,7 +7,7 @@ class Gui {open
   Function {Gui()} {open
   } {
     Fl_Window mainWindow {
-      label {FOXSI GSE} open selected
+      label {FOXSI GSE} open
       xywh {28 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
@@ -216,7 +216,7 @@ exit(1);}
       }
       Fl_Light_Button initializeBut {
         label Initialize
-        callback {app->initialize_data()}
+        callback {app->initialize()} selected
         xywh {10 35 80 25} box THIN_UP_BOX
       }
       Fl_Button startReadingDataButton {

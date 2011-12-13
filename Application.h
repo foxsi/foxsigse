@@ -35,7 +35,7 @@ public:
 	
 	// Various GUI Buttons
 	
-	void initialize_data(void);		// Initialize a connection to a data stream
+	void initialize(void);		// Initialize a connection to a data stream
 	void close_data(void);			// Close a connection to a data stream
 	void openSendParamsWindow(void);		// Open the send params window
 	void openSetHoldTimeWindow(void);		// Open the set hold time window

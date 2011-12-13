@@ -6,6 +6,7 @@
  *  Copyright 2011 NASA GSFC. All rights reserved.
  *
  */
+#include "Application.h"
 
 #include "data.h"
 #include "threads.h"
@@ -16,13 +17,14 @@
 
 #include "gui.h"
 #include "usbd2xx.h"
-#include "Application.h"
+#include "okFrontPanelDLL.h"
 
 #define MAXPATH 128
 #define NUM_THREADS 8
 #define XSTRIPS 128
 #define YSTRIPS 128
 #define MAX_CHANNEL 1024
+#define FORMATTER_CONFIGURATION_FILE "gsesync.bit"
 
 extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
@@ -38,11 +40,12 @@ extern double detImagemask[XSTRIPS][YSTRIPS];
 #define FRAME_SIZE_IN_SHORTINTS 784
 #define FRAME_SIZE_IN_BYTES 1568
 
-
 extern Gui *gui;
-extern Application *app;
+
 char dataFilename[MAXPATH];
 FILE *dataFile;
+
+okCFrontPanel *dev;
 
 int newdisplay;
 int stop_message;
@@ -59,6 +62,69 @@ double nreads;
 extern char *data_file_save_dir;
 extern int file_type;
 
+void data_initialize(void)
+{
+	// Initialize a connection to a data stream
+	
+	if (data_source == 0)
+	{
+		char dll_date[32], dll_time[32];
+		int init_state = 1;
+		
+		gui->app->print_to_console("Initializing Simulated data.\n");
+		
+		if (FALSE == okFrontPanelDLL_LoadLib(NULL)) 
+		{
+			gui->app->print_to_console("FrontPanel DLL could not be loaded.\n");
+			init_state = 0;
+		}
+		okFrontPanelDLL_GetVersion(dll_date, dll_time);
+		printf("FrontPanel DLL loaded.Built: %s %s\n", dll_date, dll_time);
+		
+		okCFrontPanel *devi = data_initialize_formatter_FPGA();
+		if (NULL == devi) 
+		{
+			gui->app->print_to_console("FPGA could not be initialized.\n");
+			init_state = 0;
+		}
+		
+		if (init_state == 1){
+			gui->startReadingDataButton->activate();
+			gui->app->print_to_console("Done initializing.\n");
+		} else gui->app->print_to_console("Initialization failed.\n");
+	}
+	
+	if (data_source == 1)
+	{
+		gui->app->print_to_console("Initializing USB/ASIC connection.\n");
+		if (gui->usb->open() < 0)
+		{
+			gui->app->print_to_console("Could not open device.");
+		}
+		else
+		{		
+			gui->startReadingDataButton->activate();
+			gui->sendParamsWindow_sendBut->activate();
+			gui->setHoldTimeWindow_setBut->activate();
+			gui->setHoldTimeWindow_autorunBut->activate();
+			gui->app->print_to_console("Done initializing.");
+		}
+	}
+	
+	if (data_source == 2)
+	{
+		gui->app->print_to_console("Initializing USB/Formatter connection");
+		gui->startReadingDataButton->activate();
+		gui->app->print_to_console("Done initializing.");
+	}
+		
+	gui->initializeBut->value(1);
+	gui->closeBut->value(0);
+		
+	gui->app->flush_image();
+	gui->app->flush_histogram();
+}
+
 void* data_watch_buffer(void* p)
 {
 	/* Watches the buffer variable for changes. When changes occur, parse 
@@ -73,7 +139,9 @@ void* data_watch_buffer(void* p)
 			pthread_mutex_lock( &mymutex); /* wait on readgse */
 			Fl::lock();
 			
-			data_frame_print_to_file(buffer0);
+			if (gui->writeFileBut->value() == 1){
+				data_frame_print_to_file(buffer0);
+			}
 			data_update_display(buffer0);
 			
 			newdisplay = 0;
@@ -101,6 +169,7 @@ void* data_read_data(void *p)
 	 * by data_watch_buffer which uses it to update the displays.
 	 */
 	ssize_t wlen;
+	int len;
 	int badSync = 0;
 	int badRead = 0;
 	int status = 0;
@@ -132,10 +201,12 @@ void* data_read_data(void *p)
 		
 		// read the data
 		if (data_source == 0){
+			// read from the simulation
 			data_simulate_data();
 		}
 		
 		if (data_source == 1) {
+			// read from the USB/ASIC
 			status = gui->usb->findSync();
 			if(status<1){
 				badSync++;
@@ -147,6 +218,11 @@ void* data_read_data(void *p)
 				badRead++;
 				continue;
 			}
+		}
+		
+		if (data_source == 2){
+			// read from the USB/Formatter, reads 4 frames at a time.
+			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer0);
 		}
 		
 		if(fout > 0)
@@ -172,7 +248,7 @@ void* data_read_data(void *p)
 		
 		if (stop_message == 1){
 			Fl::lock();
-			app->print_to_console("Read finished or stopped.\n");
+			gui->app->print_to_console("Read finished or stopped.\n");
 						
 			if (data_source == 1) {
 				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
@@ -184,11 +260,11 @@ void* data_read_data(void *p)
 			Fl::unlock();	
 			
 			if (fout > 0){
-				app->printf_to_console("Closing file: %s.\n", dataFilename, NULL);
+				gui->app->printf_to_console("Closing file: %s.\n", dataFilename, NULL);
 				close(fout);
 			}
 			if (dataFile != NULL){
-				app->printf_to_console("Closing file: %s.\n", dataFilename, NULL);
+				gui->app->printf_to_console("Closing file: %s.\n", dataFilename, NULL);
 				fclose(dataFile);
 			}
 			
@@ -274,29 +350,29 @@ void data_start_file(void)
 	
 	if (gui->writeFileBut->value() == 1) {
 		data_set_datafilename();
-		app->printf_to_console("Trying to open file: %s\n", dataFilename, NULL);
+		gui->app->printf_to_console("Trying to open file: %s\n", dataFilename, NULL);
 		if (gui->fileTypeChoice->value() == 0) {
 			dataFile = fopen(dataFilename, "w");
 			
 			if (dataFile == NULL)
-				app->printf_to_console("Cannot open file %s.\n", dataFilename, NULL); 
+				gui->app->printf_to_console("Cannot open file %s.\n", dataFilename, NULL); 
 			else 
-				app->printf_to_console("Opened file %s.\n", dataFilename, NULL);
+				gui->app->printf_to_console("Opened file %s.\n", dataFilename, NULL);
 			
-			//app->write_header(dataFile);
+			//gui->app->write_header(dataFile);
 			
 		}
 		if (gui->fileTypeChoice->value() == 1) {
 			if((fout = open(dataFilename,O_RDWR|O_CREAT,0600)) < 0){
-				app->printf_to_console("Cannot open file %s.\n", dataFilename, NULL);}
+				gui->app->printf_to_console("Cannot open file %s.\n", dataFilename, NULL);}
 			else {
-				app->printf_to_console("Opened file %s.\n", dataFilename, NULL);
+				gui->app->printf_to_console("Opened file %s.\n", dataFilename, NULL);
 			}
 			
 		}
 		
 	} else {
-		app->printf_to_console( "Closing file %s.\n", dataFilename, NULL);
+		gui->app->printf_to_console( "Closing file %s.\n", dataFilename, NULL);
 		if (gui->fileTypeChoice->value() == 1){close(fout);}
 		if (gui->fileTypeChoice->value() == 0){fclose(dataFile);}
 		fout = 0;
@@ -321,7 +397,7 @@ void data_start_reading(void)
 	ret = pthread_attr_init(&tattr);
 	ret = pthread_attr_setschedparam (&tattr, &param);
 	
-	app->print_to_console("Reading...\n");
+	gui->app->print_to_console("Reading...\n");
 	
 	// start the read_data thread
 	ret = pthread_create(&thread, &tattr, data_read_data, (void *) taskids[0]);
@@ -344,7 +420,10 @@ void data_stop_reading(void)
 
 void data_frame_print_to_file(unsigned short int *frame)
 {
-	if (gui->writeFileBut->value() == 1) {gui->usb->writeFrame(dataFile);}
+	if (data_source == 1)
+	{
+		gui->usb->writeFrame(dataFile);
+	}
 }
 
 void data_update_display(unsigned short int *frame)
@@ -364,7 +443,8 @@ void data_update_display(unsigned short int *frame)
 	
 	// order for asics n n then p p
 	
-	if (data_source == 1){		
+	if (data_source == 1){
+		// parse and display the data from the USB/ASIC connection
 		int index = 0;
 
 		// Loop through the 4 ASICS
@@ -404,27 +484,26 @@ void data_update_display(unsigned short int *frame)
 			
 			printf( "Pedestal: %u\n", frame[index]);	index++;	//pedestal
 			
-			printf("Strip Data (%i%):\n", index);
+			printf("Strip Data (%i):\n", index);
 			printf( "\nCommon mode %i: %u\n", index+64, frame[index+64]);	//common mode
 
 			// strip data
 			
-			for(int i = 0; i < 64; i++){
+			for(int i = 0; i < XSTRIPS/2; i++){
 				// strip_data = frame[index] & 0x3ff;
 				// strip_number = (frame[index] << 10) & 0x3f;
 				strip_data = frame[index] - frame[index+64];
 				if (j == 3){if (strip_data > 0){ HistogramFunction[strip_data]++; }}
-				printf( "%u\t", frame[index]);	index++;
 				
 				if (strip_data != 0){
 					// if (j < 2){ xstrips[i + j*64] = strip_data; }
 					if (j < 2){ xstrips[i + j*64] = strip_data; }
 					if (j >= 2){ ystrips[i + (j-2)*64] = strip_data; }
 				}
+				printf( "%u\t", frame[index]);	index++;
 			}
 			
 			printf( "\nCommon mode %i: %u\n", index, frame[index]);	index++;	//common mode
-			
 			printf("Readout info:\n");
 			// 10 extra words of readout information
 			printf( "%u\t", frame[index]);	index++;
@@ -441,9 +520,9 @@ void data_update_display(unsigned short int *frame)
 			
 		}
 		
-		for(int i = 0; i<128; i++)
+		for(int i = 0; i<XSTRIPS; i++)
 		{
-			for(int j = 0; j<128; j++)
+			for(int j = 0; j<YSTRIPS; j++)
 			{
 				detImage[i][j] = xstrips[i] * ystrips[j];
 				detImagemask[i][j] = xmask[i] * ymask[j];
@@ -498,4 +577,71 @@ void data_set_datafilename(void)
 	dataFilename[MAXPATH - 1] = '\0';
 	printf("%s\n",dataFilename);
 
+}
+
+okCFrontPanel *data_initialize_formatter_FPGA(void)
+{
+	bool bresult;
+	// Open the first XEM - try all board types.
+	dev = new okCFrontPanel;
+	
+	if (okCFrontPanel::NoError != dev->OpenBySerial()) {
+		delete dev;
+		printf("Device could not be opened.  Is one connected?\n");
+		return(0);
+	}
+	
+	switch (dev->GetBoardModel()) {
+		case okCFrontPanel::brdXEM3005:
+			printf("                                        Found a device: XEM3005\n");
+			break;
+		default:
+			printf("Unsupported device.\n");
+			delete dev;
+			return(NULL);
+	}
+	
+	// Configure the PLL appropriately
+	okCPLL22150 *pll = new okCPLL22150 ;
+ 	pll->SetReference(48.0f, false);
+ 	bresult = pll->SetVCOParameters(574, 105); // output 32 x 8.2 MHz - close to 8.192 MHz
+	//cout << "Settin VCO Parameters " << bresult << endl;
+ 	pll->SetDiv1(okCPLL22150::DivSrc_VCO, 8);
+	// 32.8 approcimately 16 x 2.048 MHz
+ 	pll->SetDiv2(okCPLL22150::DivSrc_VCO, 127);
+ 	pll->SetOutputSource(0, okCPLL22150::ClkSrc_Div2By2); // Xilinx pin A8 = SYS_CLK1 (clk1)
+ 	pll->SetOutputEnable(0, true);
+ 	pll->SetOutputSource(1, okCPLL22150::ClkSrc_Div1ByN); // Xilinx pin A8 = SYS_CLK1 (clk1)
+ 	pll->SetOutputEnable(1, true);
+ 	pll->SetOutputSource(2, okCPLL22150::ClkSrc_Div1ByN); // Xilinx pin E9 = SYS_CLK2 (clk2)
+ 	pll->SetOutputEnable(2, true);
+ 	pll->SetOutputSource(3, okCPLL22150::ClkSrc_Div1ByN); // p71 = SYS_CLK4
+ 	pll->SetOutputEnable(3, true);
+ 	pll->SetOutputSource(4, okCPLL22150::ClkSrc_Div1ByN); // p69 = SYS_CLK5
+ 	pll->SetOutputEnable(4, true);
+ 	pll->SetOutputSource(5, okCPLL22150::ClkSrc_Div2ByN); //p67 = SYS_CLK6
+ 	pll->SetOutputEnable(5, true);
+	dev->SetPLL22150Configuration(*pll);
+	
+	// Get some general information about the XEM.
+	printf("Device firmware version: %d.%d\n", dev->GetDeviceMajorVersion(), dev->GetDeviceMinorVersion());
+	printf("Device serial number: %s\n", dev->GetSerialNumber().c_str());
+	printf("Device ID string: %s\n", dev->GetDeviceID().c_str());
+	
+	// Download the configuration file.
+	if (okCFrontPanel::NoError != dev->ConfigureFPGA(FORMATTER_CONFIGURATION_FILE)) {
+		printf("FPGA configuration failed.\n");
+		delete dev;
+		return(0);
+	}
+	
+	// Check for FrontPanel support in the FPGA configuration.
+	if (false == dev->IsFrontPanelEnabled()) {
+		printf("FrontPanel support is not enabled.\n");
+		delete dev;
+		return(0);
+	}
+	
+	printf("FrontPanel support is enabled.\n");	
+	return dev;
 }

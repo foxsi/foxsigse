@@ -158,22 +158,9 @@ void Application::readFile()
 	//gui->data->readDatafile(file);
 }
  
-void Application::initialize_data(void)
+void Application::initialize(void)
 {
-	// Initialize a connection to a data stream
-	if (gui->usb->open() < 0)	cout << "Could not open device.\n\n";
-//		else	gui->usb->findSync();
-	
-	//gui->syncLightBut->value(1);
-	gui->initializeBut->value(1);
-	gui->closeBut->value(0);
-	
-	gui->startReadingDataButton->activate();
-	gui->sendParamsWindow_sendBut->activate();
-	gui->setHoldTimeWindow_setBut->activate();
-	gui->setHoldTimeWindow_autorunBut->activate();
-	flush_image();
-	flush_histogram();
+	data_initialize();
 }
 
 void Application::close_data(void)

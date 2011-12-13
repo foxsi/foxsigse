@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8627E5271497E4EF00593007 /* okFrontPanelDLL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8627E5261497E4EF00593007 /* okFrontPanelDLL.cpp */; };
 		86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86739DD8138C708900D6C498 /* usbd2xx.cpp */; };
 		86739E8F138C79F500D6C498 /* libftd2xx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 86739E8E138C79F500D6C498 /* libftd2xx.dylib */; };
 		86E4A437138C2AEC0004DBB3 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86E4A436138C2AEC0004DBB3 /* OpenGL.framework */; };
@@ -51,6 +52,8 @@
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		8627E5251497E4EF00593007 /* okFrontPanelDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = okFrontPanelDLL.h; sourceTree = "<group>"; };
+		8627E5261497E4EF00593007 /* okFrontPanelDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = okFrontPanelDLL.cpp; sourceTree = "<group>"; };
 		86739DD8138C708900D6C498 /* usbd2xx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = usbd2xx.cpp; sourceTree = "<group>"; };
 		86739DD9138C708900D6C498 /* usbd2xx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = usbd2xx.h; sourceTree = "<group>"; };
 		86739E8E138C79F500D6C498 /* libftd2xx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libftd2xx.dylib; path = /usr/local/lib/libftd2xx.dylib; sourceTree = "<absolute>"; };
@@ -194,6 +197,8 @@
 				86739DD9138C708900D6C498 /* usbd2xx.h */,
 				C9601E9710B1FAED0018BADE /* main.h */,
 				C9601E9810B1FAED0018BADE /* main.cpp */,
+				8627E5251497E4EF00593007 /* okFrontPanelDLL.h */,
+				8627E5261497E4EF00593007 /* okFrontPanelDLL.cpp */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -304,6 +309,7 @@
 				AD84A8E6148B259600A65724 /* telemetry.cpp in Sources */,
 				AD84A8EE148B25D300A65724 /* commands.cpp in Sources */,
 				AD84A8FD148B264400A65724 /* data.cpp in Sources */,
+				8627E5271497E4EF00593007 /* okFrontPanelDLL.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
