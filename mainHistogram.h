@@ -28,6 +28,8 @@ public:
 private:
 	double ymax;
 	double ymin;
+	float xmax;
+	float xmin;
 	
 };
 

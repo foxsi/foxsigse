@@ -406,14 +406,6 @@ void Application::clear_console(void)
 	gui->buff->select(0, gui->buff->length());
 	gui->buff->remove_selection();
 }
-	
-void Application::set_lowthreshold(void)
-{
-	low_threshold = gui->mainImageMin_slider->value();
-	gui->histLow->value(low_threshold);
-	gui->mainHistogramWindow->redraw();
-	gui->histLow->redraw();
-}
 
 void Application::test(void)
 {
@@ -457,4 +449,12 @@ void Application::update_binsize(void)
 {
 	mainHistogram_binsize = gui->binsize_counter->value();
 	gui->mainHistogramWindow->redraw();
+}
+
+void Application::set_lowthreshold(void)
+{
+	low_threshold = gui->mainImageMin_slider->value();
+	gui->histLow->value(low_threshold);
+	gui->mainHistogramWindow->redraw();
+	gui->histLow->redraw();
 }

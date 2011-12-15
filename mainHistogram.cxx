@@ -32,7 +32,9 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 {
 	ymax = 1024;
 	ymin = 0;
-
+	xmax = MAX_CHANNEL;
+	xmin = 0;
+	
 	/* initialize random seed: */
 	//srand ( time(NULL) );
 	
@@ -53,6 +55,7 @@ void mainHistogram::draw()
 	int k = 0;
 	
 	ymax = maximumValue(displayHistogram, MAX_CHANNEL/mainHistogram_binsize);
+	xmax = MAX_CHANNEL/mainHistogram_binsize;
 	
 	YTICKINTERVALM = (ymax-ymin)/YNUMTICKS;
 	YTICKINTERVAL = YTICKINTERVALM/2;
@@ -114,18 +117,18 @@ void mainHistogram::draw()
 	// draw vertival select line from mouse click
 	glBegin(GL_LINES);
 	glColor3f(0.0, 1.0, 0.0);
-	glVertex2f(FLHistcursorX[0], 0);
-	glVertex2f(FLHistcursorX[0], ymax);
+	glVertex2f(FLHistcursorX[0]+0.5, 0);
+	glVertex2f(FLHistcursorX[0]+0.5, ymax);
 	glEnd();
 	
 	// draw the line showing the low energy cutoff
 	glColor4f(0.0, 0.0, 1.0, 0.5);
-	glRectf(0, 0, low_threshold, ymax);
+	glRectf(0, 0, (int) low_threshold/mainHistogram_binsize, ymax);
 	
 	glBegin(GL_LINES);
 	glColor3f(0.0, 0.0, 1.0);
-	glVertex2f(low_threshold, 0);
-	glVertex2f(low_threshold, ymax);
+	glVertex2f((int) low_threshold/mainHistogram_binsize, 0);
+	glVertex2f((int) low_threshold/mainHistogram_binsize, ymax);
 	glEnd();
 	
 	glPopMatrix();
@@ -134,7 +137,8 @@ void mainHistogram::draw()
 	//update the axis labels
 	gui->mainHistogramYlabelmax->value(ymax);
 	gui->mainHistogramYlabelmid->value(ymax/2.0);
-	
+	gui->histCounts->value(displayHistogram[mouseHistPixel]);
+
 	//Should not make this update everytime
 	//gui->mainHistogramXlabelmid->value(xmid);
 	//gui->mainHistogramXlabelmax->value(xmax);
@@ -163,17 +167,15 @@ int mainHistogram::handle(int eventType)
 	if(eventType == FL_PUSH)
 	{
 		//convert between fltk coordinates and opengl coordinates
-		FLHistcursorX[0] = floor(Fl::event_x()*(MAX_CHANNEL)/w());
-		FLHistcursorY[0] = floor((h()-Fl::event_y())*(YSTRIPS)/h());
+		FLHistcursorX[0] = floor(Fl::event_x()*(xmax)/w());
+		FLHistcursorY[0] = floor((h()-Fl::event_y())*(ymax)/h());
 
 		mouseHistPixel = FLHistcursorX[0];
 	}
 	
 	// now update the value displayed
 	gui->histEnergy->value(mouseHistPixel);	
-	gui->histCounts->value(HistogramFunction[mouseHistPixel]);
-	
-	gui->histCounts->value(displayHistogram[mouseHistPixel/mainHistogram_binsize]);
+	gui->histCounts->value(displayHistogram[mouseHistPixel]);
 	
 	redraw();
 	
