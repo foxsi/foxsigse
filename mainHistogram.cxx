@@ -14,15 +14,14 @@
 #define MAX_CHANNEL 1024
 
 int HistogramFunction[MAX_CHANNEL];
+double displayHistogram[MAX_CHANNEL];
 
 int chosenHistPixel;
 int mouseHistPixel;
 int low_threshold = 0;
+int mainHistogram_binsize = 25;
 
 float FLHistcursorX[2], FLHistcursorY[2];
-
-float xmid = 50;
-float xmax = 100;
 
 float YTICKINTERVAL;
 float YTICKINTERVALM;
@@ -32,6 +31,9 @@ extern Gui *gui;
 mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 : Fl_Gl_Window(x,y,w,h,l)
 {
+	ymax = 1024;
+	ymin = 0;
+
 	/* initialize random seed: */
 	//srand ( time(NULL) );
 	
@@ -39,6 +41,7 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 	for(int i=0; i < MAX_CHANNEL; i++)
 	{
 		HistogramFunction[i] = i*1;
+		displayHistogram[i] = HistogramFunction[i];
 	}
 	FLHistcursorX[0] = 500;
 	mouseHistPixel = FLHistcursorX[0] - XBORDER;
@@ -47,11 +50,13 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 void mainHistogram::draw()
 {
 	// the drawing method: draws the histFunc into the window
-	int ymax;
-	int ymin = 0;
+	int y = 0;
+	int k = 0;
+	
+	ymax = maximumValue(displayHistogram, MAX_CHANNEL/mainHistogram_binsize);
+	
 	YTICKINTERVALM = (ymax-ymin)/YNUMTICKS;
 	YTICKINTERVAL = YTICKINTERVALM/2;
-	ymax = maximumValue(HistogramFunction);
 	
 	if (!valid()) {
 		make_current();
@@ -60,13 +65,15 @@ void mainHistogram::draw()
 	//The following line causes the display to not refresh after being moved
 	//gui->mainChartWindow->bounds(0.0, ymax);
 	
-	float FL_Yconv = (float) (MAX_CHANNEL)/(ymax - ymin);
+	//float FL_Yconv = (float) (MAX_CHANNEL)/(ymax - ymin);
+	//float FL_Xconv = (float) (MAX_CHANNEL)/(MAX_CHANNEL*mainHistogram_binsize- 0);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
 	glViewport(0,0,w(),h());
-	glOrtho(0,MAX_CHANNEL+2*XBORDER,0,MAX_CHANNEL+2*YBORDER,0,-1);
+	gluOrtho2D(0,MAX_CHANNEL/mainHistogram_binsize, 0, ymax+2*XBORDER);
+	
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -78,33 +85,46 @@ void mainHistogram::draw()
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	//draw the graph
+	glBegin(GL_LINES);
 	glColor3f(1.0, 0.0, 0.0);
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(XBORDER, YBORDER);
 	
-	for(int i=0; i<MAX_CHANNEL; i++)
+	// recalculate the displayed histogram (rebinned)
+	for(int i = 0; i < MAX_CHANNEL; i+=mainHistogram_binsize)
 	{
-		glVertex2f(i+XBORDER, (YBORDER + HistogramFunction[i])*FL_Yconv);
+		y = 0;
+		for (int j = 0; j < mainHistogram_binsize; j++) {
+			y += HistogramFunction[i+j];
+			displayHistogram[k] = y;
+		}
+		k++;
 	}
-	glVertex2f(MAX_CHANNEL+XBORDER, YBORDER);
-	glVertex2f(XBORDER, YBORDER);
+	
+	for(int i = 0; i < MAX_CHANNEL/mainHistogram_binsize; i++)
+	{
+		glVertex2f(i+XBORDER, YBORDER + displayHistogram[i]);
+		glVertex2f((i+1)+XBORDER, YBORDER + displayHistogram[i]);
+		k++;
+	
+	}
+	//glVertex2f(MAX_CHANNEL+XBORDER, YBORDER);
+	//glVertex2f(XBORDER, YBORDER);
 	glEnd();
 	
 	// draw vertival select line from mouse click
+	glBegin(GL_LINES);
 	glColor3f(0.0, 1.0, 0.0);
-	glBegin(GL_LINE_LOOP);
 	glVertex2f(FLHistcursorX[0], YBORDER);
-	glVertex2f(FLHistcursorX[0], MAX_CHANNEL);
+	glVertex2f(FLHistcursorX[0], ymax);
 	glEnd();
 	
 	// draw the line showing the low energy cutoff
 	glColor4f(0.0, 0.0, 1.0, 0.5);
-	glRectf(XBORDER, 0, low_threshold, MAX_CHANNEL);
+	glRectf(XBORDER, 0, low_threshold, ymax);
 	
+	glBegin(GL_LINES);
 	glColor3f(0.0, 0.0, 1.0);
-	glBegin(GL_LINE_LOOP);
 	glVertex2f(low_threshold, YBORDER);
-	glVertex2f(low_threshold, MAX_CHANNEL);
+	glVertex2f(low_threshold, ymax);
 	glEnd();
 	
 	glPopMatrix();
@@ -152,6 +172,8 @@ int mainHistogram::handle(int eventType)
 	gui->histEnergy->value(mouseHistPixel);	
 	gui->histCounts->value(HistogramFunction[mouseHistPixel]);
 	
+	gui->histCounts->value(displayHistogram[mouseHistPixel/mainHistogram_binsize]);
+	
 	redraw();
 	
 	      //if((eventType==FL_PUSH)&&(button==1))
@@ -185,13 +207,13 @@ int mainHistogram::handle(int eventType)
 //      }
 //}
 
-int mainHistogram::maximumValue(int *array)
+float mainHistogram::maximumValue(double *array, int size)
 {
 	//float length = sizeof(array)/sizeof(array[0]);  // establish size of array
 	//cout << "size of array " << length << endl;
 	//do not consider below xmin
-	int max = array[XMIN];       // start with max = first element
-	for(int i = XMIN + 1; i < MAX_CHANNEL; i++)
+	float max = array[0];       // start with max = first element
+	for(int i = 1; i < size; i++)
 	{
 		if(array[i] > max){
 			max = array[i];}

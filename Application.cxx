@@ -56,6 +56,7 @@ int mainImage_minimum;
 int detector_display[7];
 
 extern int low_threshold;
+extern int mainHistogram_binsize;
 
 Application::Application()
 {
@@ -450,4 +451,10 @@ void Application::reset_read_counter(void)
 {
 	nreads = 0;
 	gui->nEventsDone->value(0);
+}
+
+void Application::update_binsize(void)
+{
+	mainHistogram_binsize = gui->binsize_counter->value();
+	gui->mainHistogramWindow->redraw();
 }

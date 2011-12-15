@@ -126,6 +126,7 @@ void data_initialize(void)
 		if (init_state == 1){
 			gui->startReadingDataButton->activate();
 			gui->closeBut->activate();
+			gui->detector_choice->activate();
 			gui->app->print_to_console("Done initializing.\n");
 		} else gui->app->print_to_console("Initialization failed!\n");
 	}
