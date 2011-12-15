@@ -94,6 +94,13 @@ void Gui::cb_Flush1(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_Flush1_i(o,v);
 }
 
+void Gui::cb_binsize_counter_i(Fl_Counter*, void*) {
+  app->update_binsize();
+}
+void Gui::cb_binsize_counter(Fl_Counter* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_binsize_counter_i(o,v);
+}
+
 void Gui::cb_reset_i(Fl_Button*, void*) {
   app->reset_read_counter();
 }
@@ -431,10 +438,10 @@ Gui::Gui() {
       } // Fl_Value_Output* HVOutput
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(585, 477, 480, 243, "Histogram");
+    { Fl_Group* o = new Fl_Group(585, 477, 505, 243, "Histogram");
       o->box(FL_THIN_UP_FRAME);
       o->color((Fl_Color)41);
-      { mainHistogramWindow = new mainHistogram(625, 480, 265, 240, "Histogram");
+      { mainHistogramWindow = new mainHistogram(665, 480, 265, 240, "Histogram");
         mainHistogramWindow->box(FL_GTK_UP_BOX);
         mainHistogramWindow->color(FL_BACKGROUND_COLOR);
         mainHistogramWindow->selection_color(FL_BACKGROUND_COLOR);
@@ -445,25 +452,30 @@ Gui::Gui() {
         mainHistogramWindow->align(Fl_Align(FL_ALIGN_CENTER));
         mainHistogramWindow->when(FL_WHEN_RELEASE);
       } // mainHistogram* mainHistogramWindow
-      { mainHistogramYlabelmid = new Fl_Value_Output(585, 597, 35, 23);
+      { mainHistogramYlabelmid = new Fl_Value_Output(585, 597, 70, 23);
         mainHistogramYlabelmid->box(FL_THIN_UP_BOX);
       } // Fl_Value_Output* mainHistogramYlabelmid
-      { mainHistogramYlabelmax = new Fl_Value_Output(585, 477, 35, 23);
+      { mainHistogramYlabelmax = new Fl_Value_Output(585, 477, 70, 23);
         mainHistogramYlabelmax->box(FL_THIN_UP_BOX);
       } // Fl_Value_Output* mainHistogramYlabelmax
-      { Fl_Choice* o = new Fl_Choice(965, 585, 85, 25, "choice:");
+      { Fl_Choice* o = new Fl_Choice(1005, 585, 85, 25, "choice:");
         o->down_box(FL_BORDER_BOX);
         o->menu(menu_choice);
       } // Fl_Choice* o
-      { histLow = new Fl_Value_Output(995, 546, 55, 24, "low threshold:");
+      { histLow = new Fl_Value_Output(1035, 546, 55, 24, "low threshold:");
       } // Fl_Value_Output* histLow
-      { histCounts = new Fl_Value_Output(995, 516, 55, 24, "Counts:");
+      { histCounts = new Fl_Value_Output(1035, 516, 55, 24, "Counts:");
       } // Fl_Value_Output* histCounts
-      { histEnergy = new Fl_Value_Output(995, 486, 55, 24, "Chan/Energy:");
+      { histEnergy = new Fl_Value_Output(1035, 486, 55, 24, "Chan/Energy:");
       } // Fl_Value_Output* histEnergy
-      { Fl_Button* o = new Fl_Button(970, 625, 80, 25, "Flush");
+      { Fl_Button* o = new Fl_Button(1010, 625, 80, 25, "Flush");
         o->callback((Fl_Callback*)cb_Flush1);
       } // Fl_Button* o
+      { binsize_counter = new Fl_Counter(970, 665, 120, 20, "bin size:");
+        binsize_counter->step(1);
+        binsize_counter->value(25);
+        binsize_counter->callback((Fl_Callback*)cb_binsize_counter);
+      } // Fl_Counter* binsize_counter
       o->end();
     } // Fl_Group* o
     { frameTime = new Fl_Value_Output(535, 36, 33, 24, "frame time");
@@ -532,9 +544,10 @@ Gui::Gui() {
     } // Fl_Value_Output* testOutput
     { nEventsDone = new Fl_Value_Output(295, 66, 40, 24, "read counter:");
     } // Fl_Value_Output* nEventsDone
-    { Fl_Group* o = new Fl_Group(155, 270, 220, 30, "Detectors to display");
-      o->box(FL_DOWN_BOX);
-      o->align(Fl_Align(FL_ALIGN_LEFT));
+    { detector_choice = new Fl_Group(155, 270, 220, 30, "Detectors to display");
+      detector_choice->box(FL_DOWN_BOX);
+      detector_choice->align(Fl_Align(FL_ALIGN_LEFT));
+      detector_choice->deactivate();
       { detector1_checkbox = new Fl_Check_Button(160, 270, 35, 30, "1");
         detector1_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector1_checkbox
@@ -556,8 +569,8 @@ Gui::Gui() {
       { detector7_checkbox = new Fl_Check_Button(340, 270, 35, 30, "7");
         detector7_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector7_checkbox
-      o->end();
-    } // Fl_Group* o
+      detector_choice->end();
+    } // Fl_Group* detector_choice
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow

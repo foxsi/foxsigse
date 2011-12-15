@@ -19,6 +19,7 @@
 #include <FL/Fl_Value_Output.H>
 #include "mainHistogram.h"
 #include <FL/Fl_Choice.H>
+#include <FL/Fl_Counter.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
 #include <FL/Fl_Text_Display.H>
@@ -89,6 +90,11 @@ private:
   void cb_Flush1_i(Fl_Button*, void*);
   static void cb_Flush1(Fl_Button*, void*);
 public:
+  Fl_Counter *binsize_counter;
+private:
+  void cb_binsize_counter_i(Fl_Counter*, void*);
+  static void cb_binsize_counter(Fl_Counter*, void*);
+public:
   Fl_Value_Output *frameTime;
   Fl_Value_Output *framenumOutput;
 private:
@@ -146,6 +152,7 @@ private:
 public:
   Fl_Value_Output *testOutput;
   Fl_Value_Output *nEventsDone;
+  Fl_Group *detector_choice;
   Fl_Check_Button *detector1_checkbox;
   Fl_Check_Button *detector2_checkbox;
   Fl_Check_Button *detector3_checkbox;

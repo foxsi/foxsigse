@@ -7,7 +7,7 @@ class Gui {open
   Function {Gui()} {open
   } {
     Fl_Window mainWindow {
-      label {FOXSI GSE} open selected
+      label {FOXSI GSE} open
       xywh {28 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
@@ -165,23 +165,23 @@ exit(1);}
       }
       Fl_Group {} {
         label Histogram open
-        xywh {585 477 480 243} box THIN_UP_FRAME color 41
+        xywh {585 477 505 243} box THIN_UP_FRAME color 41
       } {
         Fl_Box mainHistogramWindow {
           label Histogram
-          xywh {625 480 265 240} box GTK_UP_BOX
+          xywh {665 480 265 240} box GTK_UP_BOX
           code0 {\#include "mainHistogram.h"}
           class mainHistogram
         }
         Fl_Value_Output mainHistogramYlabelmid {
-          xywh {585 597 35 23} box THIN_UP_BOX
+          xywh {585 597 70 23} box THIN_UP_BOX
         }
         Fl_Value_Output mainHistogramYlabelmax {
-          xywh {585 477 35 23} box THIN_UP_BOX
+          xywh {585 477 70 23} box THIN_UP_BOX
         }
         Fl_Choice {} {
           label {choice:} open
-          xywh {965 585 85 25} down_box BORDER_BOX
+          xywh {1005 585 85 25} down_box BORDER_BOX
         } {
           MenuItem {} {
             label Channel
@@ -194,20 +194,25 @@ exit(1);}
         }
         Fl_Value_Output histLow {
           label {low threshold:}
-          xywh {995 546 55 24}
+          xywh {1035 546 55 24}
         }
         Fl_Value_Output histCounts {
           label {Counts:}
-          xywh {995 516 55 24}
+          xywh {1035 516 55 24}
         }
         Fl_Value_Output histEnergy {
           label {Chan/Energy:}
-          xywh {995 486 55 24}
+          xywh {1035 486 55 24}
         }
         Fl_Button {} {
           label Flush
           callback {app->flush_histogram();}
-          xywh {970 625 80 25}
+          xywh {1010 625 80 25}
+        }
+        Fl_Counter binsize_counter {
+          label {bin size:}
+          callback {app->update_binsize();} selected
+          xywh {970 665 120 20} step 1 value 25
         }
       }
       Fl_Value_Output frameTime {
@@ -303,9 +308,9 @@ app->start_reading_data();}
         label {read counter:}
         xywh {295 66 40 24}
       }
-      Fl_Group {} {
+      Fl_Group detector_choice {
         label {Detectors to display} open
-        xywh {155 270 220 30} box DOWN_BOX align 4
+        xywh {155 270 220 30} box DOWN_BOX align 4 deactivate
       } {
         Fl_Check_Button detector1_checkbox {
           label 1

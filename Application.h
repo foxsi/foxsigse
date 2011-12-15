@@ -85,6 +85,7 @@ public:
 	void set_lowthreshold(void);
 	void flush_histogram(void);
 	void flush_image(void);
+	void update_binsize(void);
 	
 private:
 	char filename[40];
