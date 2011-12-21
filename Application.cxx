@@ -24,6 +24,7 @@ extern Gui *gui;
 extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagemask[XSTRIPS][YSTRIPS];
+extern int timebins[MAX_CHANNEL];
 
 extern int stop_message;
 extern FILE *dataFile;
@@ -74,6 +75,18 @@ void Application::flush_histogram(void)
 		HistogramFunction[i] = 0;
 	}
 	gui->mainHistogramWindow->redraw();
+	
+}
+
+void Application::flush_timeseries(void)
+{	
+	// Zero the time series
+	
+	for(int i = 0;i < MAX_CHANNEL; i++)
+	{
+		timebins[i] = 0;
+	}
+	gui->mainLightcurveWindow->redraw();
 	
 }
 
@@ -449,9 +462,15 @@ void Application::update_binsize(void)
 {
 	mainHistogram_binsize = gui->binsize_counter->value();
 	gui->mainHistogramWindow->redraw();
-	gui->mainHistogramWindow->redraw();
-
 }
+
+void Application::update_timebinsize(void)
+{
+	// mainHistogram_binsize = gui->binsize_counter->value();
+	gui->mainLightcurveWindow->redraw();
+}
+
+
 
 void Application::set_lowthreshold(void)
 {

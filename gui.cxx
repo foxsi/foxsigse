@@ -137,6 +137,13 @@ void Gui::cb_closeBut(Fl_Light_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_closeBut_i(o,v);
 }
 
+void Gui::cb_timebinsize_counter_i(Fl_Counter*, void*) {
+  app->update_timebinsize();
+}
+void Gui::cb_timebinsize_counter(Fl_Counter* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_timebinsize_counter_i(o,v);
+}
+
 void Gui::cb_sendParamsBut_i(Fl_Button*, void*) {
   app->openSendParamsWindow();
 }
@@ -505,24 +512,36 @@ Gui::Gui() {
       closeBut->callback((Fl_Callback*)cb_closeBut);
       closeBut->deactivate();
     } // Fl_Light_Button* closeBut
-    { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 125, "Light curve");
-      mainLightcurveWindow->box(FL_GTK_UP_BOX);
-      mainLightcurveWindow->color(FL_BACKGROUND_COLOR);
-      mainLightcurveWindow->selection_color(FL_BACKGROUND_COLOR);
-      mainLightcurveWindow->labeltype(FL_NORMAL_LABEL);
-      mainLightcurveWindow->labelfont(0);
-      mainLightcurveWindow->labelsize(14);
-      mainLightcurveWindow->labelcolor(FL_FOREGROUND_COLOR);
-      mainLightcurveWindow->align(Fl_Align(FL_ALIGN_CENTER));
-      mainLightcurveWindow->when(FL_WHEN_RELEASE);
-    } // mainLightcurve* mainLightcurveWindow
+    { Fl_Group* o = new Fl_Group(420, 160, 437, 125, "LightCurve");
+      o->box(FL_THIN_UP_FRAME);
+      { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 125, "Light curve");
+        mainLightcurveWindow->box(FL_GTK_UP_BOX);
+        mainLightcurveWindow->color(FL_BACKGROUND_COLOR);
+        mainLightcurveWindow->selection_color(FL_BACKGROUND_COLOR);
+        mainLightcurveWindow->labeltype(FL_NORMAL_LABEL);
+        mainLightcurveWindow->labelfont(0);
+        mainLightcurveWindow->labelsize(14);
+        mainLightcurveWindow->labelcolor(FL_FOREGROUND_COLOR);
+        mainLightcurveWindow->align(Fl_Align(FL_ALIGN_CENTER));
+        mainLightcurveWindow->when(FL_WHEN_RELEASE);
+      } // mainLightcurve* mainLightcurveWindow
+      { testBut = new Fl_Button(770, 200, 75, 25, "Test");
+      } // Fl_Button* testBut
+      { testOutput = new Fl_Value_Output(770, 171, 77, 24, "value:");
+      } // Fl_Value_Output* testOutput
+      { timebinsize_counter = new Fl_Counter(725, 235, 120, 20, "bin size:");
+        timebinsize_counter->minimum(1);
+        timebinsize_counter->step(1);
+        timebinsize_counter->value(1);
+        timebinsize_counter->callback((Fl_Callback*)cb_timebinsize_counter);
+      } // Fl_Counter* timebinsize_counter
+      o->end();
+    } // Fl_Group* o
     { glitchBut = new Fl_Light_Button(195, 210, 75, 25, "Glitch");
     } // Fl_Light_Button* glitchBut
     { sendParamsBut = new Fl_Button(10, 155, 100, 25, "Send Params");
       sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
     } // Fl_Button* sendParamsBut
-    { testBut = new Fl_Button(825, 195, 75, 25, "Test");
-    } // Fl_Button* testBut
     { nEvents = new Fl_Value_Input(295, 35, 40, 24, "events");
     } // Fl_Value_Input* nEvents
     { writeFileBut = new Fl_Light_Button(10, 95, 95, 25, "Write to file");
@@ -548,8 +567,6 @@ Gui::Gui() {
     { setTrigBut = new Fl_Button(115, 155, 125, 25, "Set Trigger Options");
       setTrigBut->callback((Fl_Callback*)cb_setTrigBut);
     } // Fl_Button* setTrigBut
-    { testOutput = new Fl_Value_Output(825, 166, 77, 24, "value:");
-    } // Fl_Value_Output* testOutput
     { nEventsDone = new Fl_Value_Output(295, 66, 40, 24, "read counter:");
     } // Fl_Value_Output* nEventsDone
     { detector_choice = new Fl_Group(155, 270, 220, 30, "Detectors to display");

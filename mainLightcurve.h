@@ -18,7 +18,11 @@
 class mainLightcurve : public Fl_Gl_Window {
 public:
 	mainLightcurve(int x,int y,int w,int h,const char *l=0);
-	void draw();   
+	void draw();  
+	int ymax;
+	int ymin;
+	int xmax;
+	int xmin;
 };
 
 #endif
