@@ -79,6 +79,7 @@ void data_initialize(void)
 		gui->closeBut->activate();
 		gui->app->flush_image();
 		gui->app->flush_histogram();
+		gui->app->flush_timeseries();
 		gui->app->print_to_console("Done initializing.\n");
 		
 	}
@@ -164,6 +165,7 @@ void* data_watch_buffer(void* p)
 			
 			gui->mainHistogramWindow->redraw();
 			gui->mainImageWindow->redraw();
+			gui->mainLightcurveWindow->redraw();
 			Fl::awake(); // Without this it may not redraw until next event (like a mouse movement)!
 			Fl::unlock();
 		}
@@ -177,10 +179,22 @@ void* data_watch_buffer(void* p)
 void* data_timer(void *p)
 {
 	/* Keep track of the timer */
+	int i = 1;
 	while(1)
 	{
 		current_time = time(NULL);
+		if (data_source == 0){
 
+			if (difftime(current_time, start_time) > i)
+			{
+				timebins[MAX_CHANNEL-1] = current_timebin;
+				for(int j = 0; j < MAX_CHANNEL-1; j++){ 
+					timebins[j] = timebins[j+1]; }
+
+				i++;
+				current_timebin = 0;
+			}
+		}
 		if (stop_message == 1){
 			pthread_exit(NULL);
 		}
@@ -511,7 +525,9 @@ void data_update_display(unsigned short int *frame)
 		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
 		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
 		if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
-			
+		
+		gui->testOutput->value(timebins[1023]);
+		
 		num_hits = arc4random() % 10;
 		for(int i = 0; i < num_hits; i++)
 		{
@@ -526,6 +542,7 @@ void data_update_display(unsigned short int *frame)
 			// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
 		}
 		
+		current_timebin+=num_hits;
 		//if (<#condition#>) {
 //			current_timebin+=num_hits;
 //		} else {

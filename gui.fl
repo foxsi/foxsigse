@@ -7,7 +7,7 @@ class Gui {open
   Function {Gui()} {open
   } {
     Fl_Window mainWindow {
-      label {FOXSI GSE} open selected
+      label {FOXSI GSE} open
       xywh {28 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
@@ -245,11 +245,29 @@ app->start_reading_data();}
         callback {app->close_data()}
         xywh {10 65 80 25} deactivate
       }
-      Fl_Box mainLightcurveWindow {
-        label {Light curve}
-        xywh {420 160 300 125} box GTK_UP_BOX
-        code0 {\#include "mainLightcurve.h"}
-        class mainLightcurve
+      Fl_Group {} {
+        label LightCurve open
+        xywh {420 160 437 125} box THIN_UP_FRAME
+      } {
+        Fl_Box mainLightcurveWindow {
+          label {Light curve}
+          xywh {420 160 300 125} box GTK_UP_BOX
+          code0 {\#include "mainLightcurve.h"}
+          class mainLightcurve
+        }
+        Fl_Button testBut {
+          label Test
+          xywh {770 200 75 25}
+        }
+        Fl_Value_Output testOutput {
+          label {value:}
+          xywh {770 171 77 24}
+        }
+        Fl_Counter timebinsize_counter {
+          label {bin size:}
+          callback {app->update_timebinsize();} selected
+          xywh {725 235 120 20} minimum 1 step 1 value 1
+        }
       }
       Fl_Light_Button glitchBut {
         label Glitch
@@ -259,10 +277,6 @@ app->start_reading_data();}
         label {Send Params}
         callback {app->openSendParamsWindow()}
         xywh {10 155 100 25}
-      }
-      Fl_Button testBut {
-        label Test
-        xywh {825 195 75 25}
       }
       Fl_Value_Input nEvents {
         label events
@@ -300,10 +314,6 @@ app->start_reading_data();}
         label {Set Trigger Options}
         callback {app->openSetTrigWindow()}
         xywh {115 155 125 25}
-      }
-      Fl_Value_Output testOutput {
-        label {value:}
-        xywh {825 166 77 24}
       }
       Fl_Value_Output nEventsDone {
         label {read counter:}

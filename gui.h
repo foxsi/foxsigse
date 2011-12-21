@@ -121,13 +121,19 @@ private:
   static void cb_closeBut(Fl_Light_Button*, void*);
 public:
   mainLightcurve *mainLightcurveWindow;
+  Fl_Button *testBut;
+  Fl_Value_Output *testOutput;
+  Fl_Counter *timebinsize_counter;
+private:
+  void cb_timebinsize_counter_i(Fl_Counter*, void*);
+  static void cb_timebinsize_counter(Fl_Counter*, void*);
+public:
   Fl_Light_Button *glitchBut;
   Fl_Button *sendParamsBut;
 private:
   void cb_sendParamsBut_i(Fl_Button*, void*);
   static void cb_sendParamsBut(Fl_Button*, void*);
 public:
-  Fl_Button *testBut;
   Fl_Value_Input *nEvents;
   Fl_Light_Button *writeFileBut;
 private:
@@ -154,7 +160,6 @@ private:
   void cb_setTrigBut_i(Fl_Button*, void*);
   static void cb_setTrigBut(Fl_Button*, void*);
 public:
-  Fl_Value_Output *testOutput;
   Fl_Value_Output *nEventsDone;
   Fl_Group *detector_choice;
   Fl_Check_Button *detector1_checkbox;
