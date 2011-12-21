@@ -18,9 +18,10 @@
 
 void* data_testfunction(void *p);
 void* data_watch_buffer(void *p);
+void* data_read_data(void *p);
+void* data_timer(void *p);
 void data_start_file(void);
 void data_simulate_data(void);
-void* data_read_data(void *p);
 void data_start_reading(void);
 void data_stop_reading(void);
 void data_update_display(unsigned short int *frame);

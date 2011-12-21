@@ -137,7 +137,7 @@ int subImage::handle(int eventType)
 	sprintf( text, "%d,%d", subImageMousePixel[0], subImageMousePixel[1]);
 	gui->pixelNum->value(text);
 	//sprintf( text, "%4.2f", detImage[subImageMousePixel[0]][subImageMousePixel[1]]);
-	sprintf( text, "%4.2f", detImage[subImageMousePixel[0]][subImageMousePixel[1]]);
+		sprintf( text, "%4.2f", detImage[subImageMousePixel[0]][subImageMousePixel[1]]);
 	gui->pixelCounts->value(text);
 	
 	redraw();

@@ -449,6 +449,8 @@ void Application::update_binsize(void)
 {
 	mainHistogram_binsize = gui->binsize_counter->value();
 	gui->mainHistogramWindow->redraw();
+	gui->mainHistogramWindow->redraw();
+
 }
 
 void Application::set_lowthreshold(void)
@@ -457,4 +459,19 @@ void Application::set_lowthreshold(void)
 	gui->histLow->value(low_threshold);
 	gui->mainHistogramWindow->redraw();
 	gui->histLow->redraw();
+}
+
+void Application::set_energy_histogram(void)
+{
+	gui->binsize_counter->value(1);
+	mainHistogram_binsize = 1;
+	gui->mainHistogramWindow->redraw();
+
+}
+
+void Application::set_channel_histogram(void)
+{
+	gui->binsize_counter->value(25);
+	mainHistogram_binsize = 25;
+	gui->mainHistogramWindow->redraw();
 }

@@ -83,6 +83,10 @@ public:
   Fl_Value_Output *mainHistogramYlabelmid;
   Fl_Value_Output *mainHistogramYlabelmax;
   static Fl_Menu_Item menu_choice[];
+private:
+  void cb_Energy_i(Fl_Menu_*, void*);
+  static void cb_Energy(Fl_Menu_*, void*);
+public:
   Fl_Value_Output *histLow;
   Fl_Value_Output *histCounts;
   Fl_Value_Output *histEnergy;
@@ -160,6 +164,7 @@ public:
   Fl_Check_Button *detector5_checkbox;
   Fl_Check_Button *detector6_checkbox;
   Fl_Check_Button *detector7_checkbox;
+  Fl_Value_Output *inttimeOutput;
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:
