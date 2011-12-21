@@ -81,9 +81,16 @@ void Gui::cb_mainImageMin_slider(Fl_Value_Slider* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_mainImageMin_slider_i(o,v);
 }
 
+void Gui::cb_Energy_i(Fl_Menu_*, void*) {
+  app->set_energy_histogram();
+}
+void Gui::cb_Energy(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_Energy_i(o,v);
+}
+
 Fl_Menu_Item Gui::menu_choice[] = {
  {"Channel", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Energy", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Energy", 0,  (Fl_Callback*)Gui::cb_Energy, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0}
 };
 
@@ -472,6 +479,7 @@ Gui::Gui() {
         o->callback((Fl_Callback*)cb_Flush1);
       } // Fl_Button* o
       { binsize_counter = new Fl_Counter(970, 665, 120, 20, "bin size:");
+        binsize_counter->minimum(1);
         binsize_counter->step(1);
         binsize_counter->value(25);
         binsize_counter->callback((Fl_Callback*)cb_binsize_counter);
@@ -571,6 +579,8 @@ Gui::Gui() {
       } // Fl_Check_Button* detector7_checkbox
       detector_choice->end();
     } // Fl_Group* detector_choice
+    { inttimeOutput = new Fl_Value_Output(535, 66, 33, 24, "time (s):");
+    } // Fl_Value_Output* inttimeOutput
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow

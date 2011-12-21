@@ -50,10 +50,15 @@ okCFrontPanel *dev;
 
 int newdisplay;
 int stop_message;
+time_t start_time;
+time_t current_time;
 extern int data_source;
 unsigned short int buffer[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int buffer0[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int framecount;
+
+extern int current_timebin;
+extern int timebins[1024];
 
 int *taskids[NUM_THREADS];
 int fout;
@@ -163,6 +168,19 @@ void* data_watch_buffer(void* p)
 			Fl::unlock();
 		}
 		
+		if (stop_message == 1){
+			pthread_exit(NULL);
+		}
+	}
+}
+
+void* data_timer(void *p)
+{
+	/* Keep track of the timer */
+	while(1)
+	{
+		current_time = time(NULL);
+
 		if (stop_message == 1){
 			pthread_exit(NULL);
 		}
@@ -416,6 +434,7 @@ void data_start_reading(void)
 	gui->stopReadingDataButton->activate();
 	
 	stop_message = 0;
+	start_time = time(NULL);
 	
 	// define a high (custom) priority for the read_data thread
     int newprio = -10;
@@ -437,6 +456,13 @@ void data_start_reading(void)
 	// start the watch_buffer thread
 	ret = pthread_create(&thread, NULL, data_watch_buffer, (void *) taskids[1]);	
 	
+	//newprio = -5;
+	//param.sched_priority = newprio;
+	//ret = pthread_attr_init(&tattr);
+	//ret = pthread_attr_setschedparam (&tattr, &param);
+	
+	// start the data reading clock
+	ret = pthread_create(&thread, NULL, data_timer, (void *) taskids[2]);
 }
 
 void data_stop_reading(void)
@@ -468,7 +494,8 @@ void data_update_display(unsigned short int *frame)
 	gui->nEventsDone->value(nreads); 
 	
 	if (data_source == 0) {
-		int x, y, z;
+		int num_hits;
+		
 		// if parsing simulated data
 		unsigned voltage_status;
 		unsigned voltage;
@@ -477,26 +504,35 @@ void data_update_display(unsigned short int *frame)
 		voltage = (buffer[13] >> 12) & 0xFFF;
 		
 		gui->nEventsDone->value(nreads); 
-		
 		gui->framenumOutput->value(frame[5]);
-		// gui->testOutput->value(strip.number);
+		gui->inttimeOutput->value(difftime(current_time,start_time));
+
 		gui->HVOutput->value(voltage);
-		printf("voltage: %i status: %i", voltage, voltage_status);
 		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
 		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
 		if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
-	
+			
+		num_hits = arc4random() % 10;
+		for(int i = 0; i < num_hits; i++)
+		{
+			int x, y, z;
+			// HistogramFunction[strip_data]++;
+			x = arc4random() % XSTRIPS + 1;
+			y = arc4random() % YSTRIPS + 1;
+			z = arc4random() % MAX_CHANNEL + 1;
+			HistogramFunction[z] += 1;
+			detImage[x][y] = z;
+			detImagetime[x][y] = clock();
+			// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
+		}
 		
-		// gui->testOutput->value(strip.number);
-	 	
-		// HistogramFunction[strip_data]++;
-		x = arc4random() % 128 + 1;
-		y = arc4random() % 128 + 1;
-		z = arc4random() % 1024 + 1;
-		HistogramFunction[z] += 1;
-		detImage[x][y] = z;
-		detImagetime[x][y] = clock();
-		// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
+		//if (<#condition#>) {
+//			current_timebin+=num_hits;
+//		} else {
+//			current_timebin = 0;
+//		}
+
+		
 	}
 	
 	if (data_source == 1){

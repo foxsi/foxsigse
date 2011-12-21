@@ -86,7 +86,8 @@ public:
 	void flush_histogram(void);
 	void flush_image(void);
 	void update_binsize(void);
-	
+	void set_energy_histogram(void);
+	void set_channel_histogram(void);
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
