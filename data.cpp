@@ -57,12 +57,16 @@ unsigned short int buffer[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int buffer0[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int framecount;
 
-extern int current_timebin;
-extern int timebins[1024];
+extern unsigned int current_timebin;
+extern unsigned int LightcurveFunction[MAX_CHANNEL];
+extern long displayLightcurve[MAX_CHANNEL];
+extern int mainLightcurve_binsize[MAX_CHANNEL];
+
 
 int *taskids[NUM_THREADS];
 int fout;
 pthread_mutex_t mymutex;
+pthread_mutex_t timebinmutex;
 double nreads;
 
 extern char *data_file_save_dir;
@@ -101,6 +105,7 @@ void data_initialize(void)
 			gui->setHoldTimeWindow_autorunBut->activate();
 			gui->app->flush_image();
 			gui->app->flush_histogram();
+			gui->app->flush_timeseries();
 			gui->app->print_to_console("Done initializing.\n");
 		}
 
@@ -179,26 +184,42 @@ void* data_watch_buffer(void* p)
 void* data_timer(void *p)
 {
 	/* Keep track of the timer */
-	int i = 1;
 	while(1)
 	{
 		current_time = time(NULL);
-		if (data_source == 0){
 
-			if (difftime(current_time, start_time) > i)
-			{
-				timebins[MAX_CHANNEL-1] = current_timebin;
-				for(int j = 0; j < MAX_CHANNEL-1; j++){ 
-					timebins[j] = timebins[j+1]; }
-
-				i++;
-				current_timebin = 0;
-			}
-		}
 		if (stop_message == 1){
-			pthread_exit(NULL);
-		}
+			pthread_exit(NULL);}		
 	}
+}
+
+void* data_countrate(void *p)
+{
+	/* Keep track of the timer */
+	unsigned int i = 1;
+	while(1)
+	{
+		int temp;
+		temp = mainLightcurve_binsize[0];
+		
+		sleep(temp);
+		
+		pthread_mutex_lock(&timebinmutex);
+		
+		LightcurveFunction[0] = current_timebin;
+		
+		for(int j = MAX_CHANNEL-1; j > 0; j--){ 
+			LightcurveFunction[j] = LightcurveFunction[j-1];
+			mainLightcurve_binsize[j] = mainLightcurve_binsize[j-1];
+		}
+		
+		current_timebin = 0;
+		pthread_mutex_unlock(&timebinmutex);
+		
+		if (stop_message == 1){
+			pthread_exit(NULL);}		
+	}
+	
 }
 
 void* data_read_data(void *p)
@@ -317,6 +338,7 @@ void* data_read_data(void *p)
 			}
 			
 			pthread_mutex_destroy(&mymutex);
+			pthread_mutex_destroy(&timebinmutex);
 			pthread_exit(NULL);
 		}
 		nreads++;	
@@ -455,12 +477,13 @@ void data_start_reading(void)
 	param.sched_priority = newprio;
 	ret = pthread_attr_init(&tattr);
 	ret = pthread_attr_setschedparam (&tattr, &param);
-	
+		
 	gui->app->print_to_console("Reading...\n");
 	
 	// start the read_data thread
 	ret = pthread_create(&thread, &tattr, data_read_data, (void *) taskids[0]);
 	pthread_mutex_init(&mymutex,NULL);
+	pthread_mutex_init(&timebinmutex,NULL);
 
 	//newprio = -5;
 	//param.sched_priority = newprio;
@@ -477,6 +500,8 @@ void data_start_reading(void)
 	
 	// start the data reading clock
 	ret = pthread_create(&thread, NULL, data_timer, (void *) taskids[2]);
+	// start the count rate thread
+	ret = pthread_create(&thread, NULL, data_countrate, (void *) taskids[3]);
 }
 
 void data_stop_reading(void)
@@ -526,8 +551,6 @@ void data_update_display(unsigned short int *frame)
 		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
 		if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
 		
-		gui->testOutput->value(timebins[1023]);
-		
 		num_hits = arc4random() % 10;
 		for(int i = 0; i < num_hits; i++)
 		{
@@ -542,14 +565,9 @@ void data_update_display(unsigned short int *frame)
 			// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
 		}
 		
+		pthread_mutex_lock( &timebinmutex);
 		current_timebin+=num_hits;
-		//if (<#condition#>) {
-//			current_timebin+=num_hits;
-//		} else {
-//			current_timebin = 0;
-//		}
-
-		
+		pthread_mutex_unlock(&timebinmutex);
 	}
 	
 	if (data_source == 1){

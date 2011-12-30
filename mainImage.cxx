@@ -199,24 +199,24 @@ int mainImage::handle(int eventType)
 		
 	}
 	
-	//save the current view 
-	for(int j=0;j<ZOOMNUM;j++)
-	{
-		for(int i=0;i<ZOOMNUM;i++)
+	/* //save the current view 
+		for(int j=0;j<ZOOMNUM;j++)
 		{
-			int curPixel[2];
-			
-			curPixel[0] = mousePixel[0] + i - ZOOMNUM/2;
-			curPixel[1] = mousePixel[1] + j - ZOOMNUM/2;
-			if ((curPixel[0] < 0)||(curPixel[1] < 0)||(curPixel[0] > XSTRIPS)||(curPixel[1] > YSTRIPS))
-			{ detsubImage[i][j] = 0.0; } 
-			else { 
-				detsubImage[i][j] = detImage[curPixel[0]][curPixel[1]];
-				detsubImagealpha[i][j] = detImagealpha[curPixel[0]][curPixel[1]];
+			for(int i=0;i<ZOOMNUM;i++)
+			{
+				int curPixel[2];
+				
+				curPixel[0] = mousePixel[0] + i - ZOOMNUM/2;
+				curPixel[1] = mousePixel[1] + j - ZOOMNUM/2;
+				if ((curPixel[0] < 0)||(curPixel[1] < 0)||(curPixel[0] > XSTRIPS)||(curPixel[1] > YSTRIPS))
+				{ detsubImage[i][j] = 0.0; } 
+				else { 
+					detsubImage[i][j] = detImage[curPixel[0]][curPixel[1]];
+					detsubImagealpha[i][j] = detImagealpha[curPixel[0]][curPixel[1]];
+				}
 			}
 		}
-	}
-	
+	 */	
 	
 	//now update the text box with the current chosen pixel
 	if(gui->subImageLockbut->value() == 0)
@@ -228,7 +228,7 @@ int mainImage::handle(int eventType)
 	}
 	
 	//redraw();
-	if(gui->subImageLockbut->value() == 0){gui->subImageWindow->redraw();}
+	//if(gui->subImageLockbut->value() == 0){gui->subImageWindow->redraw();}
 	return(1);
 }
 

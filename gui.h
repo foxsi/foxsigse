@@ -122,6 +122,10 @@ private:
 public:
   mainLightcurve *mainLightcurveWindow;
   Fl_Button *testBut;
+private:
+  void cb_testBut_i(Fl_Button*, void*);
+  static void cb_testBut(Fl_Button*, void*);
+public:
   Fl_Value_Output *testOutput;
   Fl_Counter *timebinsize_counter;
 private:

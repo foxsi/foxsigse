@@ -13,7 +13,7 @@
 #define MAX_CHANNEL 1024
 
 int HistogramFunction[MAX_CHANNEL];
-double displayHistogram[MAX_CHANNEL];
+extern double displayHistogram[MAX_CHANNEL];
 
 int chosenHistPixel;
 int mouseHistPixel;
@@ -75,7 +75,6 @@ void mainHistogram::draw()
 	
 	glViewport(0,0,w(),h());
 	gluOrtho2D(0,MAX_CHANNEL/mainHistogram_binsize, 0, ymax);
-	
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -95,9 +94,8 @@ void mainHistogram::draw()
 	{
 		y = 0;
 		for (int j = 0; j < mainHistogram_binsize; j++) {
-			y += HistogramFunction[i+j];
-			displayHistogram[k] = y;
-		}
+			y += HistogramFunction[i+j];}
+		displayHistogram[k] = y;
 		k++;
 	}
 	

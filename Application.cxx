@@ -22,9 +22,12 @@
 extern Gui *gui;
 
 extern int HistogramFunction[MAX_CHANNEL];
+
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagemask[XSTRIPS][YSTRIPS];
-extern int timebins[MAX_CHANNEL];
+unsigned int LightcurveFunction[MAX_CHANNEL];
+long displayLightcurve[MAX_CHANNEL];
+double displayHistogram[MAX_CHANNEL];
 
 extern int stop_message;
 extern FILE *dataFile;
@@ -34,6 +37,8 @@ extern int nreads;
 // filename is set automatically with local time
 extern char dataFilename[MAXPATH];
 extern char dataFileDir[MAXPATH];
+
+int mainLightcurve_binsize[MAX_CHANNEL];
 
 // these are declared in transFunc.cpp
 //extern HistogramFunction histFunc[4];
@@ -69,10 +74,10 @@ Application::Application()
 void Application::flush_histogram(void)
 {	
 	// Zero the Histogram
-
 	for(int i = 0;i < MAX_CHANNEL; i++)
 	{
 		HistogramFunction[i] = 0;
+		displayHistogram[i] = 0;
 	}
 	gui->mainHistogramWindow->redraw();
 	
@@ -81,13 +86,12 @@ void Application::flush_histogram(void)
 void Application::flush_timeseries(void)
 {	
 	// Zero the time series
-	
 	for(int i = 0;i < MAX_CHANNEL; i++)
 	{
-		timebins[i] = 0;
+		LightcurveFunction[i] = 0;
+		displayLightcurve[i] = 0;
 	}
 	gui->mainLightcurveWindow->redraw();
-	
 }
 
 void Application::flush_image(void)
@@ -467,6 +471,7 @@ void Application::update_binsize(void)
 void Application::update_timebinsize(void)
 {
 	// mainHistogram_binsize = gui->binsize_counter->value();
+	mainLightcurve_binsize[0] = gui->timebinsize_counter->value();
 	gui->mainLightcurveWindow->redraw();
 }
 

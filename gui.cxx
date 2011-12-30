@@ -137,6 +137,13 @@ void Gui::cb_closeBut(Fl_Light_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_closeBut_i(o,v);
 }
 
+void Gui::cb_testBut_i(Fl_Button*, void*) {
+  app->flush_timeseries();
+}
+void Gui::cb_testBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_testBut_i(o,v);
+}
+
 void Gui::cb_timebinsize_counter_i(Fl_Counter*, void*) {
   app->update_timebinsize();
 }
@@ -526,6 +533,7 @@ Gui::Gui() {
         mainLightcurveWindow->when(FL_WHEN_RELEASE);
       } // mainLightcurve* mainLightcurveWindow
       { testBut = new Fl_Button(770, 200, 75, 25, "Test");
+        testBut->callback((Fl_Callback*)cb_testBut);
       } // Fl_Button* testBut
       { testOutput = new Fl_Value_Output(770, 171, 77, 24, "value:");
       } // Fl_Value_Output* testOutput

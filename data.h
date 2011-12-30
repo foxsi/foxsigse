@@ -20,6 +20,7 @@ void* data_testfunction(void *p);
 void* data_watch_buffer(void *p);
 void* data_read_data(void *p);
 void* data_timer(void *p);
+void* data_countrate(void *p);
 void data_start_file(void);
 void data_simulate_data(void);
 void data_start_reading(void);

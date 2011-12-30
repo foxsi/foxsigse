@@ -257,6 +257,7 @@ app->start_reading_data();}
         }
         Fl_Button testBut {
           label Test
+          callback {app->flush_timeseries();} selected
           xywh {770 200 75 25}
         }
         Fl_Value_Output testOutput {
@@ -265,7 +266,7 @@ app->start_reading_data();}
         }
         Fl_Counter timebinsize_counter {
           label {bin size:}
-          callback {app->update_timebinsize();} selected
+          callback {app->update_timebinsize();}
           xywh {725 235 120 20} minimum 1 step 1 value 1
         }
       }
