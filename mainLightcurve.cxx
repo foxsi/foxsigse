@@ -9,7 +9,7 @@ extern Gui *gui;
 unsigned int current_timebin = 0;
 extern unsigned int LightcurveFunction[MAX_CHANNEL];
 extern long displayLightcurve[MAX_CHANNEL];
-extern int mainLightcurve_binsize[MAX_CHANNEL];
+extern float mainLightcurve_binsize[MAX_CHANNEL];
 
 // the constructor method
 mainLightcurve::mainLightcurve(int x,int y,int w,int h,const char *l)
@@ -17,7 +17,7 @@ mainLightcurve::mainLightcurve(int x,int y,int w,int h,const char *l)
 {
 	ymax = 1000;
 	ymin = 0;
-	xmax = MAX_CHANNEL;
+	xmax = 20;
 	xmin = 0;
 	
 	for(int i=0; i < MAX_CHANNEL; i++)
@@ -34,7 +34,6 @@ void mainLightcurve::draw()
 	int k = 0;
 	
 	//xmax = MAX_CHANNEL/mainLightcurve_binsize;
-	xmax = 20;
 	
 	if (!valid()) {
 		make_current();
@@ -57,7 +56,7 @@ void mainLightcurve::draw()
 	glBegin(GL_LINES);
 	glColor3f(1.0, 0.0, 0.0);
 	
-	for (int x = 0; x < xmax; x+=mainLightcurve_binsize[k]){
+	for (float x = 0; x < xmax; x+=mainLightcurve_binsize[k]){
 		glVertex2f(x, LightcurveFunction[k]/mainLightcurve_binsize[k]);
 		glVertex2f(x + mainLightcurve_binsize[k], LightcurveFunction[k]/mainLightcurve_binsize[k]);
 		
@@ -70,5 +69,10 @@ void mainLightcurve::draw()
 	glPopMatrix();
 	glFinish();
 	
-	gui->testOutput->value(LightcurveFunction[0]/mainLightcurve_binsize[0]);
+	gui->ctsOutput->value(LightcurveFunction[0]/mainLightcurve_binsize[0]);
 }
+
+void mainLightcurve::set_xmax(int newxmax){
+	xmax = newxmax;
+}
+

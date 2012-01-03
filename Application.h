@@ -90,6 +90,7 @@ public:
 	void update_timebinsize(void);
 	void set_energy_histogram(void);
 	void set_channel_histogram(void);
+	void update_lightcurvexmax(void);
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream

@@ -7,6 +7,7 @@
 #include "gui.h"
 #include "Foxsidata.h"
 #include "usbd2xx.h"
+#include "mainLightcurve.h"
 #include <pthread.h>
 #include <sched.h>
 
@@ -20,7 +21,6 @@
 #define MAXPATH 128
 
 extern Gui *gui;
-
 extern int HistogramFunction[MAX_CHANNEL];
 
 extern double detImage[XSTRIPS][YSTRIPS];
@@ -38,7 +38,7 @@ extern int nreads;
 extern char dataFilename[MAXPATH];
 extern char dataFileDir[MAXPATH];
 
-int mainLightcurve_binsize[MAX_CHANNEL];
+float mainLightcurve_binsize[MAX_CHANNEL];
 
 // these are declared in transFunc.cpp
 //extern HistogramFunction histFunc[4];
@@ -472,11 +472,13 @@ void Application::update_timebinsize(void)
 {
 	// mainHistogram_binsize = gui->binsize_counter->value();
 	mainLightcurve_binsize[0] = gui->timebinsize_counter->value();
-	gui->mainLightcurveWindow->redraw();
 }
 
-
-
+void Application::update_lightcurvexmax(void)
+{
+	gui->mainLightcurveWindow->set_xmax(gui->lightcurvexmax_counter->value());
+	gui->mainLightcurveWindow->redraw();
+}
 void Application::set_lowthreshold(void)
 {
 	low_threshold = gui->mainImageMin_slider->value();

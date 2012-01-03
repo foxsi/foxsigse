@@ -247,27 +247,32 @@ app->start_reading_data();}
       }
       Fl_Group {} {
         label LightCurve open
-        xywh {420 160 437 125} box THIN_UP_FRAME
+        xywh {420 160 437 145} box THIN_UP_FRAME
       } {
         Fl_Box mainLightcurveWindow {
           label {Light curve}
-          xywh {420 160 300 125} box GTK_UP_BOX
+          xywh {420 160 300 145} box GTK_UP_BOX
           code0 {\#include "mainLightcurve.h"}
           class mainLightcurve
         }
-        Fl_Button testBut {
-          label Test
-          callback {app->flush_timeseries();} selected
-          xywh {770 200 75 25}
+        Fl_Button {} {
+          label Flush
+          callback {app->flush_timeseries();}
+          xywh {770 193 75 25}
         }
-        Fl_Value_Output testOutput {
-          label {value:}
-          xywh {770 171 77 24}
+        Fl_Value_Output ctsOutput {
+          label {cts/s:}
+          xywh {770 165 77 24}
         }
         Fl_Counter timebinsize_counter {
-          label {bin size:}
-          callback {app->update_timebinsize();}
-          xywh {725 235 120 20} minimum 1 step 1 value 1
+          label {bin size (s):}
+          callback {app->update_timebinsize();} selected
+          xywh {725 222 120 20} minimum 0.1 value 1
+        }
+        Fl_Counter lightcurvexmax_counter {
+          label {total sec:}
+          callback {app->update_lightcurvexmax();}
+          xywh {725 262 120 20} minimum 1 step 1 value 20
         }
       }
       Fl_Light_Button glitchBut {
@@ -1304,6 +1309,9 @@ PreferenceWindow->hide();}
         }
       }
     }
+    code {// initialization
+timebinsize_counter->step(0.1, 1);
+lightcurvexmax_counter->step(5, 10);} {}
   }
   Function {show()} {open
   } {

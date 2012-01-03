@@ -137,11 +137,11 @@ void Gui::cb_closeBut(Fl_Light_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_closeBut_i(o,v);
 }
 
-void Gui::cb_testBut_i(Fl_Button*, void*) {
+void Gui::cb_Flush2_i(Fl_Button*, void*) {
   app->flush_timeseries();
 }
-void Gui::cb_testBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_testBut_i(o,v);
+void Gui::cb_Flush2(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_Flush2_i(o,v);
 }
 
 void Gui::cb_timebinsize_counter_i(Fl_Counter*, void*) {
@@ -149,6 +149,13 @@ void Gui::cb_timebinsize_counter_i(Fl_Counter*, void*) {
 }
 void Gui::cb_timebinsize_counter(Fl_Counter* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_timebinsize_counter_i(o,v);
+}
+
+void Gui::cb_lightcurvexmax_counter_i(Fl_Counter*, void*) {
+  app->update_lightcurvexmax();
+}
+void Gui::cb_lightcurvexmax_counter(Fl_Counter* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_lightcurvexmax_counter_i(o,v);
 }
 
 void Gui::cb_sendParamsBut_i(Fl_Button*, void*) {
@@ -519,9 +526,9 @@ Gui::Gui() {
       closeBut->callback((Fl_Callback*)cb_closeBut);
       closeBut->deactivate();
     } // Fl_Light_Button* closeBut
-    { Fl_Group* o = new Fl_Group(420, 160, 437, 125, "LightCurve");
+    { Fl_Group* o = new Fl_Group(420, 160, 437, 145, "LightCurve");
       o->box(FL_THIN_UP_FRAME);
-      { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 125, "Light curve");
+      { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 145, "Light curve");
         mainLightcurveWindow->box(FL_GTK_UP_BOX);
         mainLightcurveWindow->color(FL_BACKGROUND_COLOR);
         mainLightcurveWindow->selection_color(FL_BACKGROUND_COLOR);
@@ -532,17 +539,22 @@ Gui::Gui() {
         mainLightcurveWindow->align(Fl_Align(FL_ALIGN_CENTER));
         mainLightcurveWindow->when(FL_WHEN_RELEASE);
       } // mainLightcurve* mainLightcurveWindow
-      { testBut = new Fl_Button(770, 200, 75, 25, "Test");
-        testBut->callback((Fl_Callback*)cb_testBut);
-      } // Fl_Button* testBut
-      { testOutput = new Fl_Value_Output(770, 171, 77, 24, "value:");
-      } // Fl_Value_Output* testOutput
-      { timebinsize_counter = new Fl_Counter(725, 235, 120, 20, "bin size:");
-        timebinsize_counter->minimum(1);
-        timebinsize_counter->step(1);
+      { Fl_Button* o = new Fl_Button(770, 193, 75, 25, "Flush");
+        o->callback((Fl_Callback*)cb_Flush2);
+      } // Fl_Button* o
+      { ctsOutput = new Fl_Value_Output(770, 165, 77, 24, "cts/s:");
+      } // Fl_Value_Output* ctsOutput
+      { timebinsize_counter = new Fl_Counter(725, 222, 120, 20, "bin size (s):");
+        timebinsize_counter->minimum(0.1);
         timebinsize_counter->value(1);
         timebinsize_counter->callback((Fl_Callback*)cb_timebinsize_counter);
       } // Fl_Counter* timebinsize_counter
+      { lightcurvexmax_counter = new Fl_Counter(725, 262, 120, 20, "total sec:");
+        lightcurvexmax_counter->minimum(1);
+        lightcurvexmax_counter->step(1);
+        lightcurvexmax_counter->value(20);
+        lightcurvexmax_counter->callback((Fl_Callback*)cb_lightcurvexmax_counter);
+      } // Fl_Counter* lightcurvexmax_counter
       o->end();
     } // Fl_Group* o
     { glitchBut = new Fl_Light_Button(195, 210, 75, 25, "Glitch");
@@ -1204,6 +1216,9 @@ Gui::Gui() {
     } // Fl_Choice* DataSource_choice
     PreferenceWindow->end();
   } // Fl_Double_Window* PreferenceWindow
+  // initialization
+  timebinsize_counter->step(0.1, 1);
+  lightcurvexmax_counter->step(5, 10);
 }
 
 void Gui::show() {

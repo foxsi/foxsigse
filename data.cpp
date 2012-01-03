@@ -5,6 +5,9 @@
  *  Created by Steven Christe on 10/31/11.
  *  Copyright 2011 NASA GSFC. All rights reserved.
  *
+ *	pthread tutorial
+ *	https://computing.llnl.gov/tutorials/pthreads/#ConVarSignal
+ *
  */
 #include "Application.h"
 
@@ -60,7 +63,7 @@ unsigned short int framecount;
 extern unsigned int current_timebin;
 extern unsigned int LightcurveFunction[MAX_CHANNEL];
 extern long displayLightcurve[MAX_CHANNEL];
-extern int mainLightcurve_binsize[MAX_CHANNEL];
+extern float mainLightcurve_binsize[MAX_CHANNEL];
 
 
 int *taskids[NUM_THREADS];
@@ -199,10 +202,13 @@ void* data_countrate(void *p)
 	unsigned int i = 1;
 	while(1)
 	{
-		int temp;
-		temp = mainLightcurve_binsize[0];
+		int microseconds;
+		microseconds = mainLightcurve_binsize[0]*1000000.0;
 		
-		sleep(temp);
+		// System activity may lengthen the sleep by an indeterminate amount.
+		// therefore this is not the best way to measure count rate
+		// quick and dirty
+		usleep(microseconds);
 		
 		pthread_mutex_lock(&timebinmutex);
 		
@@ -693,7 +699,7 @@ void data_update_display(unsigned short int *frame)
 		gui->nEventsDone->value(nreads); 
 		
 		gui->framenumOutput->value(frame[5]);
-		gui->testOutput->value(strip.number);
+		//gui->ctsOutput->value(strip.number);
 		gui->HVOutput->value(voltage);
 		printf("voltage: %i status: %i", voltage, voltage_status);
 		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
