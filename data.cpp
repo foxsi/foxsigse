@@ -34,6 +34,7 @@ extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagetime[XSTRIPS][YSTRIPS];
 extern double detImagemask[XSTRIPS][YSTRIPS];
+extern int low_threshold;
 
 // Note that an unsigned short int is 2 bytes
 // for formatter
@@ -55,6 +56,7 @@ int newdisplay;
 int stop_message;
 time_t start_time;
 time_t current_time;
+
 extern int data_source;
 unsigned short int buffer[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int buffer0[FRAME_SIZE_IN_SHORTINTS];
@@ -62,9 +64,6 @@ unsigned short int framecount;
 
 extern unsigned int current_timebin;
 extern unsigned int LightcurveFunction[MAX_CHANNEL];
-extern long displayLightcurve[MAX_CHANNEL];
-extern float mainLightcurve_binsize[MAX_CHANNEL];
-
 
 int *taskids[NUM_THREADS];
 int fout;
@@ -189,8 +188,12 @@ void* data_timer(void *p)
 	/* Keep track of the timer */
 	while(1)
 	{
+		// a sleep statement so that it does not pole the time too often
+		// more often than is necessary
+		usleep(0.5/1000000.0);
 		current_time = time(NULL);
-
+		gui->app->elapsed_time_sec = difftime(time(NULL), start_time);
+		
 		if (stop_message == 1){
 			pthread_exit(NULL);}		
 	}
@@ -203,7 +206,7 @@ void* data_countrate(void *p)
 	while(1)
 	{
 		int microseconds;
-		microseconds = mainLightcurve_binsize[0]*1000000.0;
+		microseconds = gui->mainLightcurveWindow->binsize[0]*1000000.0;
 		
 		// System activity may lengthen the sleep by an indeterminate amount.
 		// therefore this is not the best way to measure count rate
@@ -216,7 +219,7 @@ void* data_countrate(void *p)
 		
 		for(int j = MAX_CHANNEL-1; j > 0; j--){ 
 			LightcurveFunction[j] = LightcurveFunction[j-1];
-			mainLightcurve_binsize[j] = mainLightcurve_binsize[j-1];
+			gui->mainLightcurveWindow->binsize[j] = gui->mainLightcurveWindow->binsize[j-1];
 		}
 		
 		current_timebin = 0;
@@ -535,11 +538,12 @@ void data_update_display(unsigned short int *frame)
 	int xmask[128] = {0};
 	int xstrips[128] = {0};
 	int ystrips[128] = {0};
+	int num_hits = 0;
 	
 	gui->nEventsDone->value(nreads); 
 	
 	if (data_source == 0) {
-		int num_hits;
+
 		
 		// if parsing simulated data
 		unsigned voltage_status;
@@ -550,7 +554,7 @@ void data_update_display(unsigned short int *frame)
 		
 		gui->nEventsDone->value(nreads); 
 		gui->framenumOutput->value(frame[5]);
-		gui->inttimeOutput->value(difftime(current_time,start_time));
+		gui->inttimeOutput->value(gui->app->elapsed_time_sec);
 
 		gui->HVOutput->value(voltage);
 		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
@@ -661,8 +665,12 @@ void data_update_display(unsigned short int *frame)
 				detImage[i][j] = xstrips[i] * ystrips[j];
 				detImagemask[i][j] = xmask[i] * ymask[j];
 				detImagetime[i][j] = clock();
+				if(detImage[i][j] >= low_threshold){num_hits++;}
 			}	
 		}
+		pthread_mutex_lock( &timebinmutex);
+		current_timebin+=num_hits;
+		pthread_mutex_unlock(&timebinmutex);
 	}
 	
 	if (data_source == 2) {

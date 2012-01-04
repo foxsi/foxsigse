@@ -217,8 +217,8 @@ exit(1);}
         }
       }
       Fl_Value_Output frameTime {
-        label {frame time}
-        xywh {535 36 33 24}
+        label {frame time} selected
+        xywh {535 36 65 24}
       }
       Fl_Value_Output framenumOutput {
         label {Frame \#:}
@@ -266,7 +266,7 @@ app->start_reading_data();}
         }
         Fl_Counter timebinsize_counter {
           label {bin size (s):}
-          callback {app->update_timebinsize();} selected
+          callback {app->update_timebinsize();}
           xywh {725 222 120 20} minimum 0.1 value 1
         }
         Fl_Counter lightcurvexmax_counter {
@@ -360,15 +360,9 @@ app->start_reading_data();}
       }
       Fl_Value_Output inttimeOutput {
         label {time (s):}
-        xywh {535 66 33 24}
+        xywh {535 66 65 24}
       }
     }
-    code {app=new Application();} {}
-    code {data=new Foxsidata();} {}
-    code {usb=new USB_d2xx();} {}
-    code {buff=new Fl_Text_Buffer();
-consoleBuf->buffer(buff);} {}
-    code {prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");} {}
     Fl_Window sendParamsWindow {
       label {Send Parameters}
       xywh {155 164 1053 524} type Double visible
@@ -1309,6 +1303,12 @@ PreferenceWindow->hide();}
         }
       }
     }
+    code {app=new Application();} {}
+    code {data=new Foxsidata();} {}
+    code {usb=new USB_d2xx();} {}
+    code {buff=new Fl_Text_Buffer();
+consoleBuf->buffer(buff);} {}
+    code {prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");} {}
     code {// initialization
 timebinsize_counter->step(0.1, 1);
 lightcurvexmax_counter->step(5, 10);} {}

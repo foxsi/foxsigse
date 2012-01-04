@@ -507,7 +507,7 @@ Gui::Gui() {
       } // Fl_Counter* binsize_counter
       o->end();
     } // Fl_Group* o
-    { frameTime = new Fl_Value_Output(535, 36, 33, 24, "frame time");
+    { frameTime = new Fl_Value_Output(535, 36, 65, 24, "frame time");
     } // Fl_Value_Output* frameTime
     { framenumOutput = new Fl_Value_Output(400, 36, 55, 24, "Frame #:");
     } // Fl_Value_Output* framenumOutput
@@ -616,17 +616,11 @@ Gui::Gui() {
       } // Fl_Check_Button* detector7_checkbox
       detector_choice->end();
     } // Fl_Group* detector_choice
-    { inttimeOutput = new Fl_Value_Output(535, 66, 33, 24, "time (s):");
+    { inttimeOutput = new Fl_Value_Output(535, 66, 65, 24, "time (s):");
     } // Fl_Value_Output* inttimeOutput
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow
-  app=new Application();
-  data=new Foxsidata();
-  usb=new USB_d2xx();
-  buff=new Fl_Text_Buffer();
-  consoleBuf->buffer(buff);
-  prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");
   { sendParamsWindow = new Fl_Double_Window(1053, 524, "Send Parameters");
     sendParamsWindow->user_data((void*)(this));
     { sendParamsWindow_sendBut = new Fl_Button(415, 425, 70, 25, "Send");
@@ -1216,6 +1210,12 @@ Gui::Gui() {
     } // Fl_Choice* DataSource_choice
     PreferenceWindow->end();
   } // Fl_Double_Window* PreferenceWindow
+  app=new Application();
+  data=new Foxsidata();
+  usb=new USB_d2xx();
+  buff=new Fl_Text_Buffer();
+  consoleBuf->buffer(buff);
+  prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");
   // initialization
   timebinsize_counter->step(0.1, 1);
   lightcurvexmax_counter->step(5, 10);

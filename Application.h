@@ -91,6 +91,7 @@ public:
 	void set_energy_histogram(void);
 	void set_channel_histogram(void);
 	void update_lightcurvexmax(void);
+	int elapsed_time_sec;
 private:
 	char filename[40];
 	static void *read_data(void *variable);		// Begin reading data from a data stream
