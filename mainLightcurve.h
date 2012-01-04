@@ -15,13 +15,17 @@
 #include <stdlib.h>
 #include "Application.h"
 
+#define MAX_CHANNEL 1024
+
 class mainLightcurve : public Fl_Gl_Window {
 public:
 	mainLightcurve(int x,int y,int w,int h,const char *l=0);
-	void draw();  
+	void draw();
+	float binsize[MAX_CHANNEL];
+	int xmax;
+private:
 	int ymax;
 	int ymin;
-	int xmax;
 	int xmin;
 };
 

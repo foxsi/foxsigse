@@ -137,11 +137,25 @@ void Gui::cb_closeBut(Fl_Light_Button* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_closeBut_i(o,v);
 }
 
+void Gui::cb_Flush2_i(Fl_Button*, void*) {
+  app->flush_timeseries();
+}
+void Gui::cb_Flush2(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_Flush2_i(o,v);
+}
+
 void Gui::cb_timebinsize_counter_i(Fl_Counter*, void*) {
   app->update_timebinsize();
 }
 void Gui::cb_timebinsize_counter(Fl_Counter* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_timebinsize_counter_i(o,v);
+}
+
+void Gui::cb_lightcurvexmax_counter_i(Fl_Counter*, void*) {
+  app->update_lightcurvexmax();
+}
+void Gui::cb_lightcurvexmax_counter(Fl_Counter* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_lightcurvexmax_counter_i(o,v);
 }
 
 void Gui::cb_sendParamsBut_i(Fl_Button*, void*) {
@@ -493,7 +507,7 @@ Gui::Gui() {
       } // Fl_Counter* binsize_counter
       o->end();
     } // Fl_Group* o
-    { frameTime = new Fl_Value_Output(535, 36, 33, 24, "frame time");
+    { frameTime = new Fl_Value_Output(535, 36, 65, 24, "frame time");
     } // Fl_Value_Output* frameTime
     { framenumOutput = new Fl_Value_Output(400, 36, 55, 24, "Frame #:");
     } // Fl_Value_Output* framenumOutput
@@ -512,9 +526,9 @@ Gui::Gui() {
       closeBut->callback((Fl_Callback*)cb_closeBut);
       closeBut->deactivate();
     } // Fl_Light_Button* closeBut
-    { Fl_Group* o = new Fl_Group(420, 160, 437, 125, "LightCurve");
+    { Fl_Group* o = new Fl_Group(420, 160, 437, 145, "LightCurve");
       o->box(FL_THIN_UP_FRAME);
-      { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 125, "Light curve");
+      { mainLightcurveWindow = new mainLightcurve(420, 160, 300, 145, "Light curve");
         mainLightcurveWindow->box(FL_GTK_UP_BOX);
         mainLightcurveWindow->color(FL_BACKGROUND_COLOR);
         mainLightcurveWindow->selection_color(FL_BACKGROUND_COLOR);
@@ -525,16 +539,22 @@ Gui::Gui() {
         mainLightcurveWindow->align(Fl_Align(FL_ALIGN_CENTER));
         mainLightcurveWindow->when(FL_WHEN_RELEASE);
       } // mainLightcurve* mainLightcurveWindow
-      { testBut = new Fl_Button(770, 200, 75, 25, "Test");
-      } // Fl_Button* testBut
-      { testOutput = new Fl_Value_Output(770, 171, 77, 24, "value:");
-      } // Fl_Value_Output* testOutput
-      { timebinsize_counter = new Fl_Counter(725, 235, 120, 20, "bin size:");
-        timebinsize_counter->minimum(1);
-        timebinsize_counter->step(1);
+      { Fl_Button* o = new Fl_Button(770, 193, 75, 25, "Flush");
+        o->callback((Fl_Callback*)cb_Flush2);
+      } // Fl_Button* o
+      { ctsOutput = new Fl_Value_Output(770, 165, 77, 24, "cts/s:");
+      } // Fl_Value_Output* ctsOutput
+      { timebinsize_counter = new Fl_Counter(725, 222, 120, 20, "bin size (s):");
+        timebinsize_counter->minimum(0.1);
         timebinsize_counter->value(1);
         timebinsize_counter->callback((Fl_Callback*)cb_timebinsize_counter);
       } // Fl_Counter* timebinsize_counter
+      { lightcurvexmax_counter = new Fl_Counter(725, 262, 120, 20, "total sec:");
+        lightcurvexmax_counter->minimum(1);
+        lightcurvexmax_counter->step(1);
+        lightcurvexmax_counter->value(20);
+        lightcurvexmax_counter->callback((Fl_Callback*)cb_lightcurvexmax_counter);
+      } // Fl_Counter* lightcurvexmax_counter
       o->end();
     } // Fl_Group* o
     { glitchBut = new Fl_Light_Button(195, 210, 75, 25, "Glitch");
@@ -596,17 +616,11 @@ Gui::Gui() {
       } // Fl_Check_Button* detector7_checkbox
       detector_choice->end();
     } // Fl_Group* detector_choice
-    { inttimeOutput = new Fl_Value_Output(535, 66, 33, 24, "time (s):");
+    { inttimeOutput = new Fl_Value_Output(535, 66, 65, 24, "time (s):");
     } // Fl_Value_Output* inttimeOutput
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow
-  app=new Application();
-  data=new Foxsidata();
-  usb=new USB_d2xx();
-  buff=new Fl_Text_Buffer();
-  consoleBuf->buffer(buff);
-  prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");
   { sendParamsWindow = new Fl_Double_Window(1053, 524, "Send Parameters");
     sendParamsWindow->user_data((void*)(this));
     { sendParamsWindow_sendBut = new Fl_Button(415, 425, 70, 25, "Send");
@@ -1196,6 +1210,15 @@ Gui::Gui() {
     } // Fl_Choice* DataSource_choice
     PreferenceWindow->end();
   } // Fl_Double_Window* PreferenceWindow
+  app=new Application();
+  data=new Foxsidata();
+  usb=new USB_d2xx();
+  buff=new Fl_Text_Buffer();
+  consoleBuf->buffer(buff);
+  prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");
+  // initialization
+  timebinsize_counter->step(0.1, 1);
+  lightcurvexmax_counter->step(5, 10);
 }
 
 void Gui::show() {

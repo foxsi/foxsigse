@@ -121,12 +121,20 @@ private:
   static void cb_closeBut(Fl_Light_Button*, void*);
 public:
   mainLightcurve *mainLightcurveWindow;
-  Fl_Button *testBut;
-  Fl_Value_Output *testOutput;
+private:
+  void cb_Flush2_i(Fl_Button*, void*);
+  static void cb_Flush2(Fl_Button*, void*);
+public:
+  Fl_Value_Output *ctsOutput;
   Fl_Counter *timebinsize_counter;
 private:
   void cb_timebinsize_counter_i(Fl_Counter*, void*);
   static void cb_timebinsize_counter(Fl_Counter*, void*);
+public:
+  Fl_Counter *lightcurvexmax_counter;
+private:
+  void cb_lightcurvexmax_counter_i(Fl_Counter*, void*);
+  static void cb_lightcurvexmax_counter(Fl_Counter*, void*);
 public:
   Fl_Light_Button *glitchBut;
   Fl_Button *sendParamsBut;

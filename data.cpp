@@ -5,6 +5,9 @@
  *  Created by Steven Christe on 10/31/11.
  *  Copyright 2011 NASA GSFC. All rights reserved.
  *
+ *	pthread tutorial
+ *	https://computing.llnl.gov/tutorials/pthreads/#ConVarSignal
+ *
  */
 #include "Application.h"
 
@@ -31,6 +34,7 @@ extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagetime[XSTRIPS][YSTRIPS];
 extern double detImagemask[XSTRIPS][YSTRIPS];
+extern int low_threshold;
 
 // Note that an unsigned short int is 2 bytes
 // for formatter
@@ -52,17 +56,19 @@ int newdisplay;
 int stop_message;
 time_t start_time;
 time_t current_time;
+
 extern int data_source;
 unsigned short int buffer[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int buffer0[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int framecount;
 
-extern int current_timebin;
-extern int timebins[1024];
+extern unsigned int current_timebin;
+extern unsigned int LightcurveFunction[MAX_CHANNEL];
 
 int *taskids[NUM_THREADS];
 int fout;
 pthread_mutex_t mymutex;
+pthread_mutex_t timebinmutex;
 double nreads;
 
 extern char *data_file_save_dir;
@@ -101,6 +107,7 @@ void data_initialize(void)
 			gui->setHoldTimeWindow_autorunBut->activate();
 			gui->app->flush_image();
 			gui->app->flush_histogram();
+			gui->app->flush_timeseries();
 			gui->app->print_to_console("Done initializing.\n");
 		}
 
@@ -179,26 +186,49 @@ void* data_watch_buffer(void* p)
 void* data_timer(void *p)
 {
 	/* Keep track of the timer */
-	int i = 1;
 	while(1)
 	{
+		// a sleep statement so that it does not pole the time too often
+		// more often than is necessary
+		usleep(0.5/1000000.0);
 		current_time = time(NULL);
-		if (data_source == 0){
-
-			if (difftime(current_time, start_time) > i)
-			{
-				timebins[MAX_CHANNEL-1] = current_timebin;
-				for(int j = 0; j < MAX_CHANNEL-1; j++){ 
-					timebins[j] = timebins[j+1]; }
-
-				i++;
-				current_timebin = 0;
-			}
-		}
+		gui->app->elapsed_time_sec = difftime(time(NULL), start_time);
+		
 		if (stop_message == 1){
-			pthread_exit(NULL);
-		}
+			pthread_exit(NULL);}		
 	}
+}
+
+void* data_countrate(void *p)
+{
+	/* Keep track of the timer */
+	unsigned int i = 1;
+	while(1)
+	{
+		int microseconds;
+		microseconds = gui->mainLightcurveWindow->binsize[0]*1000000.0;
+		
+		// System activity may lengthen the sleep by an indeterminate amount.
+		// therefore this is not the best way to measure count rate
+		// quick and dirty
+		usleep(microseconds);
+		
+		pthread_mutex_lock(&timebinmutex);
+		
+		LightcurveFunction[0] = current_timebin;
+		
+		for(int j = MAX_CHANNEL-1; j > 0; j--){ 
+			LightcurveFunction[j] = LightcurveFunction[j-1];
+			gui->mainLightcurveWindow->binsize[j] = gui->mainLightcurveWindow->binsize[j-1];
+		}
+		
+		current_timebin = 0;
+		pthread_mutex_unlock(&timebinmutex);
+		
+		if (stop_message == 1){
+			pthread_exit(NULL);}		
+	}
+	
 }
 
 void* data_read_data(void *p)
@@ -317,6 +347,7 @@ void* data_read_data(void *p)
 			}
 			
 			pthread_mutex_destroy(&mymutex);
+			pthread_mutex_destroy(&timebinmutex);
 			pthread_exit(NULL);
 		}
 		nreads++;	
@@ -455,12 +486,13 @@ void data_start_reading(void)
 	param.sched_priority = newprio;
 	ret = pthread_attr_init(&tattr);
 	ret = pthread_attr_setschedparam (&tattr, &param);
-	
+		
 	gui->app->print_to_console("Reading...\n");
 	
 	// start the read_data thread
 	ret = pthread_create(&thread, &tattr, data_read_data, (void *) taskids[0]);
 	pthread_mutex_init(&mymutex,NULL);
+	pthread_mutex_init(&timebinmutex,NULL);
 
 	//newprio = -5;
 	//param.sched_priority = newprio;
@@ -477,6 +509,8 @@ void data_start_reading(void)
 	
 	// start the data reading clock
 	ret = pthread_create(&thread, NULL, data_timer, (void *) taskids[2]);
+	// start the count rate thread
+	ret = pthread_create(&thread, NULL, data_countrate, (void *) taskids[3]);
 }
 
 void data_stop_reading(void)
@@ -504,11 +538,12 @@ void data_update_display(unsigned short int *frame)
 	int xmask[128] = {0};
 	int xstrips[128] = {0};
 	int ystrips[128] = {0};
+	int num_hits = 0;
 	
 	gui->nEventsDone->value(nreads); 
 	
 	if (data_source == 0) {
-		int num_hits;
+
 		
 		// if parsing simulated data
 		unsigned voltage_status;
@@ -519,14 +554,12 @@ void data_update_display(unsigned short int *frame)
 		
 		gui->nEventsDone->value(nreads); 
 		gui->framenumOutput->value(frame[5]);
-		gui->inttimeOutput->value(difftime(current_time,start_time));
+		gui->inttimeOutput->value(gui->app->elapsed_time_sec);
 
 		gui->HVOutput->value(voltage);
 		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
 		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
 		if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
-		
-		gui->testOutput->value(timebins[1023]);
 		
 		num_hits = arc4random() % 10;
 		for(int i = 0; i < num_hits; i++)
@@ -542,14 +575,9 @@ void data_update_display(unsigned short int *frame)
 			// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
 		}
 		
+		pthread_mutex_lock( &timebinmutex);
 		current_timebin+=num_hits;
-		//if (<#condition#>) {
-//			current_timebin+=num_hits;
-//		} else {
-//			current_timebin = 0;
-//		}
-
-		
+		pthread_mutex_unlock(&timebinmutex);
 	}
 	
 	if (data_source == 1){
@@ -637,8 +665,12 @@ void data_update_display(unsigned short int *frame)
 				detImage[i][j] = xstrips[i] * ystrips[j];
 				detImagemask[i][j] = xmask[i] * ymask[j];
 				detImagetime[i][j] = clock();
+				if(detImage[i][j] >= low_threshold){num_hits++;}
 			}	
 		}
+		pthread_mutex_lock( &timebinmutex);
+		current_timebin+=num_hits;
+		pthread_mutex_unlock(&timebinmutex);
 	}
 	
 	if (data_source == 2) {
@@ -675,7 +707,7 @@ void data_update_display(unsigned short int *frame)
 		gui->nEventsDone->value(nreads); 
 		
 		gui->framenumOutput->value(frame[5]);
-		gui->testOutput->value(strip.number);
+		//gui->ctsOutput->value(strip.number);
 		gui->HVOutput->value(voltage);
 		printf("voltage: %i status: %i", voltage, voltage_status);
 		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
