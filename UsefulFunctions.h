@@ -5,6 +5,11 @@
  *  Created by Steven Christe on 7/22/09.
  *  Copyright 2009 FOXSI. All rights reserved.
  *
+ *  Description
+ *  -----------
+ *
+ *  Holds random miscellaneous useful functions.
+ *
  */
 
 #ifndef _UsefulFunctions_h_     // prevent multiple includes

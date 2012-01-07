@@ -8,452 +8,364 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {26 44 1252 683} type Double color 19 resizable
+      xywh {28 44 1252 739} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
       code3 {\#include "usbd2xx.h"} visible
     } {
       Fl_Menu_Bar menuBar {
-        label menuBar
+        label menuBar open
         xywh {-5 -1 1255 25} box BORDER_BOX color 29
       } {
+        Submenu {} {
+          label {FOXSI GSE} open
+          xywh {0 0 100 20} labelfont 1
+        } {
+          MenuItem {} {
+            label {About FOXSI GSE}
+            callback {AboutWindow->show()}
+            xywh {0 0 36 21}
+          }
+          MenuItem {} {
+            label {Preferences...}
+            callback {app->read_preferences();
+app->update_preferencewindow();
+PreferenceWindow->show();}
+            xywh {0 0 36 21}
+          }
+          MenuItem {} {
+            label {Quit FOXSI GSE}
+            callback {prefs->flush();
+exit(1);}
+            xywh {5 5 36 21} shortcut 0x400071
+          }
+        }
         Submenu fileMenu {
           label File open
           xywh {0 0 100 20}
         } {
-          MenuItem outputDirChooser {
-            label {Choose Output Dir}
-            callback {app->set_datafile_dir()}
-            xywh {0 0 36 21}
-          }
           MenuItem readFile {
             label {Read Data file}
-            callback {app->readFile();}
             xywh {0 0 100 20}
           }
           MenuItem readUSBStream {
             label {Read USB Stream}
-            callback {app->readUSBStream()}
             xywh {0 0 36 21}
           }
           MenuItem readTeleStream {
             label {Read Tele Stream}
-            callback {app->readTeleStream()}
             xywh {0 0 36 21}
           }
           MenuItem WritePicScreen {
             label {Write Spec}
-            callback {app->WriteSpec();}
             xywh {10 10 100 20}
           }
           MenuItem WriteLightcurve {
             label {Write Lightcurve}
-            callback {app->WriteLightcurve();}
             xywh {10 10 100 20}
-          }
-          MenuItem exitButton {
-            label Quit
-            callback {exit(1);}
-            xywh {0 0 36 21} shortcut 0x400071 labelcolor 1
           }
         }
         Submenu menuProc {
-          label Menu open
+          label Window open
           xywh {0 0 100 20}
         } {
-          MenuItem Sync {
-            label {Data Sync}
-            callback {app->dataSync();}
-            xywh {0 0 100 20}
+          MenuItem {} {
+            label Commanding
+            callback {sendCommandsWindow->show()}
+            xywh {0 0 31 20}
           }
-        }
-        Submenu Detector {
-          label Detector open
-          xywh {0 0 70 21}
-        } {
-          MenuItem setDetector0 {
-            label All
-            callback {app->setDetector(0)}
-            xywh {0 0 36 21} type Radio
-          }
-          MenuItem setDetector1 {
-            label {Detector 1}
-            callback {app->setDetector(1)}
-            xywh {10 10 36 21} type Radio
-          }
-          MenuItem setDetector2 {
-            label {Detector 2}
-            callback {app->setDetector(2)}
-            xywh {10 10 36 21} type Radio
-          }
-          MenuItem setDetector3 {
-            label {Detector 3}
-            callback {app->setDetector(3)}
-            xywh {20 20 36 21} type Radio
-          }
-          MenuItem setDetector4 {
-            label {Detector 4}
-            callback {app->setDetector(4)}
-            xywh {30 30 36 21} type Radio
-          }
-          MenuItem setDetector5 {
-            label {Detector 5}
-            callback {app->setDetector(5)}
-            xywh {40 40 36 21} type Radio
-          }
-          MenuItem setDetector6 {
-            label {Detector 6}
-            callback {app->setDetector(6)}
-            xywh {50 50 36 21} type Radio
-          }
-          MenuItem setDetector7 {
-            label {Detector 7}
-            callback {app->setDetector(7)}
-            xywh {60 60 36 21} type Radio
+          MenuItem {} {
+            label {ACTEL Commanding}
+            callback {sendParamsWindow->show();}
+            xywh {0 0 31 20}
           }
         }
       }
-      Fl_Box mainHistogramWindow {
-        label Histogram
-        xywh {625 460 265 240} box GTK_UP_BOX
-        code0 {\#include "mainHistogram.h"}
-        class mainHistogram
-      }
-      Fl_Box mainImageWindow {
-        label Image
-        xywh {3 313 402 397} box GTK_UP_BOX
-        code0 {\#include "mainImage.h"}
-        class mainImage
-      }
-      Fl_Box subImageWindow {
-        label {Image Zoom}
-        xywh {415 315 145 140} box GTK_UP_BOX
-        code0 {\#include "subImage.h"}
-        class subImage
-      }
-      Fl_Group TopOutput {
-        xywh {325 35 695 520}
+      Fl_Group {} {
+        label Image open
+        xywh {15 328 555 404} box THIN_UP_FRAME
       } {
-        Fl_Output rateOutput0 {
-          label {Rate [cts/s]}
-          xywh {375 115 80 25}
+        Fl_Box mainImageWindow {
+          label Image
+          xywh {15 328 400 400} box GTK_UP_BOX
+          code0 {\#include "mainImage.h"}
+          class mainImage
         }
-        Fl_Output rateOutput1 {
-          xywh {460 115 45 25}
+        Fl_Box subImageWindow {
+          label {Image Zoom}
+          xywh {422 330 145 140} box GTK_UP_BOX
+          code0 {\#include "subImage.h"}
+          class subImage
         }
-        Fl_Output rateOutput2 {
-          xywh {510 115 45 25}
+        Fl_Output pixelNum {
+          label Pixel
+          xywh {457 510 80 25}
         }
-        Fl_Output rateOutput3 {
-          xywh {560 115 45 25}
+        Fl_Output pixelCounts {
+          label Cts
+          xywh {457 480 80 25}
         }
-        Fl_Output rateOutput4 {
-          xywh {610 115 45 25}
+        Fl_Light_Button subImageLockbut {
+          label {Unlock View}
+          xywh {432 540 105 25} selection_color 1
         }
-        Fl_Output rateOutput5 {
-          xywh {660 115 45 25}
-        }
-        Fl_Output rateOutput6 {
-          xywh {710 115 45 25}
-        }
-        Fl_Output rateOutput7 {
-          xywh {760 115 45 25}
-        }
-        Fl_Output framenumOutput {
-          label {Frame \#}
-          xywh {605 35 45 25}
-        }
-        Fl_Output shutterstateOutput {
-          label {Shut state}
-          callback {app->getShutState()}
-          xywh {465 65 30 25}
-        }
-        Fl_Output TempOutput {
-          label Temp
-          xywh {375 145 30 25}
-        }
-        Fl_Output histEnergy {
-          label Energy
-          xywh {940 500 80 25}
-        }
-        Fl_Output histCounts {
-          label Counts
-          xywh {940 530 80 25}
-        }
-      }
-      Fl_Group dataPlayback {
-        xywh {560 35 599 106}
-      } {
-        Fl_Button nextFrameBut {
-          label {Next Frame}
-          callback {data->nextFrame()}
-          xywh {675 65 80 25}
-          code0 {\#include "Application.h"}
-          code1 {\#include "Foxsidata.h"}
-        }
-        Fl_Button prevFrameBut {
-          label {Previous Frame}
-          callback {data->previousFrame()}
-          xywh {560 65 110 25}
-          code0 {\#include "Application.h"}
-          code1 {\#include "Foxsidata.h"}
-        }
-        Fl_Light_Button syncLightBut {
-          label Sync
-          xywh {765 35 70 25}
-        }
-        Fl_Button flushBut {
+        Fl_Button {} {
           label Flush
-          callback {app->FlushData()}
-          xywh {840 35 80 25}
-          code0 {\#include "Application.h"}
+          callback {app->flush_image();}
+          xywh {481 569 80 25}
         }
-        Fl_Button printFrame {
-          label {Print Frame}
-          callback {data->printFrame()}
-          xywh {760 65 80 25}
-          code0 {\#include "Application.h"}
-          code1 {\#include "Foxsidata.h"}
-        }
-        Fl_Value_Output frameTime {
-          label {frame time}
-          xywh {725 36 33 24}
-        }
-        Fl_Group {} {open
-          xywh {1010 36 148 24}
-        } {
-          Fl_Value_Output chipbitValOut0 {
-            label {Chip bit}
-            xywh {1010 36 33 24} deactivate
-          }
-          Fl_Value_Output chipbitValOut1 {
-            xywh {1046 36 33 24} deactivate
-          }
-          Fl_Value_Output chipbitValOut2 {
-            xywh {1085 36 33 24} deactivate
-          }
-          Fl_Value_Output chipbitValOut3 {
-            xywh {1125 36 33 24} deactivate
-          }
-        }
-        Fl_Group {} {open
-          xywh {1010 63 148 24}
-        } {
-          Fl_Value_Output trigbitValOut0 {
-            label {Trig bit}
-            xywh {1010 63 33 24} deactivate
-          }
-          Fl_Value_Output trigbitValOut1 {
-            xywh {1046 63 33 24} deactivate
-          }
-          Fl_Value_Output trigbitValOut2 {
-            xywh {1085 63 33 24} deactivate
-          }
-          Fl_Value_Output trigbitValOut3 {
-            xywh {1125 63 33 24} deactivate
-          }
-        }
-        Fl_Group {} {open
-          xywh {1010 90 148 24}
-        } {
-          Fl_Value_Output seubitValOut0 {
-            label {SEU bit}
-            xywh {1010 90 33 24} deactivate
-          }
-          Fl_Value_Output seubitValOut1 {
-            xywh {1046 90 33 24} deactivate
-          }
-          Fl_Value_Output seubitValOut2 {
-            xywh {1085 90 33 24} deactivate
-          }
-          Fl_Value_Output seubitValOut3 {
-            xywh {1125 90 33 24} deactivate
-          }
-        }
-        Fl_Group {} {open
-          xywh {1011 117 148 24}
-        } {
-          Fl_Value_Output noiseValOut0 {
-            label Noise
-            xywh {1011 117 33 24} deactivate
-          }
-          Fl_Value_Output noiseValOut1 {
-            xywh {1047 117 33 24} deactivate
-          }
-          Fl_Value_Output noiseValOut2 {
-            xywh {1086 117 33 24} deactivate
-          }
-          Fl_Value_Output noiseValOut3 {
-            xywh {1126 117 33 24} deactivate
-          }
+        Fl_Value_Slider mainImageMin_slider {
+          label {min:}
+          callback {app->set_lowthreshold();}
+          xywh {431 568 40 145} align 290 maximum 1024 step 1 value 1 textsize 14
         }
       }
-      Fl_Box mainChartWindow {
-        label 1
-        xywh {470 155 130 115} box GTK_UP_BOX labeltype NO_LABEL
-        code0 {\#include "mainChart.h"}
-        class mainChart
+      Fl_Output rateOutput0 {
+        label {Rate [cts/s]}
+        xywh {405 115 50 25}
       }
-      Fl_Output pixelNum {
-        label Pixel
-        xywh {445 495 80 25}
+      Fl_Output rateOutput1 {
+        xywh {460 115 45 25}
       }
-      Fl_Output pixelCounts {
-        label Cts
-        xywh {445 465 80 25}
+      Fl_Output rateOutput2 {
+        xywh {510 115 45 25}
       }
-      Fl_Light_Button subImageLockbut {
-        label {Unlock View}
-        xywh {420 525 105 25} selection_color 1
+      Fl_Output rateOutput3 {
+        xywh {560 115 45 25}
       }
-      Fl_Text_Display {} {
-        label {detector 1}
-        xywh {529 295 15 15}
+      Fl_Output rateOutput4 {
+        xywh {610 115 45 25}
       }
-      Fl_Light_Button mainHistogramLockbut {
-        label Unlock
-        xywh {900 465 65 25} selection_color 1
+      Fl_Output rateOutput5 {
+        xywh {660 115 45 25}
       }
-      Fl_Box mainChartWindow1 {
-        label 1
-        xywh {615 155 130 115} box GTK_UP_BOX labeltype NO_LABEL
-        code0 {\#include "mainChart.h"}
-        class mainChart
+      Fl_Output rateOutput6 {
+        xywh {710 115 45 25}
       }
-      Fl_Text_Display {} {
-        label {detector 2}
-        xywh {670 295 15 15}
+      Fl_Output rateOutput7 {
+        xywh {760 115 45 25}
       }
-      Fl_Value_Output mainHistogramXlabelmid {
-        label {Energy:}
-        xywh {735 707 35 23} box THIN_UP_BOX
-      }
-      Fl_Value_Output mainHistogramXlabelmax {
-        xywh {865 707 35 23} box THIN_UP_BOX
-      }
-      Fl_Value_Output mainHistogramYlabelmax {
-        xywh {585 457 35 23} box THIN_UP_BOX
-      }
-      Fl_Value_Output mainHistogramYlabelmid {
-        xywh {585 577 35 23} box THIN_UP_BOX
-      }
-      Fl_Text_Display consoleBuf {
-        xywh {590 320 520 130}
-      }
-      Fl_Choice {} {
-        label {Detector:} open
-        xywh {90 65 95 25} down_box BORDER_BOX
+      Fl_Group {} {
+        label {Telemetry Info} open
+        xywh {700 40 255 55} box THIN_UP_FRAME
       } {
-        MenuItem {} {
-          label All
-          xywh {0 0 31 20}
+        Fl_Value_Output shutterstateOutput {
+          label {Shutter state}
+          xywh {873 41 37 27}
         }
-        MenuItem {} {
-          label {Detector 1}
-          xywh {0 0 31 20}
+        Fl_Value_Output tempOutput {
+          label Temp
+          xywh {743 41 40 24}
         }
-        MenuItem {} {
-          label {Detector 2}
-          xywh {0 0 31 20}
+        Fl_Value_Output HVOutput {
+          label HV
+          xywh {743 70 40 24}
         }
       }
-      Fl_Choice {} {
-        label {Data Source:} open
-        xywh {90 35 115 25} down_box BORDER_BOX
+      Fl_Group {} {
+        label Histogram open
+        xywh {585 477 505 243} box THIN_UP_FRAME color 41
       } {
-        MenuItem {} {
-          label {ACTEL USB}
-          xywh {0 0 31 20}
+        Fl_Box mainHistogramWindow {
+          label Histogram
+          xywh {665 480 265 240} box GTK_UP_BOX
+          code0 {\#include "mainHistogram.h"}
+          class mainHistogram
         }
+        Fl_Value_Output mainHistogramYlabelmid {
+          xywh {585 597 70 23} box THIN_UP_BOX
+        }
+        Fl_Value_Output mainHistogramYlabelmax {
+          xywh {585 477 70 23} box THIN_UP_BOX
+        }
+        Fl_Choice {} {
+          label {choice:} open
+          xywh {1005 585 85 25} down_box BORDER_BOX
+        } {
+          MenuItem {} {
+            label Channel
+            xywh {0 0 31 20}
+          }
+          MenuItem {} {
+            label Energy
+            callback {app->set_energy_histogram()}
+            xywh {0 0 31 20}
+          }
+        }
+        Fl_Value_Output histLow {
+          label {low threshold:}
+          xywh {1035 546 55 24}
+        }
+        Fl_Value_Output histCounts {
+          label {Counts:}
+          xywh {1035 516 55 24}
+        }
+        Fl_Value_Output histEnergy {
+          label {Chan/Energy:}
+          xywh {1035 486 55 24}
+        }
+        Fl_Button {} {
+          label Flush
+          callback {app->flush_histogram();}
+          xywh {1010 625 80 25}
+        }
+        Fl_Counter binsize_counter {
+          label {bin size:}
+          callback {app->update_binsize();}
+          xywh {970 665 120 20} minimum 1 step 1 value 25
+        }
+      }
+      Fl_Value_Output frameTime {
+        label {frame time} selected
+        xywh {535 36 65 24}
+      }
+      Fl_Value_Output framenumOutput {
+        label {Frame \#:}
+        xywh {400 36 55 24}
+      }
+      Fl_Button {} {
+        label reset
+        callback {app->reset_read_counter();}
+        xywh {400 65 55 25}
       }
       Fl_Light_Button initializeBut {
         label Initialize
-        callback {app->initialize_data()}
-        xywh {209 35 80 25} box THIN_UP_BOX
+        callback {app->initialize()}
+        xywh {10 35 80 25} box THIN_UP_BOX
       }
       Fl_Button startReadingDataButton {
-        label Read
-        callback {app->start_reading_data();}
-        xywh {390 35 60 25} deactivate
+        label Start
+        callback {app->read_preferences();
+app->start_reading_data();}
+        xywh {95 35 60 25} deactivate
       }
       Fl_Light_Button closeBut {
         label Close
         callback {app->close_data()}
-        xywh {209 65 80 25}
+        xywh {10 65 80 25} deactivate
       }
-      Fl_Box mainLightcurveWindow {
-        label {Light curve}
-        xywh {760 155 300 125} box GTK_UP_BOX
-        code0 {\#include "mainLightcurve.h"}
-        class mainLightcurve
+      Fl_Group {} {
+        label LightCurve open
+        xywh {420 160 437 145} box THIN_UP_FRAME
+      } {
+        Fl_Box mainLightcurveWindow {
+          label {Light curve}
+          xywh {420 160 300 145} box GTK_UP_BOX
+          code0 {\#include "mainLightcurve.h"}
+          class mainLightcurve
+        }
+        Fl_Button {} {
+          label Flush
+          callback {app->flush_timeseries();}
+          xywh {770 193 75 25}
+        }
+        Fl_Value_Output ctsOutput {
+          label {cts/s:}
+          xywh {770 165 77 24}
+        }
+        Fl_Counter timebinsize_counter {
+          label {bin size (s):}
+          callback {app->update_timebinsize();}
+          xywh {725 222 120 20} minimum 0.1 value 1
+        }
+        Fl_Counter lightcurvexmax_counter {
+          label {total sec:}
+          callback {app->update_lightcurvexmax();}
+          xywh {725 262 120 20} minimum 1 step 1 value 20
+        }
       }
       Fl_Light_Button glitchBut {
         label Glitch
-        xywh {90 100 75 25}
+        xywh {195 210 75 25}
       }
       Fl_Button sendParamsBut {
         label {Send Params}
         callback {app->openSendParamsWindow()}
-        xywh {83 140 100 25}
-      }
-      Fl_Button testBut {
-        label Test
-        callback {app->test();}
-        xywh {15 275 75 25}
+        xywh {10 155 100 25}
       }
       Fl_Value_Input nEvents {
         label events
-        xywh {345 35 40 24} value 1
+        xywh {295 35 40 24}
       }
       Fl_Light_Button writeFileBut {
         label {Write to file}
         callback {app->start_file()}
-        xywh {85 210 95 25}
+        xywh {10 95 95 25}
       }
-      Fl_Value_Input nEventsDone {
-        label counter
-        xywh {345 66 40 24} value 1
+      Fl_Button stopReadingDataButton {
+        label Stop
+        callback {app->stop_reading_data();}
+        xywh {160 35 75 25} labelcolor 1 deactivate
       }
-      Fl_Button {} {
-        label BREAK
-        callback {app->break_acq(193);}
-        xywh {215 245 63 20} deactivate
-      }
-      Fl_Button {} {
-        label CLEAR
-        callback {app->break_acq(192);}
-        xywh {215 270 63 20} deactivate
+      Fl_Group {} {
+        label Console open
+        xywh {585 327 600 130} box THIN_UP_FRAME
+      } {
+        Fl_Text_Display consoleBuf {
+          xywh {585 327 520 130}
+        }
+        Fl_Button {} {
+          label Clear
+          callback {app->clear_console();}
+          xywh {1110 327 75 25}
+        }
       }
       Fl_Button setHoldBut {
         label {Set Hold Time}
         callback {app->openSetHoldTimeWindow()}
-        xywh {85 175 100 25}
-      }
-      Fl_Button {} {
-        label Clear
-        callback {app->clear_console();}
-        xywh {1115 320 63 20} labelcolor 1
+        xywh {10 190 100 25}
       }
       Fl_Button setTrigBut {
         label {Set Trigger Options}
         callback {app->openSetTrigWindow()}
-        xywh {198 175 125 25}
+        xywh {115 155 125 25}
       }
-      Fl_Light_Button stopReadingDataButton {
-        label Stop
-        callback {app->stop_reading_data();}
-        xywh {455 35 75 25} labelcolor 1 deactivate
+      Fl_Value_Output nEventsDone {
+        label {read counter:}
+        xywh {295 66 40 24}
+      }
+      Fl_Group detector_choice {
+        label {Detectors to display} open
+        xywh {155 270 220 30} box DOWN_BOX align 4 deactivate
+      } {
+        Fl_Check_Button detector1_checkbox {
+          label 1
+          xywh {160 270 35 30} down_box DOWN_BOX
+        }
+        Fl_Check_Button detector2_checkbox {
+          label 2
+          xywh {190 270 35 30} down_box DOWN_BOX
+        }
+        Fl_Check_Button detector3_checkbox {
+          label 3
+          xywh {220 270 35 30} down_box DOWN_BOX
+        }
+        Fl_Check_Button detector4_checkbox {
+          label 4
+          xywh {250 270 35 30} down_box DOWN_BOX
+        }
+        Fl_Check_Button detector5_checkbox {
+          label 5
+          xywh {280 270 35 30} down_box DOWN_BOX
+        }
+        Fl_Check_Button detector6_checkbox {
+          label 6
+          xywh {310 270 35 30} down_box DOWN_BOX
+        }
+        Fl_Check_Button detector7_checkbox {
+          label 7
+          xywh {340 270 35 30} down_box DOWN_BOX
+        }
+      }
+      Fl_Value_Output inttimeOutput {
+        label {time (s):}
+        xywh {535 66 65 24}
       }
     }
-    code {app=new Application();} {}
-    code {data=new Foxsidata();} {}
-    code {usb=new USB_d2xx();} {}
-    code {buff=new Fl_Text_Buffer();
-consoleBuf->buffer(buff);} {}
     Fl_Window sendParamsWindow {
-      label {Send Parameters} open selected
-      xywh {155 164 1053 524} type Double hide
+      label {Send Parameters}
+      xywh {155 164 1053 524} type Double visible
     } {
       Fl_Button sendParamsWindow_sendBut {
         label Send
@@ -1198,7 +1110,7 @@ app->send_params();
       }
     }
     Fl_Window setHoldTimeWindow {
-      label {Set hold time and take data} open
+      label {Set hold time and take data}
       xywh {869 528 312 165} type Double hide
     } {
       Fl_Value_Input setHoldTimeWindow_holdTime {
@@ -1222,7 +1134,7 @@ app->send_params();
       }
     }
     Fl_Window setTrigWindow {
-      label {Trigger Options} open
+      label {Trigger Options}
       xywh {502 184 357 203} type Double hide
     } {
       Fl_Value_Input setTrigWindow_delayTime {
@@ -1251,12 +1163,12 @@ app->send_params();
       Fl_Value_Input setTrigWindow_useTimeout {
         label {Use timeout}
         callback {if(setTrigWindow_useTimeout->value()){
-setTrigWindow_setTimeout->activate();
-setTrigWindow_timeoutTime->activate();
-} else{
-setTrigWindow_setTimeout->deactivate();
-setTrigWindow_timeoutTime->deactivate();
-}}
+		setTrigWindow_setTimeout->activate();
+		setTrigWindow_timeoutTime->activate();
+		} else{
+		setTrigWindow_setTimeout->deactivate();
+		setTrigWindow_timeoutTime->deactivate();
+	  }}
         xywh {211 63 25 21} value 1
       }
       Fl_Button setTrigWindow_setTrigMode {
@@ -1265,6 +1177,141 @@ setTrigWindow_timeoutTime->deactivate();
         xywh {255 60 80 25}
       }
     }
+    Fl_Window sendCommandsWindow {
+      label {Send Commands}
+      xywh {436 54 364 175} type Double visible
+    } {
+      Fl_Button {} {
+        label Send
+        callback {app->send_voltage_command();}
+        xywh {265 10 70 25} value 1 labelcolor 1
+      }
+      Fl_Button {} {
+        label Close
+        callback {sendCommandsWindow->hide();}
+        xywh {265 130 70 25}
+      }
+      Fl_Button {} {
+        label Send
+        callback {app->send_clockset_command();}
+        xywh {265 70 70 25} value 1 labelcolor 1
+      }
+      Fl_Button {} {
+        label {Strobe Attenuator State 0}
+        callback {app->send_atten_state(0);}
+        xywh {70 100 180 25} box THIN_UP_BOX labelcolor 1
+      }
+      Fl_Button {} {
+        label {Strobe Attenuator State 1}
+        callback {app->send_atten_state(1);}
+        xywh {70 130 180 25} box THIN_UP_BOX labelcolor 1
+      }
+      Fl_Value_Input highVoltage_input {
+        label {HV Set (0-4095):}
+        xywh {175 11 75 24}
+      }
+      Fl_Value_Input clockLow_input {
+        label {Clock Set Low:}
+        xywh {175 40 75 24}
+      }
+      Fl_Value_Input clockHigh_input {
+        label {Clock Set High:}
+        xywh {175 70 75 24}
+      }
+    }
+    Fl_Window AboutWindow {
+      label About
+      xywh {572 180 361 109} type Double visible
+    } {
+      Fl_Box {} {
+        label {FOXSI Ground Station Software}
+        xywh {140 9 80 16} labelfont 1
+      }
+      Fl_Box {} {
+        label {Written by}
+        xywh {140 29 80 16}
+      }
+      Fl_Box {} {
+        label {Steven Christe, Lindsay Glesener, Stephen McBride}
+        xywh {140 49 80 16}
+      }
+      Fl_Box {} {
+        label 2011
+        xywh {140 69 80 16}
+      }
+    }
+    Fl_Window PreferenceWindow {
+      label Preferences
+      xywh {43 223 429 175} type Double visible
+    } {
+      Fl_Value_Input pixelhalflife_value {
+        label {pixel half life (s)}
+        xywh {295 46 70 24} value 5
+      }
+      Fl_Choice fileTypeChoice {
+        label {File type:} open
+        xywh {70 45 75 25} down_box BORDER_BOX
+      } {
+        MenuItem {} {
+          label {Text (slow)}
+          xywh {5 5 31 20}
+        }
+        MenuItem {} {
+          label {Binary (fast)}
+          xywh {5 5 31 20}
+        }
+      }
+      Fl_Button {} {
+        label OK
+        callback {app->save_preferences();
+PreferenceWindow->hide();}
+        xywh {280 145 63 20}
+      }
+      Fl_Button {} {
+        label Cancel
+        callback {PreferenceWindow->hide()}
+        xywh {350 145 63 20}
+      }
+      Fl_Button {} {
+        label Change
+        callback {app->set_datafile_dir();}
+        xywh {340 15 75 25}
+      }
+      Fl_File_Input datafilesavedir_fileInput {
+        label {save dir:}
+        xywh {70 6 260 34}
+      }
+      Fl_Value_Input readdelay_value {
+        label {read delay (us)}
+        xywh {295 71 70 24} value 10000
+      }
+      Fl_Choice DataSource_choice {
+        label {Data Source:} open
+        xywh {95 80 95 25} down_box BORDER_BOX
+      } {
+        MenuItem {} {
+          label Simulate
+          xywh {5 5 31 20}
+        }
+        MenuItem {} {
+          label ACTEL
+          xywh {5 5 31 20}
+        }
+        MenuItem {} {
+          label Formatter
+          xywh {5 5 31 20}
+        }
+      }
+    }
+    code {app=new Application();} {}
+    code {data=new Foxsidata();} {}
+    code {usb=new USB_d2xx();} {}
+    code {buff=new Fl_Text_Buffer();
+consoleBuf->buffer(buff);} {}
+    code {prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");} {}
+    code {// initialization
+timebinsize_counter->step(0.1, 1);
+lightcurvexmax_counter->step(5, 10);} {}
   }
   Function {show()} {open
   } {
@@ -1281,5 +1328,7 @@ subImageWindow->show();} {}
   decl {USB_d2xx *usb;} {public local
   }
   decl {Fl_Text_Buffer *buff;} {public local
+  }
+  decl {Fl_Preferences *prefs;} {public local
   }
 } 

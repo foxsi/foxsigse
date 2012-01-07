@@ -23,6 +23,8 @@ int subImageMousePixel[2];
 int subImageChosenPixel[2];
 
 float detsubImage[ZOOMNUM][ZOOMNUM];
+float detsubImagealpha[ZOOMNUM][ZOOMNUM];
+
 float GL_subImageCursor[2]; 
 
 subImage::subImage(int x,int y,int w,int h,const char *l)
@@ -35,6 +37,7 @@ subImage::subImage(int x,int y,int w,int h,const char *l)
 void subImage::draw() 
 {
 	float grey;
+	double alpha;
 	
 	if (!valid()) {
 		make_current();
@@ -65,8 +68,9 @@ void subImage::draw()
 				//if ((curPixel[0] < 0)||(curPixel[1] < 0)){ grey = 0.0; } else { grey = detImage[curPixel[0]][curPixel[1]]; }
 				//grey = detImage[curPixel[0]][curPixel[1]];
 				grey = detsubImage[i][j];
+				alpha = detsubImagealpha[i][j];
 				//grey = detImage[i][j];
-				glColor3f(grey, grey, grey);
+				glColor4f(grey, grey, grey,alpha);
 				glBegin(GL_QUADS);
 				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
 				glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
@@ -80,42 +84,39 @@ void subImage::draw()
 			for(int i=0;i<ZOOMNUM;i++)
 			{
 				grey = detsubImage[i][j];
-				
-				glColor3f(grey, grey, grey);
+				alpha = detsubImagealpha[i][j];
+				glColor4f(grey, grey, grey,alpha);
 				glBegin(GL_QUADS);
 				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
 				glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
 				glEnd();
 			}
 		}
-	
+		
 		//draw a red box under the cursor selection
 		glColor3f(1, 0, 0);	//red
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(GL_subImageCursor[0], GL_subImageCursor[1]); glVertex2f(GL_subImageCursor[0]+1, GL_subImageCursor[1]); 
 		glVertex2f(GL_subImageCursor[0]+1, GL_subImageCursor[1]+1); glVertex2f(GL_subImageCursor[0], GL_subImageCursor[1]+1);
 		glEnd();
-		
-		
-		
 	}
 }
 
 int subImage::handle(int eventType)
 {
-	int button;
-		char text[8];
+	/* int button;
+	char text[8];
 
 	button=Fl::event_button();
 
 	//convert between fltk coordinates and opengl coordinates
 	GL_subImageCursor[0]=floor(Fl::event_x()*(ZOOMNUM + 2*XBORDER)/w());
 	GL_subImageCursor[1]=floor((h()-Fl::event_y())*(ZOOMNUM + 2*YBORDER)/h());
-	
+
 	//convert between fltk coordinates and openGL coordinates
 	//GL_cursor[0]=Fl::event_x()*(XSTRIPS + 2.0*XBORDER)/w();
 	//GL_cursor[1]=(h()-Fl::event_y())*(YSTRIPS + 2.0*YBORDER)/h();
-	
+
 	//translate to pixel number but keep within bounds 
 	//subImageMousePixel[0] = (GL_subImageCursor[0] - XBORDER) > 1 ? chosenPixel[0] - XBORDER : 1;
 	//subImageMousePixel[0] = subImageMousePixel[0] < ZOOMNUM ? subImageMousePixel[0]: ZOOMNUM;
@@ -126,7 +127,7 @@ int subImage::handle(int eventType)
 	subImageMousePixel[0] = GL_subImageCursor[0] - XBORDER + chosenPixel[0]-ZOOMNUM/2;
 	subImageMousePixel[1] = GL_subImageCursor[1] - YBORDER + chosenPixel[1]-ZOOMNUM/2;
 	//printf("pixel: (%4.2f,%4.2f)\n", FLcursorX[0] - XBORDER+1, FLcursorY[0]-YBORDER+1);
-	
+
 	if((eventType==FL_PUSH)&&(button==1))
 	{
 		subImageChosenPixel[0] = subImageMousePixel[0]; subImageChosenPixel[1] = subImageMousePixel[1];
@@ -136,10 +137,11 @@ int subImage::handle(int eventType)
 	sprintf( text, "%d,%d", subImageMousePixel[0], subImageMousePixel[1]);
 	gui->pixelNum->value(text);
 	//sprintf( text, "%4.2f", detImage[subImageMousePixel[0]][subImageMousePixel[1]]);
-	sprintf( text, "%4.2f", detImage[subImageMousePixel[0]][subImageMousePixel[1]]);
+		sprintf( text, "%4.2f", detImage[subImageMousePixel[0]][subImageMousePixel[1]]);
 	gui->pixelCounts->value(text);
+
+	redraw(); */
 	
-	redraw();
 	
 	return(1);
 }

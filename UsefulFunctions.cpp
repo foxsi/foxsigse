@@ -8,9 +8,6 @@
  */
 
 #include "UsefulFunctions.h"
-//#include <pthread.h>
-
-extern int stop_message;
 
 string convertBase(unsigned long v, long base)
 {
@@ -60,23 +57,3 @@ unsigned reversebits(unsigned x, int n)
 	return y;
 	
 }
-
-/*
-void *do_some_work(void *variable)
-{
-	for(int i = 0; i < 1000; i++)
-    {
-		
-        //another way to check whether thread should cancel
-        if(stop_message == 1)
-        {
-            printf("I feel like I should really stop working!\n");
-            // clean up code goes here then exit
-            pthread_exit(NULL);
-        }
-        // do some work
-		printf("Doing some work...");
-        sleep(1);
-    }        
-}
-*/

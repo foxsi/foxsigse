@@ -9,19 +9,23 @@
 #include "Foxsidata.h"
 #include "usbd2xx.h"
 #include <FL/Fl_Menu_Bar.H>
-#include "mainHistogram.h"
+#include <FL/Fl_Group.H>
 #include "mainImage.h"
 #include "subImage.h"
-#include <FL/Fl_Group.H>
 #include <FL/Fl_Output.H>
-#include <FL/Fl_Button.H>
 #include <FL/Fl_Light_Button.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Value_Slider.H>
 #include <FL/Fl_Value_Output.H>
-#include "mainChart.h"
-#include <FL/Fl_Text_Display.H>
+#include "mainHistogram.h"
 #include <FL/Fl_Choice.H>
+#include <FL/Fl_Counter.H>
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
+#include <FL/Fl_Text_Display.H>
+#include <FL/Fl_Check_Button.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_File_Input.H>
 
 class Gui {
 public:
@@ -29,93 +33,41 @@ public:
   Fl_Double_Window *mainWindow;
   Fl_Menu_Bar *menuBar;
   static Fl_Menu_Item menu_menuBar[];
+private:
+  void cb_About_i(Fl_Menu_*, void*);
+  static void cb_About(Fl_Menu_*, void*);
+  void cb_Preferences_i(Fl_Menu_*, void*);
+  static void cb_Preferences(Fl_Menu_*, void*);
+  void cb_Quit_i(Fl_Menu_*, void*);
+  static void cb_Quit(Fl_Menu_*, void*);
+public:
   static Fl_Menu_Item *fileMenu;
-  static Fl_Menu_Item *outputDirChooser;
-private:
-  void cb_outputDirChooser_i(Fl_Menu_*, void*);
-  static void cb_outputDirChooser(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *readFile;
-private:
-  void cb_readFile_i(Fl_Menu_*, void*);
-  static void cb_readFile(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *readUSBStream;
-private:
-  void cb_readUSBStream_i(Fl_Menu_*, void*);
-  static void cb_readUSBStream(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *readTeleStream;
-private:
-  void cb_readTeleStream_i(Fl_Menu_*, void*);
-  static void cb_readTeleStream(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *WritePicScreen;
-private:
-  void cb_WritePicScreen_i(Fl_Menu_*, void*);
-  static void cb_WritePicScreen(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *WriteLightcurve;
-private:
-  void cb_WriteLightcurve_i(Fl_Menu_*, void*);
-  static void cb_WriteLightcurve(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *exitButton;
-private:
-  void cb_exitButton_i(Fl_Menu_*, void*);
-  static void cb_exitButton(Fl_Menu_*, void*);
-public:
   static Fl_Menu_Item *menuProc;
-  static Fl_Menu_Item *Sync;
 private:
-  void cb_Sync_i(Fl_Menu_*, void*);
-  static void cb_Sync(Fl_Menu_*, void*);
+  void cb_Commanding_i(Fl_Menu_*, void*);
+  static void cb_Commanding(Fl_Menu_*, void*);
+  void cb_ACTEL_i(Fl_Menu_*, void*);
+  static void cb_ACTEL(Fl_Menu_*, void*);
 public:
-  static Fl_Menu_Item *Detector;
-  static Fl_Menu_Item *setDetector0;
-private:
-  void cb_setDetector0_i(Fl_Menu_*, void*);
-  static void cb_setDetector0(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector1;
-private:
-  void cb_setDetector1_i(Fl_Menu_*, void*);
-  static void cb_setDetector1(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector2;
-private:
-  void cb_setDetector2_i(Fl_Menu_*, void*);
-  static void cb_setDetector2(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector3;
-private:
-  void cb_setDetector3_i(Fl_Menu_*, void*);
-  static void cb_setDetector3(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector4;
-private:
-  void cb_setDetector4_i(Fl_Menu_*, void*);
-  static void cb_setDetector4(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector5;
-private:
-  void cb_setDetector5_i(Fl_Menu_*, void*);
-  static void cb_setDetector5(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector6;
-private:
-  void cb_setDetector6_i(Fl_Menu_*, void*);
-  static void cb_setDetector6(Fl_Menu_*, void*);
-public:
-  static Fl_Menu_Item *setDetector7;
-private:
-  void cb_setDetector7_i(Fl_Menu_*, void*);
-  static void cb_setDetector7(Fl_Menu_*, void*);
-public:
-  mainHistogram *mainHistogramWindow;
   mainImage *mainImageWindow;
   subImage *subImageWindow;
-  Fl_Group *TopOutput;
+  Fl_Output *pixelNum;
+  Fl_Output *pixelCounts;
+  Fl_Light_Button *subImageLockbut;
+private:
+  void cb_Flush_i(Fl_Button*, void*);
+  static void cb_Flush(Fl_Button*, void*);
+public:
+  Fl_Value_Slider *mainImageMin_slider;
+private:
+  void cb_mainImageMin_slider_i(Fl_Value_Slider*, void*);
+  static void cb_mainImageMin_slider(Fl_Value_Slider*, void*);
+public:
   Fl_Output *rateOutput0;
   Fl_Output *rateOutput1;
   Fl_Output *rateOutput2;
@@ -124,67 +76,35 @@ public:
   Fl_Output *rateOutput5;
   Fl_Output *rateOutput6;
   Fl_Output *rateOutput7;
-  Fl_Output *framenumOutput;
-  Fl_Output *shutterstateOutput;
+  Fl_Value_Output *shutterstateOutput;
+  Fl_Value_Output *tempOutput;
+  Fl_Value_Output *HVOutput;
+  mainHistogram *mainHistogramWindow;
+  Fl_Value_Output *mainHistogramYlabelmid;
+  Fl_Value_Output *mainHistogramYlabelmax;
+  static Fl_Menu_Item menu_choice[];
 private:
-  void cb_shutterstateOutput_i(Fl_Output*, void*);
-  static void cb_shutterstateOutput(Fl_Output*, void*);
+  void cb_Energy_i(Fl_Menu_*, void*);
+  static void cb_Energy(Fl_Menu_*, void*);
 public:
-  Fl_Output *TempOutput;
-  Fl_Output *histEnergy;
-  Fl_Output *histCounts;
-  Fl_Group *dataPlayback;
-  Fl_Button *nextFrameBut;
+  Fl_Value_Output *histLow;
+  Fl_Value_Output *histCounts;
+  Fl_Value_Output *histEnergy;
 private:
-  void cb_nextFrameBut_i(Fl_Button*, void*);
-  static void cb_nextFrameBut(Fl_Button*, void*);
+  void cb_Flush1_i(Fl_Button*, void*);
+  static void cb_Flush1(Fl_Button*, void*);
 public:
-  Fl_Button *prevFrameBut;
+  Fl_Counter *binsize_counter;
 private:
-  void cb_prevFrameBut_i(Fl_Button*, void*);
-  static void cb_prevFrameBut(Fl_Button*, void*);
-public:
-  Fl_Light_Button *syncLightBut;
-  Fl_Button *flushBut;
-private:
-  void cb_flushBut_i(Fl_Button*, void*);
-  static void cb_flushBut(Fl_Button*, void*);
-public:
-  Fl_Button *printFrame;
-private:
-  void cb_printFrame_i(Fl_Button*, void*);
-  static void cb_printFrame(Fl_Button*, void*);
+  void cb_binsize_counter_i(Fl_Counter*, void*);
+  static void cb_binsize_counter(Fl_Counter*, void*);
 public:
   Fl_Value_Output *frameTime;
-  Fl_Value_Output *chipbitValOut0;
-  Fl_Value_Output *chipbitValOut1;
-  Fl_Value_Output *chipbitValOut2;
-  Fl_Value_Output *chipbitValOut3;
-  Fl_Value_Output *trigbitValOut0;
-  Fl_Value_Output *trigbitValOut1;
-  Fl_Value_Output *trigbitValOut2;
-  Fl_Value_Output *trigbitValOut3;
-  Fl_Value_Output *seubitValOut0;
-  Fl_Value_Output *seubitValOut1;
-  Fl_Value_Output *seubitValOut2;
-  Fl_Value_Output *seubitValOut3;
-  Fl_Value_Output *noiseValOut0;
-  Fl_Value_Output *noiseValOut1;
-  Fl_Value_Output *noiseValOut2;
-  Fl_Value_Output *noiseValOut3;
-  mainChart *mainChartWindow;
-  Fl_Output *pixelNum;
-  Fl_Output *pixelCounts;
-  Fl_Light_Button *subImageLockbut;
-  Fl_Light_Button *mainHistogramLockbut;
-  mainChart *mainChartWindow1;
-  Fl_Value_Output *mainHistogramXlabelmid;
-  Fl_Value_Output *mainHistogramXlabelmax;
-  Fl_Value_Output *mainHistogramYlabelmax;
-  Fl_Value_Output *mainHistogramYlabelmid;
-  Fl_Text_Display *consoleBuf;
-  static Fl_Menu_Item menu_Detector[];
-  static Fl_Menu_Item menu_Data[];
+  Fl_Value_Output *framenumOutput;
+private:
+  void cb_reset_i(Fl_Button*, void*);
+  static void cb_reset(Fl_Button*, void*);
+public:
   Fl_Light_Button *initializeBut;
 private:
   void cb_initializeBut_i(Fl_Light_Button*, void*);
@@ -201,16 +121,26 @@ private:
   static void cb_closeBut(Fl_Light_Button*, void*);
 public:
   mainLightcurve *mainLightcurveWindow;
+private:
+  void cb_Flush2_i(Fl_Button*, void*);
+  static void cb_Flush2(Fl_Button*, void*);
+public:
+  Fl_Value_Output *ctsOutput;
+  Fl_Counter *timebinsize_counter;
+private:
+  void cb_timebinsize_counter_i(Fl_Counter*, void*);
+  static void cb_timebinsize_counter(Fl_Counter*, void*);
+public:
+  Fl_Counter *lightcurvexmax_counter;
+private:
+  void cb_lightcurvexmax_counter_i(Fl_Counter*, void*);
+  static void cb_lightcurvexmax_counter(Fl_Counter*, void*);
+public:
   Fl_Light_Button *glitchBut;
   Fl_Button *sendParamsBut;
 private:
   void cb_sendParamsBut_i(Fl_Button*, void*);
   static void cb_sendParamsBut(Fl_Button*, void*);
-public:
-  Fl_Button *testBut;
-private:
-  void cb_testBut_i(Fl_Button*, void*);
-  static void cb_testBut(Fl_Button*, void*);
 public:
   Fl_Value_Input *nEvents;
   Fl_Light_Button *writeFileBut;
@@ -218,30 +148,36 @@ private:
   void cb_writeFileBut_i(Fl_Light_Button*, void*);
   static void cb_writeFileBut(Fl_Light_Button*, void*);
 public:
-  Fl_Value_Input *nEventsDone;
+  Fl_Button *stopReadingDataButton;
 private:
-  void cb_BREAK_i(Fl_Button*, void*);
-  static void cb_BREAK(Fl_Button*, void*);
-  void cb_CLEAR_i(Fl_Button*, void*);
-  static void cb_CLEAR(Fl_Button*, void*);
+  void cb_stopReadingDataButton_i(Fl_Button*, void*);
+  static void cb_stopReadingDataButton(Fl_Button*, void*);
+public:
+  Fl_Text_Display *consoleBuf;
+private:
+  void cb_Clear_i(Fl_Button*, void*);
+  static void cb_Clear(Fl_Button*, void*);
 public:
   Fl_Button *setHoldBut;
 private:
   void cb_setHoldBut_i(Fl_Button*, void*);
   static void cb_setHoldBut(Fl_Button*, void*);
-  void cb_Clear_i(Fl_Button*, void*);
-  static void cb_Clear(Fl_Button*, void*);
 public:
   Fl_Button *setTrigBut;
 private:
   void cb_setTrigBut_i(Fl_Button*, void*);
   static void cb_setTrigBut(Fl_Button*, void*);
 public:
-  Fl_Light_Button *stopReadingDataButton;
-private:
-  void cb_stopReadingDataButton_i(Fl_Light_Button*, void*);
-  static void cb_stopReadingDataButton(Fl_Light_Button*, void*);
-public:
+  Fl_Value_Output *nEventsDone;
+  Fl_Group *detector_choice;
+  Fl_Check_Button *detector1_checkbox;
+  Fl_Check_Button *detector2_checkbox;
+  Fl_Check_Button *detector3_checkbox;
+  Fl_Check_Button *detector4_checkbox;
+  Fl_Check_Button *detector5_checkbox;
+  Fl_Check_Button *detector6_checkbox;
+  Fl_Check_Button *detector7_checkbox;
+  Fl_Value_Output *inttimeOutput;
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:
@@ -309,10 +245,44 @@ private:
   void cb_setTrigWindow_setTrigMode_i(Fl_Button*, void*);
   static void cb_setTrigWindow_setTrigMode(Fl_Button*, void*);
 public:
+  Fl_Double_Window *sendCommandsWindow;
+private:
+  void cb_Send_i(Fl_Button*, void*);
+  static void cb_Send(Fl_Button*, void*);
+  void cb_Close3_i(Fl_Button*, void*);
+  static void cb_Close3(Fl_Button*, void*);
+  void cb_Send1_i(Fl_Button*, void*);
+  static void cb_Send1(Fl_Button*, void*);
+  void cb_Strobe_i(Fl_Button*, void*);
+  static void cb_Strobe(Fl_Button*, void*);
+  void cb_Strobe1_i(Fl_Button*, void*);
+  static void cb_Strobe1(Fl_Button*, void*);
+public:
+  Fl_Value_Input *highVoltage_input;
+  Fl_Value_Input *clockLow_input;
+  Fl_Value_Input *clockHigh_input;
+  Fl_Double_Window *AboutWindow;
+  Fl_Double_Window *PreferenceWindow;
+  Fl_Value_Input *pixelhalflife_value;
+  Fl_Choice *fileTypeChoice;
+  static Fl_Menu_Item menu_fileTypeChoice[];
+private:
+  void cb_OK_i(Fl_Button*, void*);
+  static void cb_OK(Fl_Button*, void*);
+  void cb_Cancel_i(Fl_Button*, void*);
+  static void cb_Cancel(Fl_Button*, void*);
+  void cb_Change_i(Fl_Button*, void*);
+  static void cb_Change(Fl_Button*, void*);
+public:
+  Fl_File_Input *datafilesavedir_fileInput;
+  Fl_Value_Input *readdelay_value;
+  Fl_Choice *DataSource_choice;
+  static Fl_Menu_Item menu_DataSource_choice[];
   void show();
   Application *app; 
   Foxsidata *data; 
   USB_d2xx *usb; 
   Fl_Text_Buffer *buff; 
+  Fl_Preferences *prefs; 
 };
 #endif

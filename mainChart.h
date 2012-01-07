@@ -11,7 +11,7 @@
 #include "Application.h"
 
 class mainChart : public Fl_Chart {
-   public:
+public:
 	mainChart(int x,int y,int w,int h,const char *l=0);
 };
 

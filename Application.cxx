@@ -2,9 +2,12 @@
 
 #include "Application.h"
 #include <FL/Fl_File_Chooser.H>
+#include "data.h"
+#include "commands.h"
 #include "gui.h"
 #include "Foxsidata.h"
 #include "usbd2xx.h"
+#include "mainLightcurve.h"
 #include <pthread.h>
 #include <sched.h>
 
@@ -14,22 +17,25 @@
 
 #define XSTRIPS 128
 #define YSTRIPS 128
-
-#define CHANNELS 1024
-
+#define MAX_CHANNEL 1024
 #define MAXPATH 128
 
 extern Gui *gui;
+extern int HistogramFunction[MAX_CHANNEL];
 
-extern int HistogramFunction[CHANNELS];
 extern double detImage[XSTRIPS][YSTRIPS];
+extern double detImagemask[XSTRIPS][YSTRIPS];
+unsigned int LightcurveFunction[MAX_CHANNEL];
+double displayHistogram[MAX_CHANNEL];
 
-int stop_message;
-FILE *dataFile;
+extern int stop_message;
+extern FILE *dataFile;
+extern int fout;
+extern int nreads;
 
 // filename is set automatically with local time
-char dataFilename[MAXPATH];
-char dataFileDir[MAXPATH];
+extern char dataFilename[MAXPATH];
+extern char dataFileDir[MAXPATH];
 
 // these are declared in transFunc.cpp
 //extern HistogramFunction histFunc[4];
@@ -43,69 +49,110 @@ char dataFileDir[MAXPATH];
 //char *imgname;	//name of the image
 //GLubyte *imgpix;	//pixel buffer for image
 
+// Preference variables
+int file_type;
+char *data_file_save_dir;
+int read_delay;
+int data_source;	// 0 means simulation, 1 means ASIC, 2 means Formatter
+float pixel_half_life;
+int mainImage_minimum;
+int detector_display[7];
 
-// the constructor method for the Application class
+extern int low_threshold;
+extern int mainHistogram_binsize;
+
 Application::Application()
 {
-  // add initialization here:
-  //nchan = -1;	//value not set yet, i.e. image not read
-  //imgx = 0;
-  //imgy = 0;
-  //filename[0]='\0';
-}
-
-//zero all analyzed data
-void Application::FlushData(void)
-{	
-	gui->data->FlushHistogram();
-	gui->data->FlushImage();
-}
-
-// open the data file for saving data
-void Application::start_file()
-{
-	struct tm *times;
-	time_t ltime;
+	// Constructor method for the Application class
+	// Add initialization here:
 	
-	char file[200];
+}
 
-	if (gui->writeFileBut->value() == 1) {
-		
-		// Open a file to write the data to
-		// Name of file is automatically set with current date
-		char stringtemp[80];
-		time(&ltime);
-		times = localtime(&ltime);
-		strftime(stringtemp,25,"data_%Y%m%d_%H%M%S.dat\0",times);
-		strncpy(dataFilename,stringtemp,MAXPATH - 1);
-		strcpy(file, dataFileDir);
-		strcat(file, dataFilename);
-		//if (dataFileDir != "./"){ strcat(dataFilename, dataFileDir); }
-		//dataFilename[MAXPATH - 1] = '\0';
-		{
-			dataFile = fopen(file, "w");
-			if (dataFile == NULL)
-				{ print_to_console("Cannot open file %s.\n", file); } 
-			else 
-			{ print_to_console("Opened file %s.\n", file); }
-		}
-	} else {
-		print_to_console( "Closing file %s.\n", dataFilename);
-		fclose(dataFile);
+void Application::flush_histogram(void)
+{	
+	// Zero the Histogram
+	for(int i = 0;i < MAX_CHANNEL; i++)
+	{
+		HistogramFunction[i] = 0;
+		displayHistogram[i] = 0;
 	}
+	gui->mainHistogramWindow->redraw();
+	
+}
 
+void Application::flush_timeseries(void)
+{	
+	// Zero the time series
+	for(int i = 0;i < MAX_CHANNEL; i++)
+	{
+		LightcurveFunction[i] = 0;
+	}
+	gui->mainLightcurveWindow->redraw();
+}
+
+void Application::flush_image(void)
+{
+	for(int i=0;i<XSTRIPS;i++)
+	{
+		for(int j=0;j<YSTRIPS;j++)
+		{
+			detImage[i][j] = 0;
+			detImagemask[i][j] = 0;
+		}
+	}
+	gui->mainImageWindow->redraw();
+	gui->subImageWindow->redraw();
+}
+
+void Application::save_preferences(void)
+{
+	gui->prefs->set("pixel_half_life", (float) gui->pixelhalflife_value->value());
+	gui->prefs->set("file_type", gui->fileTypeChoice->value());
+	gui->prefs->set("data_file_save_dir", gui->datafilesavedir_fileInput->value());
+	gui->prefs->set("read_delay", gui->readdelay_value->value());
+	gui->prefs->set("data_source", gui->DataSource_choice->value());
+	gui->prefs->set("mainImage_minimum", gui->mainImageMin_slider->value());
+}
+
+void Application::read_preferences(void)
+{
+	// Read the preferences
+	gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
+	gui->prefs->get("file_type", file_type, 0);
+	gui->prefs->get("data_file_save_dir", data_file_save_dir, "/Users/schriste/");
+	gui->prefs->get("read_delay", read_delay, 10000);
+	gui->prefs->get("data_source", data_source, 0);
+	
+	gui->prefs->get("mainImage_minimum", mainImage_minimum, 0);
+}
+
+void Application::update_preferencewindow(void)
+{	
+	// Update them in the Preferences window
+	gui->pixelhalflife_value->value(pixel_half_life);
+	gui->fileTypeChoice->value(file_type);
+	gui->datafilesavedir_fileInput->value(data_file_save_dir);
+	gui->readdelay_value->value(read_delay);
+	gui->DataSource_choice->value(data_source);	
 }
 
 void Application::set_datafile_dir(void)
 {
 	char *temp = fl_dir_chooser("Pick a directory:", "", 0);
-	strcpy(dataFileDir, temp);
-	if(dataFileDir == NULL)
-		return;
-	print_to_console("Output directory set to %s.\n", dataFileDir);
-	printf("%s", dataFilename);
+	strcpy(data_file_save_dir, temp);
+	gui->datafilesavedir_fileInput->value(data_file_save_dir);
+	printf_to_console("Output directory set to %s.\n", data_file_save_dir, NULL);	
 }
 
+void Application::start_file()
+{
+	data_start_file();
+}
+
+void Application::write_header(FILE *file)
+{
+	gui->usb->writeHeader(file);
+}
 
 // the method that gets executed when the readFile callback is called
 void Application::readFile()
@@ -119,163 +166,15 @@ void Application::readFile()
 
 	//store image name
 	//strcpy(filename,file);
-	FlushData();
+	flush_image();
+	flush_histogram();
 	
-	gui->data->readDatafile(file);
+	//gui->data->readDatafile(file);
 }
-
-// add application routines here:
-
-//quit the program
-void Application::Exit()
+ 
+void Application::initialize(void)
 {
-	exit(0);
-}
-
-void Application::simulateData(void)
-{
-}
-
-void Application::readUSBStream(void)
-{
-	//opens a new window
-	//Fl_Double_Window *subWindow = new Fl_Double_Window(400,200, "subWindow");
-	//Fl_Text_Display *textDisplay = new Fl_Text_Display(0,0,400,200, 0);
-	//Fl_Text_Buffer *textBuffer = new Fl_Text_Buffer;
-	//textDisplay->buffer(textBuffer);
-
-	//subWindow->begin();
-	//Fl_Widget *box = new Fl_Widget(20, 40, 260, 100, "Hello, World!");
-	//box->box(UP_BOX);
-	//box->labelfont(HELVETICA_BOLD_ITALIC);
-	//box->labelsize(36);
-	//box->labeltype(SHADOW_LABEL);
-	//subWindow->end();
-	//subWindow->show();
-	
-	if (gui->usb->open() < 0) {
-		cout << "Could not open device.\n\n";
-	}
-	gui->usb->readFrame();
-	gui->usb->printFrame();
-	gui->usb->close();
-}
-
-void Application::readTeleStream(void)
-{
-
-}
-
-void Application::WriteSpec(void)
-{
-
-}
-
-void Application::WriteLightcurve(void)
-{
-
-}
-
-void Application::dataSync(void)
-{
-
-}
-
-void Application::setDetector(int detector)
-{
-
-}
-
-float Application::getRate(int detector)
-{
-
-	switch ( detector )
-      	{
-        case 0:
-		return 0.0;
-		break;
-	case 1:
-        	return 1.0;
-        	break;
-        case 2:
-		return 2.0;
-		break;
-	case 3:
-        	return 3.0;
-        	break;
-        case 4:
-		return 4.0;
-		break;
-	case 5:
-        	return 5.0;
-        	break;
-        case 6:
-		return 6.0;
-		break;
-	case 7:
-        	return 7.0;
-        	break;
-        default:
-        	return -1.0;
-	}
-
-}
-
-int Application::getFrameNum(void)
-{
-	return 1010;
-}
-
-int Application::getShutState(void)
-{
-	return 1;
-}
-
-float Application::getTemp(void)
-{
-	return 1;
-}
-
-const char Application::getPixel(void)
-{
-	return '1';
-}
-
-void Application::initialize_data(void)
-{
-	// Initialize a connection to a data stream
-	if (gui->usb->open() < 0)	cout << "Could not open device.\n\n";
-//		else	gui->usb->findSync();
-	
-	gui->syncLightBut->value(1);
-	gui->initializeBut->value(1);
-	gui->closeBut->value(0);
-	
-	gui->chipbitValOut0->activate();
-	gui->chipbitValOut1->activate();
-	gui->chipbitValOut2->activate();
-	gui->chipbitValOut3->activate();
-	
-	gui->trigbitValOut0->activate();
-	gui->trigbitValOut1->activate();
-	gui->trigbitValOut2->activate();
-	gui->trigbitValOut3->activate();
-	
-	gui->seubitValOut0->activate();
-	gui->seubitValOut1->activate();
-	gui->seubitValOut2->activate();
-	gui->seubitValOut3->activate();
-	
-	gui->noiseValOut0->activate();
-	gui->noiseValOut1->activate();
-	gui->noiseValOut2->activate();
-	gui->noiseValOut3->activate();
-	
-	gui->startReadingDataButton->activate();
-	gui->sendParamsWindow_sendBut->activate();
-	gui->setHoldTimeWindow_setBut->activate();
-	gui->setHoldTimeWindow_autorunBut->activate();
-	FlushData();
+	data_initialize();
 }
 
 void Application::close_data(void)
@@ -289,37 +188,29 @@ void Application::close_data(void)
 
 void Application::start_reading_data(void)
 {
-	pthread_t thread;
-    struct sched_param param;
-    pthread_attr_t tattr;
+	print_to_console("Reading started.\n");
+	gui->stopReadingDataButton->activate();
+	gui->closeBut->deactivate();
+	gui->startReadingDataButton->deactivate();
 	
-	int *variable;
-	int ret;
-	
-	stop_message = 0;
-	
-	variable = (int *) malloc(sizeof(int));
-	*variable = 6;
-	
-	// define the custom priority for one of the threads
-    int newprio = -10;
-	param.sched_priority = newprio;
-	ret = pthread_attr_init(&tattr);
-	ret = pthread_attr_setschedparam (&tattr, &param);
-	
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	
-	ret = pthread_create(&thread, &tattr, read_data, (void *) variable);
-	
+	data_start_reading();	
 }
 
-void Application::print_to_console(const char *text, char *string1)
+void Application::printf_to_console(const char *text, char *string1, int number)
 {
 	char buffer[200];
 	sprintf(buffer, text, string1);
 	gui->consoleBuf->insert(buffer);
+	gui->consoleBuf->show_insert_position();
 }
 								   
+void Application::print_to_console(const char *text)
+{
+	gui->consoleBuf->insert(text);
+	gui->consoleBuf->show_insert_position();
+}
+
+/*
 void* Application::read_data(void* variable)
 {
 	char buffer[50];
@@ -333,25 +224,26 @@ void* Application::read_data(void* variable)
 	gui->startReadingDataButton->deactivate();
 	Fl::unlock();
 	
-	if (gui->writeFileBut->value() == 1){
-		// Open data file
-		//dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
-		if(dataFile == NULL){
-			Fl::lock();
-			sprintf(buffer, "Invalid filename.\n");
-			gui->consoleBuf->insert(buffer);
-			Fl::unlock();
-			return NULL;
-		}
-	}
-
-	sprintf(buffer, "Reading...\n");
+	// data file should be open as long as the "Write to file" has been clicked
+	//if (gui->writeFileBut->value() == 1){
+	// Open data file
+	//dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
+	//	if(dataFile == NULL){
+	//		Fl::lock();
+	//		sprintf(buffer, "Invalid filename.\n");
+	//		gui->consoleBuf->insert(buffer);
+	//		Fl::unlock();
+	//		return NULL;
+	//	}
+	//}
+	
 	Fl::lock();
-	gui->consoleBuf->insert(buffer);
-	Fl::unlock();	
-
+	print_to_console("Reading...\n");
+	Fl::unlock();
+	
 	int i = 0;
-	while ( i<gui->nEvents->value() ){
+	int nEnd = gui->nEvents->value(); 
+	while ( i<nEnd ){
 //	for (int i = 0; i<gui->nEvents->value(); i++) {
 		usleep(20000);		// adjust this to achieve desired reading speed
 				
@@ -392,9 +284,10 @@ void* Application::read_data(void* variable)
 		// print frame to XCode console (unless nEvents is large, then skip it to save time).
 		if(gui->nEvents->value() < 5)  gui->usb->printFrame();
 		// write to file if the write button is enabled
-		if (gui->writeFileBut->value() == 1)  gui->usb->writeFrame(dataFile);
+		if (gui->writeFileBut->value() == 1)  gui->usb->writeFrame(dataFile, i);
 		gui->nEventsDone->value(i);
 		Fl::unlock();
+		Fl::awake();
 		
 		i++;
 	}
@@ -415,6 +308,7 @@ void* Application::read_data(void* variable)
 
 	return 0;
 }
+ */
 
 void Application::openSendParamsWindow(void)
 {
@@ -445,6 +339,9 @@ void Application::send_global_params(int option)
 
 void Application::start_auto_run(void)
 {
+	print_to_console("Can't autorun; disabled.\n");
+
+	/*
 	pthread_t thread;
     struct sched_param param;
     pthread_attr_t tattr;
@@ -466,11 +363,12 @@ void Application::start_auto_run(void)
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	
 	ret = pthread_create(&thread, &tattr, auto_run_sequence, (void *) variable);
-	
+	*/
 }
 
 void* Application::auto_run_sequence(void* variable)
 {
+	/*
 	for(int i=1; i<32; i++){
 		Fl::lock();
 		gui->nEventsDone->value(0);
@@ -495,14 +393,15 @@ void* Application::auto_run_sequence(void* variable)
 		
 	}	
 	return 0;
+	*/	
+	return 0;
 }
 
 
-void Application::break_acq(int data)
-{
-	gui->usb->breakAcq(data);
-
-}
+//void Application::break_acq(int data)
+//{
+//	gui->usb->breakAcq(data);
+//}
 
 void Application::save_settings(void)
 {
@@ -520,14 +419,81 @@ void Application::clear_console(void)
 	gui->buff->select(0, gui->buff->length());
 	gui->buff->remove_selection();
 }
-	
+
 void Application::test(void)
 {
+}
 
+void Application::send_atten_state(bool value)
+{
+	command_attenuator_state(value);
+}
+
+void Application::send_voltage_command(void)
+{
+	command_voltage_set(gui->highVoltage_input->value());
+}
+
+void Application::send_clockset_command(void)
+{
+	command_clock_set(gui->clockHigh_input->value(), gui->clockLow_input->value());
 }
 
 void Application::stop_reading_data(void)
 {
-	// send the thread the message to stop itself
-	stop_message = 1;	
+	data_stop_reading();
+	
+	Fl::lock();
+	gui->stopReadingDataButton->deactivate();
+	gui->startReadingDataButton->activate();
+	gui->closeBut->activate();
+	Fl::unlock();
+	
+	// send the thread the message to stop itself	
+}
+
+void Application::reset_read_counter(void)
+{
+	nreads = 0;
+	gui->nEventsDone->value(0);
+}
+
+void Application::update_binsize(void)
+{
+	mainHistogram_binsize = gui->binsize_counter->value();
+	gui->mainHistogramWindow->redraw();
+}
+
+void Application::update_timebinsize(void)
+{
+	// mainHistogram_binsize = gui->binsize_counter->value();
+	gui->mainLightcurveWindow->binsize[0] = gui->timebinsize_counter->value();
+}
+
+void Application::update_lightcurvexmax(void)
+{
+	gui->mainLightcurveWindow->xmax = gui->lightcurvexmax_counter->value();
+	gui->mainLightcurveWindow->redraw();
+}
+void Application::set_lowthreshold(void)
+{
+	low_threshold = gui->mainImageMin_slider->value();
+	gui->histLow->value(low_threshold);
+	gui->mainHistogramWindow->redraw();
+	gui->histLow->redraw();
+}
+
+void Application::set_energy_histogram(void)
+{
+	gui->binsize_counter->value(1);
+	mainHistogram_binsize = 1;
+	gui->mainHistogramWindow->redraw();
+
+}
+
+void Application::set_channel_histogram(void)
+{
+	gui->binsize_counter->value(25);
+	mainHistogram_binsize = 25;
+	gui->mainHistogramWindow->redraw();
 }

@@ -32,11 +32,12 @@ public:
 	int findSync();		// Read data until sync word is found, then stop.
 	int readFrame();	// Read one frame from the device.
 	void writeFrame(FILE *dataFile);	// Write last frame to file.
+	void writeHeader(FILE *dataFile);	// Write header at start of file.
 	void close();		// Close and cleanup the device and data file.
 	void printFrame();	// Print out the last frame that was read
 	void setConfig();	// Write configuration register to FPGA.
 	void setGlobalConfig(int option);	// Write config settings that are global, not just one ASIC.
-	void breakAcq(int data);	// Break ACQ loop.
+	//void breakAcq(int data);	// Break ACQ loop.
 	void saveSettings();	// Save current control settings for one ASIC.
 	void restoreSettings();	// Restore last control settings for one ASIC.
 	void loadDefaultSettings();	// set or restore default settings for one ASIC.
