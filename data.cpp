@@ -83,6 +83,7 @@ void data_initialize(void)
 		gui->app->print_to_console("Initializing Simulated data.\n");
 		gui->startReadingDataButton->activate();
 		gui->closeBut->activate();
+		gui->closeBut->value(0);
 		gui->app->flush_image();
 		gui->app->flush_histogram();
 		gui->app->flush_timeseries();
@@ -102,6 +103,7 @@ void data_initialize(void)
 		{		
 			gui->startReadingDataButton->activate();
 			gui->closeBut->activate();
+			gui->closeBut->value(0);
 			gui->sendParamsWindow_sendBut->activate();
 			gui->setHoldTimeWindow_setBut->activate();
 			gui->setHoldTimeWindow_autorunBut->activate();
@@ -326,6 +328,13 @@ void* data_read_data(void *p)
 			}
 			gui->stopReadingDataButton->deactivate();
 			gui->startReadingDataButton->activate();
+			gui->writeFileBut->value(0);
+			gui->closeBut->activate();
+			
+			if(nreads > maxreads-1){
+				gui->nEventsDone->value(0);
+				nreads = 0;
+			}
 
 			Fl::unlock();	
 			
