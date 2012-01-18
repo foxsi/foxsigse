@@ -86,11 +86,14 @@ public:
 	void flush_histogram(void);
 	void flush_image(void);
 	void flush_timeseries(void);
-	void update_binsize(void);
+	void update_histogrambinsize(void);
 	void update_timebinsize(void);
 	void set_energy_histogram(void);
 	void set_channel_histogram(void);
 	void update_lightcurvexmax(void);
+	void update_histogramxmax(void);
+	void toggle_image_integrate(void);
+	
 	int elapsed_time_sec;
 private:
 	char filename[40];

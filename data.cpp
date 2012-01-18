@@ -78,6 +78,9 @@ void data_initialize(void)
 {
 	// Initialize a connection to a data stream
 	
+	// Read the data source from the preferences
+	gui->prefs->get("data_source", data_source, 0);
+	
 	if (data_source == 0)
 	{
 		gui->app->print_to_console("Initializing Simulated data.\n");
@@ -191,7 +194,6 @@ void* data_timer(void *p)
 	while(1)
 	{
 		// a sleep statement so that it does not pole the time too often
-		// more often than is necessary
 		usleep(0.5/1000000.0);
 		current_time = time(NULL);
 		gui->app->elapsed_time_sec = difftime(time(NULL), start_time);
@@ -245,8 +247,7 @@ void* data_read_data(void *p)
 	int badSync = 0;
 	int badRead = 0;
 	int status = 0;
-	char buffer[50];
-
+	char textbuffer[50];
 	int maxreads;
 	
 	maxreads = gui->nEvents->value();
@@ -282,19 +283,21 @@ void* data_read_data(void *p)
 			status = gui->usb->findSync();
 			if(status<1){
 				badSync++;
-				continue;
 			}
 			
 			status = gui->usb->readFrame();
 			if(status<1){
 				badRead++;
-				continue;
+			} else {
 			}
+
 		}
 		
 		if (data_source == 2){
 			// read from the USB/Formatter, reads 4 frames at a time.
 			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer);
+			// set the read status based on how len returned 
+			//if len == 
 		}
 		
 		if(fout > 0)
@@ -312,6 +315,7 @@ void* data_read_data(void *p)
 			pthread_mutex_unlock(&mymutex);
 		}
 		
+		
 		// Check to see if if only a fixed number of frames should be read
 		// if so set the stop message
 		if ((maxreads != 0) && (nreads >= maxreads)){
@@ -323,8 +327,8 @@ void* data_read_data(void *p)
 			gui->app->print_to_console("Read finished or stopped.\n");
 						
 			if (data_source == 1) {
-				sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-				gui->consoleBuf->insert(buffer);						
+				sprintf(textbuffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
+				gui->consoleBuf->insert(textbuffer);						
 			}
 			gui->stopReadingDataButton->deactivate();
 			gui->startReadingDataButton->activate();
@@ -545,26 +549,32 @@ void data_update_display(unsigned short int *frame)
 
 	int ymask[128] = {0};
 	int xmask[128] = {0};
-	int xstrips[128] = {0};
-	int ystrips[128] = {0};
+	// xstrips are defined as p strips
+	signed int xstrips[128] = {0};
+	// ystrips are defined as n strips
+	signed int ystrips[128] = {0};
+	
+	unsigned int asic0n_data[64] = {0};
+	unsigned int asic1n_data[64] = {0};
+	unsigned int asic2p_data[64] = {0};
+	unsigned int asic3p_data[64] = {0};
+	
 	int num_hits = 0;
 	
 	gui->nEventsDone->value(nreads); 
+	gui->inttimeOutput->value(gui->app->elapsed_time_sec);
 	
 	if (data_source == 0) {
+		// Parse simulated data
 
-		
-		// if parsing simulated data
 		unsigned voltage_status;
 		unsigned voltage;
 
 		voltage_status = buffer[13] & 0xF;
 		voltage = (buffer[13] >> 12) & 0xFFF;
 		
-		gui->nEventsDone->value(nreads); 
 		gui->framenumOutput->value(frame[5]);
-		gui->inttimeOutput->value(gui->app->elapsed_time_sec);
-
+		
 		gui->HVOutput->value(voltage);
 		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
 		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
@@ -590,96 +600,129 @@ void data_update_display(unsigned short int *frame)
 	}
 	
 	if (data_source == 1){
-		// parse and display the data from the USB/ASIC connection
-		// order for asics n n then p p
+		// Parse the data from the USB/ASIC connection
+		// 
+		// Notes
+		// -----
+		//
+		// * the order for asics n n then p p
+		// * the asic mask does not work
+		//unsigned short int frameData[FRAME_SIZE_IN_SHORTINTS];
+		
 		int index = 0;
-
+		unsigned int common_mode = 0;
+		unsigned int common_mode_nside[2] = {0};
+		int read_status = 1;
+		
 		// Loop through the 4 ASICS
 		for( int j = 0; j < 4; j++)
 		{
-			printf("ASIC %d frame START ---------------------- \n", j);
+			read_status = 1;
+					
+			if ((j == 1) && (frame[index] != 60305)) { read_status = 0; }
+			if ((j == 2) && (frame[index] != 60306)) { read_status = 0; }
+			if ((j == 3) && (frame[index] != 60307)) { read_status = 0; }
 
-			// for the other ASICs, it's already in the data stream.
-			if(j==0){
-				printf( "eb90\n");
-			} else{
-				printf( "%x\n", frame[index]);	index++;
-			}
-						
-			printf( "frame counter: %u\n", frame[index]);	index++;	//frame counter
-			printf( "start bit: %x\n", frame[index]);	index++;	//start
-			printf( "chip bit: %x\n", frame[index]);	index++;	//chip
-			printf( "trigger bit: %x\n", frame[index]);	index++;	//trigger
-			printf( "seu bit: %x\n", frame[index]);	index++;	//seu
-			
-			// channel mask displayed in hex
-			// First two channel mask bits are stored as one word each.
-			printf("Channel Mask:\n");
-			
-			printf( "%x", frame[index]);	index++;	// dummy pedestal
-			printf( "%x", frame[index]);	index++;	// common mode bit
-			
-			for( int i = 0; i < 8; i++ ){ xmask[i] = getbits(frame[index], i, 1); }
-			for( int i = 8; i < 16; i++ ){ xmask[i] = getbits(frame[index], i, 1);}
-			for( int i = 16; i < 32; i++ ){ xmask[i] = getbits(frame[index], i, 1);}
-			for( int i = 32; i < 64; i++ ){ xmask[i] = getbits(frame[index], i, 1);}
-			
-			printf( "%x", frame[index]);	index++;
-			printf( "%x", frame[index]);	index++;
-			printf( "%x", frame[index]);	index++;
-			printf( "%x\n", frame[index]);	index++;
-			
-			printf( "Pedestal: %u\n", frame[index]);	index++;	//pedestal
-			
-			printf("Strip Data (%i):\n", index);
-			printf( "\nCommon mode %i: %u\n", index+64, frame[index+64]);	//common mode
-
-			// strip data
-			
-			for(int i = 0; i < XSTRIPS/2; i++){
-				// strip_data = frame[index] & 0x3ff;
-				// strip_number = (frame[index] << 10) & 0x3f;
-				strip_data = frame[index] - frame[index+64];
-				if (j == 3){if (strip_data > 0){ HistogramFunction[strip_data]++; }}
-				
-				if (strip_data != 0){
-					// if (j < 2){ xstrips[i + j*64] = strip_data; }
-					if (j < 2){ xstrips[i + j*64] = strip_data; }
-					if (j >= 2){ ystrips[i + (j-2)*64] = strip_data; }
+			if (gui->printasicframe_button->value() == 1)
+			{
+				if (j == 0){ printf("FRAME START\neb90\t"); }
+				else {
+					printf( "%x\n", frame[index]);	index++;
 				}
-				printf( "%u\t", frame[index]);	index++;
+				printf( "%u\t", frame[index]);	
+				if (j == 0){ gui->framenumOutput->value(frame[index]); }
+				index++;	//frame counter
+				printf( "%x\t", frame[index]);	index++;	//start
+				printf(  "%x\t", frame[index]);	index++;	//chip
+				printf(  "%x\t", frame[index]);	index++;	//trigger
+				printf(  "%x\t", frame[index]);	index++;	//seu
+				
+				// channel mask displayed in hex
+				// First two channel mask bits are stored as one word each.
+				printf(  "%x", frame[index]);	index++;
+				printf(  "%x", frame[index]);	index++;
+				printf(  "%x", frame[index]);	index++;
+				printf(  "%x", frame[index]);	index++;
+				printf(  "%x", frame[index]);	index++;
+				printf(  "%x\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;	//pedestal
+			} else {
+				if (j == 0){ index += 12;} else { index += 13; }
+			}
+
+			// store the common mode
+			// note the common mode is not calculated for n sides
+			// need to calculate it in software later
+			common_mode = frame[index+64];
+			
+			// strip data
+			for(int i = 0; i < 64; i++){
+				if (gui->printasicframe_button->value() == 1){
+					printf(  "%u\t", frame[index]);}
+				
+				if (j == 0){ asic0n_data[i] = frame[index]; }
+				if (j == 1){ asic1n_data[i] = frame[index]; }
+				if (j == 2){ 
+					asic2p_data[i] = frame[index]; 
+					xstrips[i + (j-2)*64] = frame[index] - common_mode;
+				}
+				if (j == 3){ 
+					asic3p_data[i] = frame[index]; 
+					xstrips[i + (j-2)*64] = frame[index] - common_mode;
+				}
+				index++;
 			}
 			
-			printf( "\nCommon mode %i: %u\n", index, frame[index]);	index++;	//common mode
-			printf("Readout info:\n");
-			// 10 extra words of readout information
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\t", frame[index]);	index++;
-			printf( "%u\n", frame[index]);	index++;		
-			printf("ASIC %u frame END  -------------------------------- \n", j);
-			
+			if (gui->printasicframe_button->value() == 1){
+				printf(  "common mode: %u\n", frame[index]);	
+				index++;	//common mode
+				// 10 extra words of readout information
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;
+				printf(  "%u\t", frame[index]);	index++;		
+				printf("\n");
+			} else {
+				index += 11;
+			}
 		}
 		
-		for(int i = 0; i<XSTRIPS; i++)
-		{
-			for(int j = 0; j<YSTRIPS; j++)
+		if (read_status == 1) {
+			common_mode_nside[0] = median(asic0n_data, 64);
+			common_mode_nside[1] = median(asic1n_data, 64);
+			
+			if (gui->printasicframe_button->value() == 1){
+				printf("common mode: %u %u\n", common_mode_nside[0], common_mode_nside[1]);}
+			
+			for(int i = 0; i < XSTRIPS; i++)
 			{
-				detImage[i][j] = xstrips[i] * ystrips[j];
-				detImagemask[i][j] = xmask[i] * ymask[j];
-				detImagetime[i][j] = clock();
-				if(detImage[i][j] >= low_threshold){num_hits++;}
-			}	
+				if (xstrips[i] > 0){ HistogramFunction[xstrips[i]]++; }
+				if (xstrips[i] >= low_threshold){
+					num_hits++;
+					for(int j = 0; j < YSTRIPS; j++)
+					{
+						if (j < 64){
+							if ((asic0n_data[i] - common_mode_nside[0]) > 30) {ystrips[i] = 1;}
+						}
+						if (j >= 64){
+							if ((asic1n_data[i] - common_mode_nside[1]) > 30) {ystrips[i] = 1;}
+						}
+						detImage[i][j] = xstrips[i] * ystrips[j];
+						detImagetime[i][j] = clock();
+					}
+				}
+			}
+			//printf("\n");
+			pthread_mutex_lock( &timebinmutex);
+				current_timebin+=num_hits;
+			pthread_mutex_unlock(&timebinmutex);
 		}
-		pthread_mutex_lock( &timebinmutex);
-		current_timebin+=num_hits;
-		pthread_mutex_unlock(&timebinmutex);
 	}
 	
 	if (data_source == 2) {

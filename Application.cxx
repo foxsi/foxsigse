@@ -77,7 +77,6 @@ void Application::flush_histogram(void)
 		displayHistogram[i] = 0;
 	}
 	gui->mainHistogramWindow->redraw();
-	
 }
 
 void Application::flush_timeseries(void)
@@ -458,9 +457,9 @@ void Application::reset_read_counter(void)
 	gui->nEventsDone->value(0);
 }
 
-void Application::update_binsize(void)
+void Application::update_histogrambinsize(void)
 {
-	mainHistogram_binsize = gui->binsize_counter->value();
+	mainHistogram_binsize = gui->histogrambinsize_counter->value();
 	gui->mainHistogramWindow->redraw();
 }
 
@@ -475,6 +474,13 @@ void Application::update_lightcurvexmax(void)
 	gui->mainLightcurveWindow->xmax = gui->lightcurvexmax_counter->value();
 	gui->mainLightcurveWindow->redraw();
 }
+
+void Application::update_histogramxmax(void)
+{
+	gui->mainHistogramWindow->xmax = gui->histogramxmax_counter->value();
+	gui->mainHistogramWindow->redraw();
+}
+
 void Application::set_lowthreshold(void)
 {
 	low_threshold = gui->mainImageMin_slider->value();
@@ -485,15 +491,25 @@ void Application::set_lowthreshold(void)
 
 void Application::set_energy_histogram(void)
 {
-	gui->binsize_counter->value(1);
-	mainHistogram_binsize = 1;
-	gui->mainHistogramWindow->redraw();
+	//gui->histogrambinsize_counter->value(1);
+	//mainHistogram_binsize = 1;
+	//gui->mainHistogramWindow->redraw();
 
 }
 
 void Application::set_channel_histogram(void)
 {
-	gui->binsize_counter->value(25);
-	mainHistogram_binsize = 25;
-	gui->mainHistogramWindow->redraw();
+	//gui->histogrambinsize_counter->value(25);
+	//mainHistogram_binsize = 25;
+	//gui->mainHistogramWindow->redraw();
+}
+
+void Application::toggle_image_integrate(void)
+{
+	if (gui->mainImage_integrate_button->value() == 1){
+		pixel_half_life = 0;
+	}
+	if (gui->mainImage_integrate_button->value() == 0){
+		gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
+	}
 }
