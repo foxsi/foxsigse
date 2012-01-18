@@ -31,6 +31,8 @@ unsigned getbits(unsigned x, int p, int n);
 //reverses bit order in an unsigned.
 unsigned reversebits(unsigned x, int n);
 
+unsigned int median(unsigned int *array, int size);
+
 //// test pointer function for threading
 //void *do_some_work(void *variable);
 

@@ -200,54 +200,36 @@ int USB_d2xx::readFrame(void)
 	int		nFrames = 1;
 	DWORD	nBytesToRead = nFrames*nBytesFrame;
 	DWORD 	nBytesRead = 0;	// actual number of bytes read.
-
-	char buffer[50];
-
+	
+	usleep(100);
+	
 	ftStatus = FT_GetQueueStatus(ftHandle, &nBytesRead);
 	ftStatus = FT_SetTimeouts(ftHandle, 500, 500);
 	
 	if( nBytesRead < nBytesToRead ){
-//		sprintf(buffer, "Not enough data to read. %d bytes waiting.\n", nBytesRead);
-//		gui->consoleBuf->insert(buffer);
 		return -1;
 	}
 	
 	for(int i=0; i<nBytesToRead; i++){  
-		frameData[i] = 0;	// initialize buffer
-//		cout << frameData[i] << endl;
+		// initialize the frameData
+		frameData[i] = 0;
 	}
 	
 	if(ftStatus == FT_OK) {
-
-//		cout << "Attempting to read " << nBytesToRead << " bytes." << endl;
-//		sprintf(buffer, "Attempting to read %d bytes.\n", nBytesToRead);
-//		gui->consoleBuf->insert(buffer);
-
 		ftStatus = FT_Read(ftHandle, frameData, nBytesToRead, &nBytesRead);
 		
-		memcpy((void *) buffer0,(void *) frameData, FRAME_SIZE_IN_BYTES);
-
 		if((ftStatus) != FT_OK || nBytesRead != nBytesToRead){
 			//app->printf_to_console("Error FT_Read(%d)\n", NULL, ftStatus);
-			//cout << buffer << endl;
 			return -1;
-		}
-		else {			
-			//app->printf_to_console("Read %d bytes.\n", NULL, nBytesRead);
+		} else {
+			memcpy((void *) buffer0,(void *) frameData, FRAME_SIZE_IN_BYTES);
 		}
 	} else {
 		app->print_to_console("Could not get USB queue status.\n");
+		return -1;
 	}
 	
-	//for(int i=0; i<nBytesToRead; i++){  
-	//	cout << frameData[i] << endl;
-	//}	
-	
-	return nBytesRead;
-	
-//	gui->mainImageWindow->redraw();
-//	gui->subImageWindow->redraw();
-//	gui->mainHistogramWindow->redraw();
+	return nBytesRead;	
 }
 
 void USB_d2xx::close(void)

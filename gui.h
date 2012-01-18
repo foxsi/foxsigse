@@ -68,6 +68,11 @@ private:
   void cb_mainImageMin_slider_i(Fl_Value_Slider*, void*);
   static void cb_mainImageMin_slider(Fl_Value_Slider*, void*);
 public:
+  Fl_Light_Button *mainImage_integrate_button;
+private:
+  void cb_mainImage_integrate_button_i(Fl_Light_Button*, void*);
+  static void cb_mainImage_integrate_button(Fl_Light_Button*, void*);
+public:
   Fl_Output *rateOutput0;
   Fl_Output *rateOutput1;
   Fl_Output *rateOutput2;
@@ -82,7 +87,8 @@ public:
   mainHistogram *mainHistogramWindow;
   Fl_Value_Output *mainHistogramYlabelmid;
   Fl_Value_Output *mainHistogramYlabelmax;
-  static Fl_Menu_Item menu_choice[];
+  Fl_Choice *mainHistogram_choice;
+  static Fl_Menu_Item menu_mainHistogram_choice[];
 private:
   void cb_Energy_i(Fl_Menu_*, void*);
   static void cb_Energy(Fl_Menu_*, void*);
@@ -94,10 +100,15 @@ private:
   void cb_Flush1_i(Fl_Button*, void*);
   static void cb_Flush1(Fl_Button*, void*);
 public:
-  Fl_Counter *binsize_counter;
+  Fl_Counter *histogrambinsize_counter;
 private:
-  void cb_binsize_counter_i(Fl_Counter*, void*);
-  static void cb_binsize_counter(Fl_Counter*, void*);
+  void cb_histogrambinsize_counter_i(Fl_Counter*, void*);
+  static void cb_histogrambinsize_counter(Fl_Counter*, void*);
+public:
+  Fl_Counter *histogramxmax_counter;
+private:
+  void cb_histogramxmax_counter_i(Fl_Counter*, void*);
+  static void cb_histogramxmax_counter(Fl_Counter*, void*);
 public:
   Fl_Value_Output *frameTime;
   Fl_Value_Output *framenumOutput;
@@ -158,6 +169,7 @@ private:
   void cb_Clear_i(Fl_Button*, void*);
   static void cb_Clear(Fl_Button*, void*);
 public:
+  Fl_Check_Button *printasicframe_button;
   Fl_Button *setHoldBut;
 private:
   void cb_setHoldBut_i(Fl_Button*, void*);

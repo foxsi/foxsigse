@@ -108,7 +108,11 @@ void mainImage::draw()
 	   	{
 			if(detImage[i][j] > low_threshold){
 				grey = detImage[i][j]/ymax;
-				alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+				if (pixel_half_life != 0){
+					alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+				} else {
+					alpha = 1;
+				}
 
 				detImagealpha[i][j] = alpha;
 				glColor4f(grey, grey, grey, alpha);

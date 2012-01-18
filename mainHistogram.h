@@ -25,12 +25,12 @@ public:
 	int handle(int eventType);
 	void glPrint(float x, float y, char *string );
 	float maximumValue(double *array, int size);
+	int xmax;
 private:
 	double ymax;
 	double ymin;
-	float xmax;
-	float xmin;
-	
+	int xmin;
+	float chan_to_energy;
 };
 
 #endif

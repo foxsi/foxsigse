@@ -46,6 +46,7 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 	}
 	FLHistcursorX[0] = 500;
 	mouseHistPixel = FLHistcursorX[0];
+	chan_to_energy = 10.0;
 }
 
 void mainHistogram::draw()
@@ -54,9 +55,9 @@ void mainHistogram::draw()
 	int y = 0;
 	int k = 0;
 	
-	ymax = maximumValue(displayHistogram, MAX_CHANNEL/mainHistogram_binsize);
-	xmax = MAX_CHANNEL/mainHistogram_binsize;
-	
+	ymax = maximumValue(displayHistogram, xmax/mainHistogram_binsize);
+	if (ymax == 0){ ymax = 10; }
+		
 	YTICKINTERVALM = (ymax-ymin)/YNUMTICKS;
 	YTICKINTERVAL = YTICKINTERVALM/2;
 	
@@ -74,7 +75,7 @@ void mainHistogram::draw()
 	glLoadIdentity();
 	
 	glViewport(0,0,w(),h());
-	gluOrtho2D(0,MAX_CHANNEL/mainHistogram_binsize, 0, ymax);
+	gluOrtho2D(0,xmax/mainHistogram_binsize, 0, ymax);
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -137,24 +138,6 @@ void mainHistogram::draw()
 	gui->mainHistogramYlabelmid->value(ymax/2.0);
 	gui->histCounts->value(displayHistogram[mouseHistPixel]);
 
-	//Should not make this update everytime
-	//gui->mainHistogramXlabelmid->value(xmid);
-	//gui->mainHistogramXlabelmax->value(xmax);
-	
-	//if(gui->mainHistogramLockbut->value() == 0)
-	//      {
-	//              //now update the text box with the current chosen pixel
-	//              sprintf( text, "%d", mouseHistPixel);
-	//              gui->histEnergy->value(text);
-	//
-	//              sprintf( text, "%d", HistogramFunction[mouseHistPixel]);
-	//              gui->histCounts->value(text);
-	//      } else
-	//      {
-	//              sprintf( text, "%d", HistogramFunction[chosenHistPixel]);
-	//              gui->histCounts->value(text);
-	//      }
-	
 }
 
 int mainHistogram::handle(int eventType)
@@ -165,14 +148,19 @@ int mainHistogram::handle(int eventType)
 	if(eventType == FL_PUSH)
 	{
 		//convert between fltk coordinates and opengl coordinates
-		FLHistcursorX[0] = floor(Fl::event_x()*(xmax)/w());
+		FLHistcursorX[0] = floor(Fl::event_x()*(xmax/mainHistogram_binsize)/w());
 		FLHistcursorY[0] = floor((h()-Fl::event_y())*(ymax)/h());
 
 		mouseHistPixel = FLHistcursorX[0];
 	}
 	
 	// now update the value displayed
-	gui->histEnergy->value(mouseHistPixel);	
+	if( gui->mainHistogram_choice->value() == 0 ){
+		gui->histEnergy->value(mouseHistPixel*mainHistogram_binsize);	
+	}
+	if( gui->mainHistogram_choice->value() == 1 ){
+		gui->histEnergy->value(mouseHistPixel*mainHistogram_binsize/chan_to_energy);	
+	}
 	gui->histCounts->value(displayHistogram[mouseHistPixel]);
 	
 	redraw();
@@ -213,8 +201,8 @@ float mainHistogram::maximumValue(double *array, int size)
 	//float length = sizeof(array)/sizeof(array[0]);  // establish size of array
 	//cout << "size of array " << length << endl;
 	//do not consider below xmin
-	float max = array[0];       // start with max = first element
-	for(int i = 1; i < size; i++)
+	float max = array[5];       // start with max = first element
+	for(int i = 6; i < size; i++)
 	{
 		if(array[i] > max){
 			max = array[i];}
