@@ -1,6 +1,7 @@
 #include "mainHistogram.h"
 #include "gui.h"
 #include <math.h>
+#include "UsefulFunctions.h"
 
 #define XSTRIPS 128
 #define YSTRIPS 128
@@ -17,7 +18,7 @@ extern double displayHistogram[MAX_CHANNEL];
 
 int chosenHistPixel;
 int mouseHistPixel;
-int low_threshold = 0;
+int low_threshold = 5;
 int mainHistogram_binsize = 25;
 
 float FLHistcursorX[2], FLHistcursorY[2];
@@ -55,7 +56,7 @@ void mainHistogram::draw()
 	int y = 0;
 	int k = 0;
 	
-	ymax = maximumValue(displayHistogram, xmax/mainHistogram_binsize);
+	ymax = maximumValue(displayHistogram, xmax/mainHistogram_binsize, 5);
 	if (ymax == 0){ ymax = 10; }
 		
 	YTICKINTERVALM = (ymax-ymin)/YNUMTICKS;
@@ -195,18 +196,3 @@ int mainHistogram::handle(int eventType)
 //      for ( i = 0; i < len; i++){ glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, string[i]);
 //      }
 //}
-
-float mainHistogram::maximumValue(double *array, int size)
-{
-	//float length = sizeof(array)/sizeof(array[0]);  // establish size of array
-	//cout << "size of array " << length << endl;
-	//do not consider below xmin
-	float max = array[5];       // start with max = first element
-	for(int i = 6; i < size; i++)
-	{
-		if(array[i] > max){
-			max = array[i];}
-	}
-	
-	return max;                // return highest value in array
-}

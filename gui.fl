@@ -8,7 +8,7 @@ class Gui {open
   } {
     Fl_Window mainWindow {
       label {FOXSI GSE} open
-      xywh {30 45 1252 686} type Double color 19 resizable
+      xywh {28 45 1252 686} type Double color 19 resizable
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
@@ -122,8 +122,13 @@ exit(1);}
         }
         Fl_Light_Button mainImage_integrate_button {
           label Integrate
-          callback {app->toggle_image_integrate();} selected
+          callback {app->toggle_image_integrate();}
           xywh {480 560 80 30}
+        }
+        Fl_Button {} {
+          label Save
+          callback {app->save_image_to_file();}
+          xywh {490 640 54 25}
         }
       }
       Fl_Output rateOutput0 {
@@ -225,6 +230,11 @@ exit(1);}
           callback {app->update_histogramxmax();}
           xywh {990 635 120 20} minimum 1 step 1 value 1024
         }
+        Fl_Button {} {
+          label Save
+          callback {app->save_histogram_to_file();}
+          xywh {958 564 54 25}
+        }
       }
       Fl_Value_Output frameTime {
         label {frame time}
@@ -257,32 +267,37 @@ app->start_reading_data();}
       }
       Fl_Group {} {
         label LightCurve open
-        xywh {744 110 437 145} box THIN_UP_FRAME
+        xywh {700 110 501 150} box THIN_UP_FRAME
       } {
         Fl_Box mainLightcurveWindow {
           label {Light curve}
-          xywh {744 110 300 145} box GTK_UP_BOX
+          xywh {772 110 300 145} box GTK_UP_BOX
           code0 {\#include "mainLightcurve.h"}
           class mainLightcurve
         }
         Fl_Button {} {
           label Flush
           callback {app->flush_timeseries();}
-          xywh {1094 143 75 25}
+          xywh {1122 143 75 25}
         }
         Fl_Value_Output ctsOutput {
           label {cts/s:}
-          xywh {1094 115 77 24}
+          xywh {1122 115 77 24}
         }
         Fl_Counter timebinsize_counter {
           label {bin size (s):}
           callback {app->update_timebinsize();}
-          xywh {1049 172 120 20} minimum 0.1 value 1
+          xywh {1077 172 120 20} minimum 0.1 value 1
         }
         Fl_Counter lightcurvexmax_counter {
           label {total sec:}
           callback {app->update_lightcurvexmax();}
-          xywh {1049 212 120 20} minimum 1 step 1 value 20
+          xywh {1077 212 120 20} minimum 1 step 1 value 20
+        }
+        Fl_Value_Slider mainLightcurve_ymaxslider {
+          label {max:}
+          callback {app->set_lightcurve_ymax();}
+          xywh {720 115 40 120} align 290 maximum 5000 step 100 textsize 14
         }
       }
       Fl_Light_Button glitchBut {
@@ -1255,8 +1270,8 @@ app->send_params();
       }
     }
     Fl_Window PreferenceWindow {
-      label Preferences
-      xywh {43 223 429 175} type Double hide
+      label Preferences open
+      xywh {43 223 429 175} type Double visible
     } {
       Fl_Value_Input pixelhalflife_value {
         label {pixel half life (s)}
@@ -1315,6 +1330,10 @@ PreferenceWindow->hide();}
           label Formatter
           xywh {5 5 31 20}
         }
+      }
+      Fl_Check_Button newControlRegisters_check {
+        label {new FPGA control registers} selected
+        xywh {25 120 63 20} down_box DOWN_BOX
       }
     }
     code {app=new Application();} {}

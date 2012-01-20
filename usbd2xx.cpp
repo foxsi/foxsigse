@@ -182,6 +182,7 @@ int USB_d2xx::findSync(void)
 			return -1;
 		}
 		ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
+		printf("%u\t", dataWord);
 		// if the sync word is found, read again to see if the sync word is repeated.
 		if (dataWord == 0xEB90){
 			ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
@@ -200,9 +201,7 @@ int USB_d2xx::readFrame(void)
 	int		nFrames = 1;
 	DWORD	nBytesToRead = nFrames*nBytesFrame;
 	DWORD 	nBytesRead = 0;	// actual number of bytes read.
-	
-	usleep(100);
-	
+		
 	ftStatus = FT_GetQueueStatus(ftHandle, &nBytesRead);
 	ftStatus = FT_SetTimeouts(ftHandle, 500, 500);
 	
@@ -219,7 +218,7 @@ int USB_d2xx::readFrame(void)
 		ftStatus = FT_Read(ftHandle, frameData, nBytesToRead, &nBytesRead);
 		
 		if((ftStatus) != FT_OK || nBytesRead != nBytesToRead){
-			//app->printf_to_console("Error FT_Read(%d)\n", NULL, ftStatus);
+			app->printf_to_console("Error FT_Read(%d)\n", NULL, ftStatus);
 			return -1;
 		} else {
 			memcpy((void *) buffer0,(void *) frameData, FRAME_SIZE_IN_BYTES);
@@ -229,6 +228,11 @@ int USB_d2xx::readFrame(void)
 		return -1;
 	}
 	
+	for(int i=0; i<nBytesToRead; i++){  
+		// initialize the frameData
+		printf("%i\t", frameData[i]);
+	}
+	printf("\n");
 	return nBytesRead;	
 }
 
@@ -506,9 +510,19 @@ void USB_d2xx::writeFrame(FILE *dataFile)
 // Set individual ASIC slow control parameters
 void USB_d2xx::setConfig(void)
 {
-	const int n=52;		// number of components in write array
+
 	const int nV=45;	// number of values in sendParamsWindow
-	char cBufWrite[n];	// write array
+	char *cBufWrite;
+	//const int n = [1,867];
+	
+	if (gui->newControlRegisters_check->value() == 0) {
+		char *cBufWrite = (char *)malloc(52 * sizeof(char));
+	} else {
+		char *cBufWrite = (char *)malloc(867 * sizeof(char));
+		//const int n=867;
+	}
+	
+	//char cBufWrite[n];	// write array
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
 
 	// load user input configuration settings from sendParamsWindow.
@@ -523,7 +537,11 @@ void USB_d2xx::setConfig(void)
 	for(int i=0; i<64; i++)	test[i] = 0;
 	
 	// initialize write buffer.
-	for(int i=0; i<n; i++) cBufWrite[i] = 0;
+	if (gui->newControlRegisters_check->value() == 0){
+		cBufWrite[0] = 0;}
+	else {
+		for(int i=0; i<867; i++) cBufWrite[i] = 0;
+	}
 	
 	// fill arrays with values from sendParameters window.
 	// CHAN values are from the channel disable buttons.
@@ -531,71 +549,100 @@ void USB_d2xx::setConfig(void)
 	for(int i=0; i<64; i++)	chan[i]  = gui->sendParamsWindow_chan[i]->value();
 	for(int i=0; i<64; i++)	test[i]  = gui->sendParamsWindow_test[i]->value();
 	
-	// logic to assemble configuration settings into write array.
-	// Note the pattern is not the same for each register and some bits are intentionally unused!
-	cBufWrite[0] = value[0]*16 + value[1]*8 + value[2]*4 + value[3]*2 + value[4] + 32*asic;	
-	cBufWrite[1] = value[5]*16 + value[6]*8 + value[7]*4 + value[8]*2 + value[9] + 32*asic;
-	cBufWrite[2] = value[10]*16 + value[11]*8 + value[12]*4 + value[13]*2 + value[14] + 32*asic;
-	cBufWrite[3] = value[15]*16 + value[16]*8 + value[17]*4 + value[18]*2 + value[19] + 32*asic;
-	cBufWrite[4] = value[20]*16 + value[21]*8 + value[22]*4 + value[23]*2 + getbits(value[24],4,1) + 32*asic; // 4 single bits + LSB of dummy digital delay.
-	cBufWrite[5] = getbits(value[24], 9, 5) + 32*asic; // 5 MSB of dummy digital delay.
-	cBufWrite[6] = getbits(value[25], 4, 5) + 32*asic;  // 5 LSB of digital threshold.
-	cBufWrite[7] = getbits(value[25], 9, 5) + 32*asic;  // 5 MSB of digital threshold.
-	cBufWrite[8] = chan[0]*16 + chan[1]*8 + chan[2]*4 + chan[3]*2 + chan[4] + 32*asic;
-	cBufWrite[9] = chan[5]*16 + chan[6]*8 + chan[7]*4 + chan[8]*2 + chan[9] + 32*asic;
-	cBufWrite[10] = chan[10]*16 + chan[11]*8 + chan[12]*4 + chan[13]*2 + chan[14] + 32*asic;
-	cBufWrite[11] = chan[15]*16 + chan[16]*8 + chan[17]*4 + chan[18]*2 + chan[19] + 32*asic;
-	cBufWrite[12] = chan[20]*16 + chan[21]*8 + chan[22]*4 + chan[23]*2 + chan[24] + 32*asic;
-	cBufWrite[13] = chan[25]*16 + chan[26]*8 + chan[27]*4 + chan[28]*2 + chan[29] + 32*asic;
-	cBufWrite[14] = chan[30]*16 + chan[31]*8 + chan[32]*4 + chan[33]*2 + chan[34] + 32*asic;
-	cBufWrite[15] = chan[35]*16 + chan[36]*8 + chan[37]*4 + chan[38]*2 + chan[39] + 32*asic;
-	cBufWrite[16] = chan[40]*16 + chan[41]*8 + chan[42]*4 + chan[43]*2 + chan[44] + 32*asic;
-	cBufWrite[17] = chan[45]*16 + chan[46]*8 + chan[47]*4 + chan[48]*2 + chan[49] + 32*asic;
-	cBufWrite[18] = chan[50]*16 + chan[51]*8 + chan[52]*4 + chan[53]*2 + chan[54] + 32*asic;
-	cBufWrite[19] = chan[55]*16 + chan[56]*8 + chan[57]*4 + chan[58]*2 + chan[59] + 32*asic;
-	cBufWrite[20] = chan[60]*8 + chan[61]*4 + chan[62]*2 + chan[63]*1 + 32*asic;  // No MSB for the last disable register.
-	cBufWrite[21] = test[0]*16 + test[1]*8 + test[2]*4 + test[3]*2 + test[4] + 32*asic;
-	cBufWrite[22] = test[5]*16 + test[6]*8 + test[7]*4 + test[8]*2 + test[9] + 32*asic;
-	cBufWrite[23] = test[10]*16 + test[11]*8 + test[12]*4 + test[13]*2 + test[14] + 32*asic;
-	cBufWrite[24] = test[15]*16 + test[16]*8 + test[17]*4 + test[18]*2 + test[19] + 32*asic;
-	cBufWrite[25] = test[20]*16 + test[21]*8 + test[22]*4 + test[23]*2 + test[24] + 32*asic;
-	cBufWrite[26] = test[25]*16 + test[26]*8 + test[27]*4 + test[28]*2 + test[29] + 32*asic;
-	cBufWrite[27] = test[30]*16 + test[31]*8 + test[32]*4 + test[33]*2 + test[34] + 32*asic;
-	cBufWrite[28] = test[35]*16 + test[36]*8 + test[37]*4 + test[38]*2 + test[39] + 32*asic;
-	cBufWrite[29] = test[40]*16 + test[41]*8 + test[42]*4 + test[43]*2 + test[44] + 32*asic;
-	cBufWrite[30] = test[45]*16 + test[46]*8 + test[47]*4 + test[48]*2 + test[49] + 32*asic;
-	cBufWrite[31] = test[50]*16 + test[51]*8 + test[52]*4 + test[53]*2 + test[54] + 32*asic;
-	cBufWrite[32] = test[55]*16 + test[56]*8 + test[57]*4 + test[58]*2 + test[59] + 32*asic;
-	cBufWrite[33] = test[60]*8 + test[61]*4 + test[62]*2 + test[63]*1 + 32*asic;  // No MSB for the last disable register.
-	cBufWrite[34] = value[26]*4 + value[27]*2 + value[28] + 32*asic;
-	cBufWrite[35] = getbits(value[29], 4, 5) + 32*asic; // digital threshold
-	cBufWrite[36] = getbits(value[30], 3, 4) + 32*asic;
-	cBufWrite[37] = getbits(value[31], 3, 4) + 32*asic;
-	cBufWrite[38] = getbits(value[32], 3, 4) + 32*asic;
-	cBufWrite[39] = getbits(value[33], 3, 4) + 32*asic;
-	cBufWrite[40] = getbits(value[34], 2, 3) + 32*asic;
-	cBufWrite[41] = getbits(value[35], 2, 3) + 32*asic;
-	cBufWrite[42] = getbits(value[36], 2, 3) + 32*asic;
-	cBufWrite[43] = getbits(value[37], 2, 3) + 32*asic;
-	cBufWrite[44] = getbits(value[38], 2, 3) + 32*asic;
-	cBufWrite[45] = getbits(value[39], 2, 3) + 32*asic;
-	cBufWrite[46] = getbits(value[40], 2, 3) + 32*asic;
-	cBufWrite[47] = getbits(value[41], 2, 3) + 32*asic;
-	cBufWrite[48] = getbits(value[42], 2, 3) + 32*asic;
-	cBufWrite[49] = getbits(value[43], 2, 3) + 32*asic;
-	cBufWrite[50] = getbits(value[44], 2, 3) + 32*asic;
-	cBufWrite[51] = 0;
+	if (gui->newControlRegisters_check->value() == 0)
+	{
+		// logic to assemble configuration settings into write array.
+		// Note the pattern is not the same for each register and some bits are intentionally unused!
+		cBufWrite[0] = value[0]*16 + value[1]*8 + value[2]*4 + value[3]*2 + value[4] + 32*asic;	
+		cBufWrite[1] = value[5]*16 + value[6]*8 + value[7]*4 + value[8]*2 + value[9] + 32*asic;
+		cBufWrite[2] = value[10]*16 + value[11]*8 + value[12]*4 + value[13]*2 + value[14] + 32*asic;
+		cBufWrite[3] = value[15]*16 + value[16]*8 + value[17]*4 + value[18]*2 + value[19] + 32*asic;
+		cBufWrite[4] = value[20]*16 + value[21]*8 + value[22]*4 + value[23]*2 + getbits(value[24],4,1) + 32*asic; // 4 single bits + LSB of dummy digital delay.
+		cBufWrite[5] = getbits(value[24], 9, 5) + 32*asic; // 5 MSB of dummy digital delay.
+		cBufWrite[6] = getbits(value[25], 4, 5) + 32*asic;  // 5 LSB of digital threshold.
+		cBufWrite[7] = getbits(value[25], 9, 5) + 32*asic;  // 5 MSB of digital threshold.
+		cBufWrite[8] = chan[0]*16 + chan[1]*8 + chan[2]*4 + chan[3]*2 + chan[4] + 32*asic;
+		cBufWrite[9] = chan[5]*16 + chan[6]*8 + chan[7]*4 + chan[8]*2 + chan[9] + 32*asic;
+		cBufWrite[10] = chan[10]*16 + chan[11]*8 + chan[12]*4 + chan[13]*2 + chan[14] + 32*asic;
+		cBufWrite[11] = chan[15]*16 + chan[16]*8 + chan[17]*4 + chan[18]*2 + chan[19] + 32*asic;
+		cBufWrite[12] = chan[20]*16 + chan[21]*8 + chan[22]*4 + chan[23]*2 + chan[24] + 32*asic;
+		cBufWrite[13] = chan[25]*16 + chan[26]*8 + chan[27]*4 + chan[28]*2 + chan[29] + 32*asic;
+		cBufWrite[14] = chan[30]*16 + chan[31]*8 + chan[32]*4 + chan[33]*2 + chan[34] + 32*asic;
+		cBufWrite[15] = chan[35]*16 + chan[36]*8 + chan[37]*4 + chan[38]*2 + chan[39] + 32*asic;
+		cBufWrite[16] = chan[40]*16 + chan[41]*8 + chan[42]*4 + chan[43]*2 + chan[44] + 32*asic;
+		cBufWrite[17] = chan[45]*16 + chan[46]*8 + chan[47]*4 + chan[48]*2 + chan[49] + 32*asic;
+		cBufWrite[18] = chan[50]*16 + chan[51]*8 + chan[52]*4 + chan[53]*2 + chan[54] + 32*asic;
+		cBufWrite[19] = chan[55]*16 + chan[56]*8 + chan[57]*4 + chan[58]*2 + chan[59] + 32*asic;
+		cBufWrite[20] = chan[60]*8 + chan[61]*4 + chan[62]*2 + chan[63]*1 + 32*asic;  // No MSB for the last disable register.
+		cBufWrite[21] = test[0]*16 + test[1]*8 + test[2]*4 + test[3]*2 + test[4] + 32*asic;
+		cBufWrite[22] = test[5]*16 + test[6]*8 + test[7]*4 + test[8]*2 + test[9] + 32*asic;
+		cBufWrite[23] = test[10]*16 + test[11]*8 + test[12]*4 + test[13]*2 + test[14] + 32*asic;
+		cBufWrite[24] = test[15]*16 + test[16]*8 + test[17]*4 + test[18]*2 + test[19] + 32*asic;
+		cBufWrite[25] = test[20]*16 + test[21]*8 + test[22]*4 + test[23]*2 + test[24] + 32*asic;
+		cBufWrite[26] = test[25]*16 + test[26]*8 + test[27]*4 + test[28]*2 + test[29] + 32*asic;
+		cBufWrite[27] = test[30]*16 + test[31]*8 + test[32]*4 + test[33]*2 + test[34] + 32*asic;
+		cBufWrite[28] = test[35]*16 + test[36]*8 + test[37]*4 + test[38]*2 + test[39] + 32*asic;
+		cBufWrite[29] = test[40]*16 + test[41]*8 + test[42]*4 + test[43]*2 + test[44] + 32*asic;
+		cBufWrite[30] = test[45]*16 + test[46]*8 + test[47]*4 + test[48]*2 + test[49] + 32*asic;
+		cBufWrite[31] = test[50]*16 + test[51]*8 + test[52]*4 + test[53]*2 + test[54] + 32*asic;
+		cBufWrite[32] = test[55]*16 + test[56]*8 + test[57]*4 + test[58]*2 + test[59] + 32*asic;
+		cBufWrite[33] = test[60]*8 + test[61]*4 + test[62]*2 + test[63]*1 + 32*asic;  // No MSB for the last disable register.
+		cBufWrite[34] = value[26]*4 + value[27]*2 + value[28] + 32*asic;
+		cBufWrite[35] = getbits(value[29], 4, 5) + 32*asic; // digital threshold
+		cBufWrite[36] = getbits(value[30], 3, 4) + 32*asic;
+		cBufWrite[37] = getbits(value[31], 3, 4) + 32*asic;
+		cBufWrite[38] = getbits(value[32], 3, 4) + 32*asic;
+		cBufWrite[39] = getbits(value[33], 3, 4) + 32*asic;
+		cBufWrite[40] = getbits(value[34], 2, 3) + 32*asic;
+		cBufWrite[41] = getbits(value[35], 2, 3) + 32*asic;
+		cBufWrite[42] = getbits(value[36], 2, 3) + 32*asic;
+		cBufWrite[43] = getbits(value[37], 2, 3) + 32*asic;
+		cBufWrite[44] = getbits(value[38], 2, 3) + 32*asic;
+		cBufWrite[45] = getbits(value[39], 2, 3) + 32*asic;
+		cBufWrite[46] = getbits(value[40], 2, 3) + 32*asic;
+		cBufWrite[47] = getbits(value[41], 2, 3) + 32*asic;
+		cBufWrite[48] = getbits(value[42], 2, 3) + 32*asic;
+		cBufWrite[49] = getbits(value[43], 2, 3) + 32*asic;
+		cBufWrite[50] = getbits(value[44], 2, 3) + 32*asic;
+		cBufWrite[51] = 0;
+		
+		/* Write */
+		dwBytesWritten = 0;
+		if((ftStatus = FT_Write(ftHandle, cBufWrite, 52, &dwBytesWritten)) != FT_OK) {
+			printf("Error FT_Write(%d)\n", ftStatus);
+			return;
+		}
+	} else {
+		// logic to assemble configuration settings into write array.
+		for(int j=0; j<11; j++)
+			for(int i=0; i<3; i++) cBufWrite[3*j+i] = getbits(value[44-j], 2-i, 1);
+		for(int j=0; j<4; j++)
+			for(int i=0; i<4; i++) cBufWrite[4*j+i+33] = getbits(value[33-j], 3-i, 1);
+		for(int i=0; i<5; i++)	cBufWrite[i+49] = getbits(value[29], 4-i, 1);
+		cBufWrite[54] = getbits(value[28], 0, 1);
+		cBufWrite[55] = getbits(value[27], 0, 1);
+		cBufWrite[56] = getbits(value[26], 0, 1);
+		for(int i=0; i<64; i++)		cBufWrite[i+57] = test[63-i];
+		for(int i=0; i<256; i++)	cBufWrite[i+121] = 0;
+		for(int i=0; i<64; i++)		cBufWrite[i+377] = chan[63-i];	
+		for(int i=0; i<10; i++)		cBufWrite[i+441] = getbits(value[25], 9-i, 1);
+		for(int i=0; i<390; i++)	cBufWrite[i+451] = 0;
+		for(int i=0; i<24; i++)		cBufWrite[i+841] = getbits(value[23-i], 0, 1);
+		cBufWrite[865] = 0;
+		cBufWrite[866] = 0;
+		
+		/* Write */
+		dwBytesWritten = 0;
+		if((ftStatus = FT_Write(ftHandle, cBufWrite, 867, &dwBytesWritten)) != FT_OK) {
+			printf("Error FT_Write(%d)\n", ftStatus);
+			return;
+		}
+	}
 
 	// Testing purposes
 //	for(int i=0; i<39; i++)
 //		printf("%d\n", cBufWrite[i]);
-	
-	/* Write */
-	dwBytesWritten = 0;
-	if((ftStatus = FT_Write(ftHandle, cBufWrite, n, &dwBytesWritten)) != FT_OK) {
-		printf("Error FT_Write(%d)\n", ftStatus);
-		return;
-	}
+
 			
 	cout << "Wrote " << dwBytesWritten << " bytes." << endl << endl;
 			
@@ -605,13 +652,26 @@ void USB_d2xx::setConfig(void)
 // Set global configuration
 void USB_d2xx::setGlobalConfig(int option)
 {
-	const int n = 1;	// number bytes to send
+	char *cBufWrite;
+	//const int n = [1,867];
+	
+	if (gui->newControlRegisters_check->value() == 0) {
+		char *cBufWrite = (char *)malloc(1 * sizeof(char));
+	} else {
+		char *cBufWrite = (char *)malloc(867 * sizeof(char));
+		//const int n=867;
+	}
+	
 	int value = 0;	
-	char cBufWrite[n];	// write array
+	
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
 
 	// initialize write buffer.
-	for(int i=0; i<n; i++) cBufWrite[i] = 0;
+	if (gui->newControlRegisters_check->value() == 0){
+		cBufWrite[0] = 0;}
+	else {
+		for(int i=0; i<867; i++) cBufWrite[i] = 0;
+	}
 
 	switch (option) {
 		case 0:
@@ -631,10 +691,11 @@ void USB_d2xx::setGlobalConfig(int option)
 			break;
 	}
 
-//	cBufWrite[0] = gui->sendParamsWindow_holdTime->value();		// get hold time value from user input
 	value = value + 128;							// put '1' in MSB as flag that this is a global setting.
 	value = value + option*32;						// put indicator in bits [6:5] to tell FPGA which kind of setting it is.
-	cBufWrite[0] = value;
+	
+	if (gui->newControlRegisters_check->value() == 0) { cBufWrite[0] = value; }
+	if (gui->newControlRegisters_check->value() == 1) {for(int i=0; i<867; i++) cBufWrite[i] = value;}
 	
 	/* Write */
 	dwBytesWritten = 0;
@@ -645,6 +706,8 @@ void USB_d2xx::setGlobalConfig(int option)
 	
 	cout << "Wrote " << dwBytesWritten << " bytes, value: " << dec << cBufWrite[0] << " value is " << value << endl << endl;	
 	printf("Wrote %d bytes, value %d\n\n", dwBytesWritten, cBufWrite[0]);
+	
+	free(cBufWrite);
 }
 
 /*
@@ -755,7 +818,7 @@ void USB_d2xx::loadDefaultSettings()
 	asic0settings[1] = 0;	asic1settings[1] = 0;	asic2settings[1] = 0;	asic3settings[1] = 0;
 	asic0settings[2] = 0;	asic1settings[2] = 0;	asic2settings[2] = 0;	asic3settings[2] = 0;
 	asic0settings[3] = 1;	asic1settings[3] = 1;	asic2settings[3] = 1;	asic3settings[3] = 1;  // sbi_hp2
-	asic0settings[4] = 1;	asic1settings[4] = 1;	asic2settings[4] = 0;	asic3settings[4] = 0;
+	asic0settings[4] = 0;	asic1settings[4] = 0;	asic2settings[4] = 0;	asic3settings[4] = 0;
 	asic0settings[5] = 0;	asic1settings[5] = 0;	asic2settings[5] = 0;	asic3settings[5] = 0;
 	asic0settings[6] = 0;	asic1settings[6] = 0;	asic2settings[6] = 0;	asic3settings[6] = 0;
 	asic0settings[7] = 1;	asic1settings[7] = 1;	asic2settings[7] = 1;	asic3settings[7] = 1;	// ro_all

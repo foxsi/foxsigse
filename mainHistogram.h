@@ -24,7 +24,6 @@ public:
  	void draw();
 	int handle(int eventType);
 	void glPrint(float x, float y, char *string );
-	float maximumValue(double *array, int size);
 	int xmax;
 private:
 	double ymax;

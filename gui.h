@@ -72,6 +72,8 @@ public:
 private:
   void cb_mainImage_integrate_button_i(Fl_Light_Button*, void*);
   static void cb_mainImage_integrate_button(Fl_Light_Button*, void*);
+  void cb_Save_i(Fl_Button*, void*);
+  static void cb_Save(Fl_Button*, void*);
 public:
   Fl_Output *rateOutput0;
   Fl_Output *rateOutput1;
@@ -109,6 +111,8 @@ public:
 private:
   void cb_histogramxmax_counter_i(Fl_Counter*, void*);
   static void cb_histogramxmax_counter(Fl_Counter*, void*);
+  void cb_Save1_i(Fl_Button*, void*);
+  static void cb_Save1(Fl_Button*, void*);
 public:
   Fl_Value_Output *frameTime;
   Fl_Value_Output *framenumOutput;
@@ -146,6 +150,11 @@ public:
 private:
   void cb_lightcurvexmax_counter_i(Fl_Counter*, void*);
   static void cb_lightcurvexmax_counter(Fl_Counter*, void*);
+public:
+  Fl_Value_Slider *mainLightcurve_ymaxslider;
+private:
+  void cb_mainLightcurve_ymaxslider_i(Fl_Value_Slider*, void*);
+  static void cb_mainLightcurve_ymaxslider(Fl_Value_Slider*, void*);
 public:
   Fl_Light_Button *glitchBut;
   Fl_Button *sendParamsBut;
@@ -290,6 +299,7 @@ public:
   Fl_Value_Input *readdelay_value;
   Fl_Choice *DataSource_choice;
   static Fl_Menu_Item menu_DataSource_choice[];
+  Fl_Check_Button *newControlRegisters_check;
   void show();
   Application *app; 
   Foxsidata *data; 

@@ -93,6 +93,9 @@ public:
 	void update_lightcurvexmax(void);
 	void update_histogramxmax(void);
 	void toggle_image_integrate(void);
+	void save_histogram_to_file(void);
+	void save_image_to_file(void);
+	void set_lightcurve_ymax(void);
 	
 	int elapsed_time_sec;
 private:

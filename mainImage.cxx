@@ -66,7 +66,6 @@ mainImage::mainImage(int x,int y,int w,int h,const char *l)
 	}
 	detImage[15][15] = 1.0;
 	detImage[75][75] = 0.5;
-	
 }
 
 // the drawing method: draws the histFunc into the window
@@ -138,14 +137,27 @@ void mainImage::draw()
 	glVertex2f(XBORDER+XSTRIPS, YBORDER+YSTRIPS); glVertex2f(XBORDER, YBORDER+YSTRIPS);
 	glEnd();
 	
-	//draw a red box under the cursor selection
-	//glColor3f(1, 0, 0);	//red
-	//glBegin(GL_LINE_LOOP);
-	//	glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER); 
-	//	glVertex2f(mousePixel[0]+1 + XBORDER, mousePixel[1] + YBORDER); 
-	//	glVertex2f(mousePixel[0]+1 + XBORDER, mousePixel[1]+1 + YBORDER); 
-	//	glVertex2f(mousePixel[0] + XBORDER, mousePixel[1]+1 + YBORDER);
-	//glEnd();
+	// draw a cross under the cursor selection
+	glColor3f(1, 0, 0);
+	glBegin(GL_LINES);
+		glVertex2f(mousePixel[0] + XBORDER - 4, mousePixel[1] + YBORDER);
+		glVertex2f(mousePixel[0] + XBORDER + 4, mousePixel[1] + YBORDER);
+	glEnd();
+	
+	glBegin(GL_LINES);
+	glVertex2f(mousePixel[0] + XBORDER - 4, mousePixel[1] + YBORDER + 1);
+	glVertex2f(mousePixel[0] + XBORDER + 4, mousePixel[1] + YBORDER + 1);
+	glEnd();	
+	
+	glBegin(GL_LINES);
+		glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER - 3.5); 
+		glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER + 3.5); 
+	glEnd();
+	
+	glBegin(GL_LINES);
+	glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER - 3.5); 
+	glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER + 3.5); 
+	glEnd();
 	
 	//draw an expanded view
 	/*if ((FLcursorX[1]!=0)&&(FLcursorY[1]!=0))
@@ -191,16 +203,13 @@ int mainImage::handle(int eventType)
 	
 	mousePixel[1] = (GL_cursor[1] - YBORDER) > 1 ? GL_cursor[1] - YBORDER : 1;
 	mousePixel[1] = mousePixel[1] < YSTRIPS ? mousePixel[1]: YSTRIPS;
-	
-	//printf("pixel: (%d,%d)\n", Fl::event_x(), Fl::event_y());
-	
+		
 	if((eventType==FL_PUSH)&&(button==1))
 	{
 		//set the view lock button to ON
 		gui->subImageLockbut->set();
 		//save the location
 		chosenPixel[0] = mousePixel[0];	chosenPixel[1] = mousePixel[1];
-		
 	}
 	
 	/* //save the current view 
@@ -230,9 +239,8 @@ int mainImage::handle(int eventType)
 		sprintf( text, "%4.2f", detImage[mousePixel[0]][mousePixel[1]]);
 		gui->pixelCounts->value(text);
 	}
+	redraw();
 	
-	//redraw();
-	//if(gui->subImageLockbut->value() == 0){gui->subImageWindow->redraw();}
 	return(1);
 }
 

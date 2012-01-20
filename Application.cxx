@@ -25,7 +25,7 @@ extern int HistogramFunction[MAX_CHANNEL];
 
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagemask[XSTRIPS][YSTRIPS];
-unsigned int LightcurveFunction[MAX_CHANNEL];
+unsigned int CountcurveFunction[MAX_CHANNEL];
 double displayHistogram[MAX_CHANNEL];
 
 extern int stop_message;
@@ -57,6 +57,7 @@ int data_source;	// 0 means simulation, 1 means ASIC, 2 means Formatter
 float pixel_half_life;
 int mainImage_minimum;
 int detector_display[7];
+int newFPGA_register;
 
 extern int low_threshold;
 extern int mainHistogram_binsize;
@@ -84,7 +85,7 @@ void Application::flush_timeseries(void)
 	// Zero the time series
 	for(int i = 0;i < MAX_CHANNEL; i++)
 	{
-		LightcurveFunction[i] = 0;
+		CountcurveFunction[i] = 0;
 	}
 	gui->mainLightcurveWindow->redraw();
 }
@@ -111,6 +112,7 @@ void Application::save_preferences(void)
 	gui->prefs->set("read_delay", gui->readdelay_value->value());
 	gui->prefs->set("data_source", gui->DataSource_choice->value());
 	gui->prefs->set("mainImage_minimum", gui->mainImageMin_slider->value());
+	gui->prefs->set("newFPGA_register", gui->newControlRegisters_check->value());
 }
 
 void Application::read_preferences(void)
@@ -121,8 +123,8 @@ void Application::read_preferences(void)
 	gui->prefs->get("data_file_save_dir", data_file_save_dir, "/Users/schriste/");
 	gui->prefs->get("read_delay", read_delay, 10000);
 	gui->prefs->get("data_source", data_source, 0);
-	
 	gui->prefs->get("mainImage_minimum", mainImage_minimum, 0);
+	gui->prefs->get("newFPGA_register", newFPGA_register,0);
 }
 
 void Application::update_preferencewindow(void)
@@ -132,7 +134,8 @@ void Application::update_preferencewindow(void)
 	gui->fileTypeChoice->value(file_type);
 	gui->datafilesavedir_fileInput->value(data_file_save_dir);
 	gui->readdelay_value->value(read_delay);
-	gui->DataSource_choice->value(data_source);	
+	gui->DataSource_choice->value(data_source);
+	gui->newControlRegisters_check->value(newFPGA_register);
 }
 
 void Application::set_datafile_dir(void)
@@ -174,14 +177,16 @@ void Application::readFile()
 void Application::initialize(void)
 {
 	data_initialize();
+	gui->initializeBut->deactivate();
+	gui->closeBut->activate();
 }
 
 void Application::close_data(void)
 {
 	// Close a connection to a data stream
 	gui->usb->close();
-	gui->initializeBut->value(0);
-	gui->closeBut->value(1);
+	gui->initializeBut->activate();
+	gui->closeBut->deactivate();
 	gui->startReadingDataButton->deactivate();
 }
 
@@ -209,105 +214,6 @@ void Application::print_to_console(const char *text)
 	gui->consoleBuf->show_insert_position();
 }
 
-/*
-void* Application::read_data(void* variable)
-{
-	char buffer[50];
-	int badSync = 0;
-	int badRead = 0;
-	int status = 0;
-	
-	Fl::lock();
-	gui->stopReadingDataButton->activate();
-//	gui->stopReadingDataButton->value(0);
-	gui->startReadingDataButton->deactivate();
-	Fl::unlock();
-	
-	// data file should be open as long as the "Write to file" has been clicked
-	//if (gui->writeFileBut->value() == 1){
-	// Open data file
-	//dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
-	//	if(dataFile == NULL){
-	//		Fl::lock();
-	//		sprintf(buffer, "Invalid filename.\n");
-	//		gui->consoleBuf->insert(buffer);
-	//		Fl::unlock();
-	//		return NULL;
-	//	}
-	//}
-	
-	Fl::lock();
-	print_to_console("Reading...\n");
-	Fl::unlock();
-	
-	int i = 0;
-	int nEnd = gui->nEvents->value(); 
-	while ( i<nEnd ){
-//	for (int i = 0; i<gui->nEvents->value(); i++) {
-		usleep(20000);		// adjust this to achieve desired reading speed
-				
-		// check to see if the Stop button was pushed, if so then clean up 
-		// and stop this thread
-		if (stop_message){
-			// clean up code goes here then exit
-			Fl::lock();
-			sprintf(buffer, "Read Stopped.\n");
-			gui->consoleBuf->insert(buffer);
-			sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-			gui->consoleBuf->insert(buffer);
-			gui->stopReadingDataButton->deactivate();
-//			gui->stopReadingDataButton->value(0);
-			gui->startReadingDataButton->activate();
-			if (gui->writeFileBut->value() == 1){
-				fclose(dataFile);
-				gui->writeFileBut->activate();
-				
-			}
-			Fl::unlock();	
-            pthread_exit(NULL);
-		}
-
-		status = gui->usb->findSync();
-		if(status<1){
-			badSync++;
-			continue;
-		}
-
-		status = gui->usb->readFrame();
-		if(status<1){
-			badRead++;
-			continue;
-		}
-		
-		Fl::lock();
-		// print frame to XCode console (unless nEvents is large, then skip it to save time).
-		if(gui->nEvents->value() < 5)  gui->usb->printFrame();
-		// write to file if the write button is enabled
-		if (gui->writeFileBut->value() == 1)  gui->usb->writeFrame(dataFile, i);
-		gui->nEventsDone->value(i);
-		Fl::unlock();
-		Fl::awake();
-		
-		i++;
-	}
-	
-	Fl::lock();
-	sprintf(buffer, "Read finished.\n");
-	gui->consoleBuf->insert(buffer);
-	sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-	gui->consoleBuf->insert(buffer);		
-	if (gui->writeFileBut->value() == 1){
-		fclose(dataFile);
-		gui->writeFileBut->value(0);
-	}
-	gui->stopReadingDataButton->deactivate();
-//	gui->stopReadingDataButton->value(0);
-	gui->startReadingDataButton->activate();
-	Fl::unlock();	
-
-	return 0;
-}
- */
 
 void Application::openSendParamsWindow(void)
 {
@@ -512,4 +418,98 @@ void Application::toggle_image_integrate(void)
 	if (gui->mainImage_integrate_button->value() == 0){
 		gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
 	}
+}
+
+void Application::save_histogram_to_file(void)
+{
+	Fl_File_Chooser *chooser    = NULL;
+	FILE *file;
+	
+	chooser = new Fl_File_Chooser("", "", Fl_File_Chooser::CREATE, "Save File");
+	
+    chooser->show();
+	
+	while(chooser->shown()) {
+        Fl::wait();
+    }
+	
+	if ( chooser->value() != NULL ) {		
+		file = fopen(chooser->value(), "w");
+		if(file != NULL){
+			
+			struct tm *times;
+			time_t ltime;
+			char stringtemp[80];
+			
+			time(&ltime);
+			times = localtime(&ltime);
+			
+			strftime(stringtemp,25,"%Y/%m/%d %H:%M:%S\0",times);
+			
+			fprintf(file, "FOXSI Histogram\n");
+			fprintf(file, "Created %s\n", stringtemp);
+			fprintf(file, "---------------\n");
+			fprintf(file, "channel, counts\n");
+			for (int i; i<MAX_CHANNEL; i++) {
+				fprintf(file, "%i, %i\n", i, HistogramFunction[i]);
+			}
+			
+			fclose(file);
+		} else {
+			print_to_console("Could not open file\n");
+		}
+
+    }	
+}
+
+void Application::save_image_to_file(void)
+{
+	Fl_File_Chooser *chooser    = NULL;
+	FILE *file;
+	
+	chooser = new Fl_File_Chooser("", "", Fl_File_Chooser::CREATE, "Save File");
+	
+    chooser->show();
+	
+	while(chooser->shown()) {
+        Fl::wait();
+    }
+	
+	if ( chooser->value() != NULL ) {		
+		file = fopen(chooser->value(), "w");
+		if(file != NULL){
+			
+			struct tm *times;
+			time_t ltime;
+			char stringtemp[80];
+			
+			time(&ltime);
+			times = localtime(&ltime);
+			
+			strftime(stringtemp,25,"%Y/%m/%d %H:%M:%S\0",times);
+			
+			fprintf(file, "FOXSI Image\n");
+			fprintf(file, "Created %s\n", stringtemp);
+			fprintf(file, "128 x 128\n");
+			fprintf(file, "-----------\n");
+			
+			for (int j=0; j<YSTRIPS; j++) {
+				for (int i=0; i<XSTRIPS; i++) 
+				{	
+					fprintf(file, "%f, ", detImage[i][j]);
+				}
+				fprintf(file, "\n");
+			}
+			
+			fclose(file);
+		} else {
+			print_to_console("Could not open file\n");
+		}
+    }	
+}
+
+void Application::set_lightcurve_ymax(void)
+{
+	gui->mainLightcurveWindow->ymax = gui->mainLightcurve_ymaxslider->value();
+	gui->mainLightcurveWindow->redraw();
 }

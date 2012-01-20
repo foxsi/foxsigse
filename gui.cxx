@@ -88,6 +88,13 @@ void Gui::cb_mainImage_integrate_button(Fl_Light_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_mainImage_integrate_button_i(o,v);
 }
 
+void Gui::cb_Save_i(Fl_Button*, void*) {
+  app->save_image_to_file();
+}
+void Gui::cb_Save(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_Save_i(o,v);
+}
+
 void Gui::cb_Energy_i(Fl_Menu_*, void*) {
   app->set_energy_histogram();
 }
@@ -120,6 +127,13 @@ void Gui::cb_histogramxmax_counter_i(Fl_Counter*, void*) {
 }
 void Gui::cb_histogramxmax_counter(Fl_Counter* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_histogramxmax_counter_i(o,v);
+}
+
+void Gui::cb_Save1_i(Fl_Button*, void*) {
+  app->save_histogram_to_file();
+}
+void Gui::cb_Save1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_Save1_i(o,v);
 }
 
 void Gui::cb_reset_i(Fl_Button*, void*) {
@@ -170,6 +184,13 @@ void Gui::cb_lightcurvexmax_counter_i(Fl_Counter*, void*) {
 }
 void Gui::cb_lightcurvexmax_counter(Fl_Counter* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_lightcurvexmax_counter_i(o,v);
+}
+
+void Gui::cb_mainLightcurve_ymaxslider_i(Fl_Value_Slider*, void*) {
+  app->set_lightcurve_ymax();
+}
+void Gui::cb_mainLightcurve_ymaxslider(Fl_Value_Slider* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_mainLightcurve_ymaxslider_i(o,v);
 }
 
 void Gui::cb_sendParamsBut_i(Fl_Button*, void*) {
@@ -455,6 +476,9 @@ Gui::Gui() {
       { mainImage_integrate_button = new Fl_Light_Button(480, 560, 80, 30, "Integrate");
         mainImage_integrate_button->callback((Fl_Callback*)cb_mainImage_integrate_button);
       } // Fl_Light_Button* mainImage_integrate_button
+      { Fl_Button* o = new Fl_Button(490, 640, 54, 25, "Save");
+        o->callback((Fl_Callback*)cb_Save);
+      } // Fl_Button* o
       o->end();
     } // Fl_Group* o
     { rateOutput0 = new Fl_Output(730, 45, 50, 25, "Rate [cts/s]");
@@ -528,6 +552,9 @@ Gui::Gui() {
         histogramxmax_counter->value(1024);
         histogramxmax_counter->callback((Fl_Callback*)cb_histogramxmax_counter);
       } // Fl_Counter* histogramxmax_counter
+      { Fl_Button* o = new Fl_Button(958, 564, 54, 25, "Save");
+        o->callback((Fl_Callback*)cb_Save1);
+      } // Fl_Button* o
       o->end();
     } // Fl_Group* o
     { frameTime = new Fl_Value_Output(535, 36, 65, 24, "frame time");
@@ -549,9 +576,9 @@ Gui::Gui() {
       closeBut->callback((Fl_Callback*)cb_closeBut);
       closeBut->deactivate();
     } // Fl_Light_Button* closeBut
-    { Fl_Group* o = new Fl_Group(744, 110, 437, 145, "LightCurve");
+    { Fl_Group* o = new Fl_Group(700, 110, 501, 150, "LightCurve");
       o->box(FL_THIN_UP_FRAME);
-      { mainLightcurveWindow = new mainLightcurve(744, 110, 300, 145, "Light curve");
+      { mainLightcurveWindow = new mainLightcurve(772, 110, 300, 145, "Light curve");
         mainLightcurveWindow->box(FL_GTK_UP_BOX);
         mainLightcurveWindow->color(FL_BACKGROUND_COLOR);
         mainLightcurveWindow->selection_color(FL_BACKGROUND_COLOR);
@@ -562,22 +589,29 @@ Gui::Gui() {
         mainLightcurveWindow->align(Fl_Align(FL_ALIGN_CENTER));
         mainLightcurveWindow->when(FL_WHEN_RELEASE);
       } // mainLightcurve* mainLightcurveWindow
-      { Fl_Button* o = new Fl_Button(1094, 143, 75, 25, "Flush");
+      { Fl_Button* o = new Fl_Button(1122, 143, 75, 25, "Flush");
         o->callback((Fl_Callback*)cb_Flush2);
       } // Fl_Button* o
-      { ctsOutput = new Fl_Value_Output(1094, 115, 77, 24, "cts/s:");
+      { ctsOutput = new Fl_Value_Output(1122, 115, 77, 24, "cts/s:");
       } // Fl_Value_Output* ctsOutput
-      { timebinsize_counter = new Fl_Counter(1049, 172, 120, 20, "bin size (s):");
+      { timebinsize_counter = new Fl_Counter(1077, 172, 120, 20, "bin size (s):");
         timebinsize_counter->minimum(0.1);
         timebinsize_counter->value(1);
         timebinsize_counter->callback((Fl_Callback*)cb_timebinsize_counter);
       } // Fl_Counter* timebinsize_counter
-      { lightcurvexmax_counter = new Fl_Counter(1049, 212, 120, 20, "total sec:");
+      { lightcurvexmax_counter = new Fl_Counter(1077, 212, 120, 20, "total sec:");
         lightcurvexmax_counter->minimum(1);
         lightcurvexmax_counter->step(1);
         lightcurvexmax_counter->value(20);
         lightcurvexmax_counter->callback((Fl_Callback*)cb_lightcurvexmax_counter);
       } // Fl_Counter* lightcurvexmax_counter
+      { mainLightcurve_ymaxslider = new Fl_Value_Slider(720, 115, 40, 120, "max:");
+        mainLightcurve_ymaxslider->maximum(5000);
+        mainLightcurve_ymaxslider->step(100);
+        mainLightcurve_ymaxslider->textsize(14);
+        mainLightcurve_ymaxslider->callback((Fl_Callback*)cb_mainLightcurve_ymaxslider);
+        mainLightcurve_ymaxslider->align(Fl_Align(290));
+      } // Fl_Value_Slider* mainLightcurve_ymaxslider
       o->end();
     } // Fl_Group* o
     { glitchBut = new Fl_Light_Button(275, 155, 75, 25, "Glitch");
@@ -1234,6 +1268,9 @@ Gui::Gui() {
       DataSource_choice->down_box(FL_BORDER_BOX);
       DataSource_choice->menu(menu_DataSource_choice);
     } // Fl_Choice* DataSource_choice
+    { newControlRegisters_check = new Fl_Check_Button(25, 120, 63, 20, "new FPGA control registers");
+      newControlRegisters_check->down_box(FL_DOWN_BOX);
+    } // Fl_Check_Button* newControlRegisters_check
     PreferenceWindow->end();
   } // Fl_Double_Window* PreferenceWindow
   app=new Application();

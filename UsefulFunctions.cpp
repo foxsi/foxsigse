@@ -60,6 +60,9 @@ unsigned reversebits(unsigned x, int n)
 
 unsigned int median(unsigned int *a, int n)
 {
+	// find the median of an array of size n
+	//
+	//
 	float temp;
 	int i,j;
 	for(i=0;i<n;i++)
@@ -76,4 +79,19 @@ unsigned int median(unsigned int *a, int n)
 		return (a[n/2]+a[n/2-1])/2;
 	else
 		return a[n/2];
+}
+
+double maximumValue(double *array, int n, int min_index)
+{
+	// find the maximum value in an array of size n
+	// ignore elements below min_index
+	
+	double max = array[min_index];       // start with max = first element
+	for(int i = min_index+1; i < n; i++)
+	{
+		if(array[i] > max){
+			max = array[i];}
+	}
+	
+	return max;
 }

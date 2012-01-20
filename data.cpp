@@ -63,7 +63,7 @@ unsigned short int buffer0[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int framecount;
 
 extern unsigned int current_timebin;
-extern unsigned int LightcurveFunction[MAX_CHANNEL];
+extern unsigned int CountcurveFunction[MAX_CHANNEL];
 
 int *taskids[NUM_THREADS];
 int fout;
@@ -85,13 +85,10 @@ void data_initialize(void)
 	{
 		gui->app->print_to_console("Initializing Simulated data.\n");
 		gui->startReadingDataButton->activate();
-		gui->closeBut->activate();
-		gui->closeBut->value(0);
 		gui->app->flush_image();
 		gui->app->flush_histogram();
 		gui->app->flush_timeseries();
 		gui->app->print_to_console("Done initializing.\n");
-		
 	}
 	
 	if (data_source == 1)
@@ -115,7 +112,6 @@ void data_initialize(void)
 			gui->app->flush_timeseries();
 			gui->app->print_to_console("Done initializing.\n");
 		}
-
 	}
 	
 	if (data_source == 2)
@@ -219,10 +215,10 @@ void* data_countrate(void *p)
 		
 		pthread_mutex_lock(&timebinmutex);
 		
-		LightcurveFunction[0] = current_timebin;
+		CountcurveFunction[0] = current_timebin;
 		
 		for(int j = MAX_CHANNEL-1; j > 0; j--){ 
-			LightcurveFunction[j] = LightcurveFunction[j-1];
+			CountcurveFunction[j] = CountcurveFunction[j-1];
 			gui->mainLightcurveWindow->binsize[j] = gui->mainLightcurveWindow->binsize[j-1];
 		}
 		
@@ -249,6 +245,7 @@ void* data_read_data(void *p)
 	int status = 0;
 	char textbuffer[50];
 	int maxreads;
+	int read_status = 0;
 	
 	maxreads = gui->nEvents->value();
 	
@@ -268,6 +265,7 @@ void* data_read_data(void *p)
 	
 	// This function never stops unless told to do so by setting stop_message to 1
 	while (1) {
+		read_status = 0;
 		
 		// For the desired reading speed		
 		if (read_delay != 0) {usleep(read_delay);}
@@ -276,19 +274,23 @@ void* data_read_data(void *p)
 		if (data_source == 0){
 			// read from the simulation
 			data_simulate_data();
+			read_status = 1;
 		}
 		
 		if (data_source == 1) {
 			// read from the USB/ASIC
 			status = gui->usb->findSync();
-			if(status<1){
+			
+			if(status < 1){
 				badSync++;
 			}
 			
 			status = gui->usb->readFrame();
-			if(status<1){
+			if(status < 1){
 				badRead++;
+				printf("Bad read\n");
 			} else {
+				read_status = 1;
 			}
 
 		}
@@ -299,41 +301,44 @@ void* data_read_data(void *p)
 			// set the read status based on how len returned 
 			//if len == 
 		}
-		
-		if(fout > 0)
-		{
-			if( (wlen = write(fout,(const void *) buffer,FRAME_SIZE_IN_BYTES) ) != FRAME_SIZE_IN_BYTES){};
-		}
-		
-		if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
-		{
-			if (newdisplay == 0)
+				
+		if (read_status == 1) {
+	
+			if(fout > 0)
 			{
-				memcpy((void *) buffer0,(void *) buffer,FRAME_SIZE_IN_BYTES);
-				newdisplay = 1;
+				if( (wlen = write(fout,(const void *) buffer,FRAME_SIZE_IN_BYTES) ) != FRAME_SIZE_IN_BYTES)
+					{// then bad write
+					};
 			}
-			pthread_mutex_unlock(&mymutex);
-		}
-		
-		
-		// Check to see if if only a fixed number of frames should be read
-		// if so set the stop message
-		if ((maxreads != 0) && (nreads >= maxreads)){
-			stop_message = 1;
+			
+			if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
+			{
+				if (newdisplay == 0)
+				{
+					memcpy((void *) buffer0,(void *) buffer,FRAME_SIZE_IN_BYTES);
+					newdisplay = 1;
+				}
+				pthread_mutex_unlock(&mymutex);
+			}
+			
+			// Check to see if if only a fixed number of frames should be read
+			// if so set the stop message
+			if ((maxreads != 0) && (nreads >= maxreads)){
+				stop_message = 1;
+			}
+			nreads++;	
 		}
 		
 		if (stop_message == 1){
 			Fl::lock();
 			gui->app->print_to_console("Read finished or stopped.\n");
 						
-			if (data_source == 1) {
-				sprintf(textbuffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-				gui->consoleBuf->insert(textbuffer);						
-			}
 			gui->stopReadingDataButton->deactivate();
 			gui->startReadingDataButton->activate();
 			gui->writeFileBut->value(0);
-			gui->closeBut->activate();
+			gui->closeBut->deactivate();
+			gui->initializeBut->activate();
+
 			
 			if(nreads > maxreads-1){
 				gui->nEventsDone->value(0);
@@ -353,7 +358,12 @@ void* data_read_data(void *p)
 			
 			if (data_source == 1)
 			{
-				//cleam up usb interface
+				sprintf(textbuffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
+				gui->consoleBuf->insert(textbuffer);	
+				
+				//clean up usb interface
+				gui->usb->close();
+				
 			}
 			if (data_source == 2) {
 				//clean up formatter interface
@@ -363,7 +373,6 @@ void* data_read_data(void *p)
 			pthread_mutex_destroy(&timebinmutex);
 			pthread_exit(NULL);
 		}
-		nreads++;	
 	}
 }
 

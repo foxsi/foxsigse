@@ -23,10 +23,11 @@ public:
 	void draw();
 	float binsize[MAX_CHANNEL];
 	int xmax;
-private:
+	float CountRatecurveFunction[MAX_CHANNEL];
 	int ymax;
 	int ymin;
-	int xmin;
+	int xmin;	
+private:
 };
 
 #endif
