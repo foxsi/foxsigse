@@ -510,17 +510,17 @@ void USB_d2xx::writeFrame(FILE *dataFile)
 // Set individual ASIC slow control parameters
 void USB_d2xx::setConfig(void)
 {
-
+	int n;
 	const int nV=45;	// number of values in sendParamsWindow
 	char *cBufWrite;
 	//const int n = [1,867];
 	
 	if (gui->newControlRegisters_check->value() == 0) {
-		char *cBufWrite = (char *)malloc(52 * sizeof(char));
+		n = 52		
 	} else {
-		char *cBufWrite = (char *)malloc(867 * sizeof(char));
-		//const int n=867;
+		n = 867
 	}
+	char *cBufWrite = (char *)malloc(n * sizeof(char));
 	
 	//char cBufWrite[n];	// write array
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
@@ -537,12 +537,8 @@ void USB_d2xx::setConfig(void)
 	for(int i=0; i<64; i++)	test[i] = 0;
 	
 	// initialize write buffer.
-	if (gui->newControlRegisters_check->value() == 0){
-		cBufWrite[0] = 0;}
-	else {
-		for(int i=0; i<867; i++) cBufWrite[i] = 0;
-	}
-	
+	for(int i=0; i<n; i++) cBufWrite[i] = 0;
+
 	// fill arrays with values from sendParameters window.
 	// CHAN values are from the channel disable buttons.
 	for(int i=0; i<nV; i++)	value[i] = gui->sendParamsWindow_value[i]->value();
@@ -606,11 +602,6 @@ void USB_d2xx::setConfig(void)
 		cBufWrite[50] = getbits(value[44], 2, 3) + 32*asic;
 		cBufWrite[51] = 0;
 		
-		/* Write */
-		dwBytesWritten = 0;
-		if((ftStatus = FT_Write(ftHandle, cBufWrite, 52, &dwBytesWritten)) != FT_OK) {
-			printf("Error FT_Write(%d)\n", ftStatus);
-			return;
 		}
 	} else {
 		// logic to assemble configuration settings into write array.
@@ -631,21 +622,21 @@ void USB_d2xx::setConfig(void)
 		cBufWrite[865] = 0;
 		cBufWrite[866] = 0;
 		
-		/* Write */
-		dwBytesWritten = 0;
-		if((ftStatus = FT_Write(ftHandle, cBufWrite, 867, &dwBytesWritten)) != FT_OK) {
-			printf("Error FT_Write(%d)\n", ftStatus);
-			return;
-		}
 	}
 
 	// Testing purposes
 //	for(int i=0; i<39; i++)
 //		printf("%d\n", cBufWrite[i]);
 
-			
+	/* Write */
+	dwBytesWritten = 0;
+	if((ftStatus = FT_Write(ftHandle, cBufWrite, n, &dwBytesWritten)) != FT_OK) {
+		printf("Error FT_Write(%d)\n", ftStatus);
+		return;
+	}
+
 	cout << "Wrote " << dwBytesWritten << " bytes." << endl << endl;
-			
+		free(cBufWrite);
 }
 
 // Added July 2011
@@ -654,24 +645,20 @@ void USB_d2xx::setGlobalConfig(int option)
 {
 	char *cBufWrite;
 	//const int n = [1,867];
-	
+	int n;
 	if (gui->newControlRegisters_check->value() == 0) {
-		char *cBufWrite = (char *)malloc(1 * sizeof(char));
+		n = 1;
 	} else {
-		char *cBufWrite = (char *)malloc(867 * sizeof(char));
-		//const int n=867;
+		n = 867;
 	}
 	
+	char *cBufWrite = (char *)malloc(n * sizeof(char));
 	int value = 0;	
 	
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
 
 	// initialize write buffer.
-	if (gui->newControlRegisters_check->value() == 0){
-		cBufWrite[0] = 0;}
-	else {
-		for(int i=0; i<867; i++) cBufWrite[i] = 0;
-	}
+	for(int i=0; i<n; i++) cBufWrite[i] = 0;
 
 	switch (option) {
 		case 0:
@@ -694,13 +681,13 @@ void USB_d2xx::setGlobalConfig(int option)
 	value = value + 128;							// put '1' in MSB as flag that this is a global setting.
 	value = value + option*32;						// put indicator in bits [6:5] to tell FPGA which kind of setting it is.
 	
-	if (gui->newControlRegisters_check->value() == 0) { cBufWrite[0] = value; }
-	if (gui->newControlRegisters_check->value() == 1) {for(int i=0; i<867; i++) cBufWrite[i] = value;}
+	for(int i=0; i<n; i++) {cBufWrite[i] = value;}
 	
 	/* Write */
 	dwBytesWritten = 0;
 	if((ftStatus = FT_Write(ftHandle, cBufWrite, 1, &dwBytesWritten)) != FT_OK) {
 		printf("Error FT_Write(%d)\n", ftStatus);
+		free(cBufWrite);
 		return;
 	}
 	
