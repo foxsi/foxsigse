@@ -516,11 +516,11 @@ void USB_d2xx::setConfig(void)
 	//const int n = [1,867];
 	
 	if (gui->newControlRegisters_check->value() == 0) {
-		n = 52		
+		n = 52;	
 	} else {
-		n = 867
+		n = 867;
 	}
-	char *cBufWrite = (char *)malloc(n * sizeof(char));
+	cBufWrite = (char *)malloc(n * sizeof(char));
 	
 	//char cBufWrite[n];	// write array
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
@@ -602,8 +602,8 @@ void USB_d2xx::setConfig(void)
 		cBufWrite[50] = getbits(value[44], 2, 3) + 32*asic;
 		cBufWrite[51] = 0;
 		
-		}
-	} else {
+	}
+	else {
 		// logic to assemble configuration settings into write array.
 		for(int j=0; j<11; j++)
 			for(int i=0; i<3; i++) cBufWrite[3*j+i] = getbits(value[44-j], 2-i, 1);
@@ -652,7 +652,7 @@ void USB_d2xx::setGlobalConfig(int option)
 		n = 867;
 	}
 	
-	char *cBufWrite = (char *)malloc(n * sizeof(char));
+	cBufWrite = (char *)malloc(n * sizeof(char));
 	int value = 0;	
 	
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
