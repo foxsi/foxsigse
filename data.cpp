@@ -22,13 +22,15 @@
 #include "usbd2xx.h"
 #include "okFrontPanelDLL.h"
 #include "telemetry.h"
+#include <FL/Fl_File_Chooser.H>
+#include <FL/Fl_Preferences.H>
+
 
 #define MAXPATH 128
 #define NUM_THREADS 8
 #define XSTRIPS 128
 #define YSTRIPS 128
 #define MAX_CHANNEL 1024
-#define FORMATTER_CONFIGURATION_FILE "gsesync.bit"
 
 extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
@@ -38,12 +40,14 @@ extern int low_threshold;
 
 // Note that an unsigned short int is 2 bytes
 // for formatter
-// #define FRAME_SIZE_IN_SHORTINTS 295
-// #define FRAME_SIZE_IN_BYTES 590
+//#define FRAME_SIZE_IN_SHORTINTS 295
+//#define FRAME_SIZE_IN_BYTES 590
+#define FRAME_SIZE_IN_SHORTINTS 1024
+#define FRAME_SIZE_IN_BYTES 2048
 
 // for ASIC
-#define FRAME_SIZE_IN_SHORTINTS 784
-#define FRAME_SIZE_IN_BYTES 1568
+//#define FRAME_SIZE_IN_SHORTINTS 784
+//#define FRAME_SIZE_IN_BYTES 1568
 
 extern Gui *gui;
 
@@ -72,6 +76,7 @@ pthread_mutex_t timebinmutex;
 double nreads;
 
 extern char *data_file_save_dir;
+extern char *formatter_configuration_file;
 extern int file_type;
 
 void data_initialize(void)
@@ -142,7 +147,7 @@ void data_initialize(void)
 			gui->closeBut->activate();
 			gui->detector_choice->activate();
 			gui->app->print_to_console("Done initializing.\n");
-		} else gui->app->print_to_console("Initialization failed!\n");
+		}
 	}
 
 }
@@ -284,7 +289,7 @@ void* data_read_data(void *p)
 			if(status < 1){
 				badSync++;
 			}
-			
+			printf("reading frame\n");
 			status = gui->usb->readFrame();
 			if(status < 1){
 				badRead++;
@@ -299,7 +304,7 @@ void* data_read_data(void *p)
 			// read from the USB/Formatter, reads 4 frames at a time.
 			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer);
 			// set the read status based on how len returned 
-			//if len == 
+			if (len == 2048){ read_status = 1; printf("read okay\n");}
 		}
 				
 		if (read_status == 1) {
@@ -307,8 +312,8 @@ void* data_read_data(void *p)
 			if(fout > 0)
 			{
 				if( (wlen = write(fout,(const void *) buffer,FRAME_SIZE_IN_BYTES) ) != FRAME_SIZE_IN_BYTES)
-					{// then bad write
-					};
+					{// then bad write};
+					}
 			}
 			
 			if (pthread_mutex_trylock(&mymutex) == 0) /* if fail missed as main hasn't finished */
@@ -319,14 +324,14 @@ void* data_read_data(void *p)
 					newdisplay = 1;
 				}
 				pthread_mutex_unlock(&mymutex);
-			}
+			} else {printf("failed to pass off data\n");}
 			
 			// Check to see if if only a fixed number of frames should be read
 			// if so set the stop message
 			if ((maxreads != 0) && (nreads >= maxreads)){
 				stop_message = 1;
 			}
-			nreads++;	
+		
 		}
 		
 		if (stop_message == 1){
@@ -334,8 +339,8 @@ void* data_read_data(void *p)
 			gui->app->print_to_console("Read finished or stopped.\n");
 						
 			gui->stopReadingDataButton->deactivate();
-			gui->startReadingDataButton->activate();
-			gui->writeFileBut->value(0);
+			gui->startReadingDataButton->deactivate();
+			gui->writeFileBut->deactivate();
 			gui->closeBut->deactivate();
 			gui->initializeBut->activate();
 
@@ -366,7 +371,8 @@ void* data_read_data(void *p)
 				
 			}
 			if (data_source == 2) {
-				//clean up formatter interface
+				// clean up formatter interface
+				// nothing to do
 			}
 			
 			pthread_mutex_destroy(&mymutex);
@@ -374,6 +380,7 @@ void* data_read_data(void *p)
 			pthread_exit(NULL);
 		}
 	}
+	
 }
 
 void data_simulate_data(void)
@@ -498,28 +505,26 @@ void data_start_reading(void)
 	
 	int *variable;
 	int ret;
-	gui->stopReadingDataButton->activate();
+	int newprio;
 	
 	stop_message = 0;
 	start_time = time(NULL);
 	
 	// define a high (custom) priority for the read_data thread
-    int newprio = -10;
+    newprio = -10;
 	param.sched_priority = newprio;
 	ret = pthread_attr_init(&tattr);
 	ret = pthread_attr_setschedparam (&tattr, &param);
 		
-	gui->app->print_to_console("Reading...\n");
-	
 	// start the read_data thread
 	ret = pthread_create(&thread, &tattr, data_read_data, (void *) taskids[0]);
 	pthread_mutex_init(&mymutex,NULL);
 	pthread_mutex_init(&timebinmutex,NULL);
 
-	//newprio = -5;
-	//param.sched_priority = newprio;
-	//ret = pthread_attr_init(&tattr);
-	//ret = pthread_attr_setschedparam (&tattr, &param);
+	newprio = -5;
+	param.sched_priority = newprio;
+	ret = pthread_attr_init(&tattr);
+	ret = pthread_attr_setschedparam (&tattr, &param);
 	
 	// start the watch_buffer thread
 	ret = pthread_create(&thread, NULL, data_watch_buffer, (void *) taskids[1]);	
@@ -533,6 +538,9 @@ void data_start_reading(void)
 	ret = pthread_create(&thread, NULL, data_timer, (void *) taskids[2]);
 	// start the count rate thread
 	ret = pthread_create(&thread, NULL, data_countrate, (void *) taskids[3]);
+	
+	gui->stopReadingDataButton->activate();
+	gui->app->print_to_console("Reading...\n");
 }
 
 void data_stop_reading(void)
@@ -616,31 +624,32 @@ void data_update_display(unsigned short int *frame)
 		//
 		// * the order for asics n n then p p
 		// * the asic mask does not work
-		//unsigned short int frameData[FRAME_SIZE_IN_SHORTINTS];
+		//
 		
 		int index = 0;
 		unsigned int common_mode = 0;
 		unsigned int common_mode_nside[2] = {0};
 		int read_status = 1;
+		int frame_number = 0;
 		
 		// Loop through the 4 ASICS
 		for( int j = 0; j < 4; j++)
 		{
 			read_status = 1;
-					
-			if ((j == 1) && (frame[index] != 60305)) { read_status = 0; }
-			if ((j == 2) && (frame[index] != 60306)) { read_status = 0; }
-			if ((j == 3) && (frame[index] != 60307)) { read_status = 0; }
+			
+			if (j == 0){ frame_number = frame[0]; }
+			if ((j == 1) && (frame[index] != 0xEB91)) { read_status = 0; }
+			if ((j == 2) && (frame[index] != 0xEB92)) { read_status = 0; }
+			if ((j == 3) && (frame[index] != 0xEB93)) { read_status = 0; }
 
 			if (gui->printasicframe_button->value() == 1)
 			{
-				if (j == 0){ printf("FRAME START\neb90\t"); }
+				if (j == 0){ printf("FRAME START\n-----------\neb90\n"); }
 				else {
 					printf( "%x\n", frame[index]);	index++;
 				}
-				printf( "%u\t", frame[index]);	
-				if (j == 0){ gui->framenumOutput->value(frame[index]); }
-				index++;	//frame counter
+				printf( "frame number: %u\n", frame[index]);//frame counter
+				index++;	
 				printf( "%x\t", frame[index]);	index++;	//start
 				printf(  "%x\t", frame[index]);	index++;	//chip
 				printf(  "%x\t", frame[index]);	index++;	//trigger
@@ -696,18 +705,22 @@ void data_update_display(unsigned short int *frame)
 				printf(  "%u\t", frame[index]);	index++;
 				printf(  "%u\t", frame[index]);	index++;
 				printf(  "%u\t", frame[index]);	index++;		
-				printf("\n");
+				printf("\n\n");
 			} else {
 				index += 11;
 			}
 		}
-		
+		if ((gui->printasicframe_button->value() == 1) && (read_status == 0))
+			{ printf("Bad frame skipping\n"); }
+			
 		if (read_status == 1) {
 			common_mode_nside[0] = median(asic0n_data, 64);
 			common_mode_nside[1] = median(asic1n_data, 64);
 			
+			gui->framenumOutput->value(frame_number);
+			
 			if (gui->printasicframe_button->value() == 1){
-				printf("common mode: %u %u\n", common_mode_nside[0], common_mode_nside[1]);}
+				printf("common mode: %u %u\n\n", common_mode_nside[0], common_mode_nside[1]);}
 			
 			for(int i = 0; i < XSTRIPS; i++)
 			{
@@ -717,19 +730,23 @@ void data_update_display(unsigned short int *frame)
 					for(int j = 0; j < YSTRIPS; j++)
 					{
 						if (j < 64){
-							if ((asic0n_data[i] - common_mode_nside[0]) > 30) {ystrips[i] = 1;}
+							if (((asic0n_data[j] - common_mode_nside[0]) > 50) && (asic0n_data[j] < 1023)){ystrips[j] = 1;}
 						}
 						if (j >= 64){
-							if ((asic1n_data[i] - common_mode_nside[1]) > 30) {ystrips[i] = 1;}
+							if (((asic1n_data[j] - common_mode_nside[1]) > 50) && (asic1n_data[j] < 1023)){ystrips[j] = 1;}
 						}
-						detImage[i][j] = xstrips[i] * ystrips[j];
-						detImagetime[i][j] = clock();
+						//detImage[i][j] += xstrips[i] * ystrips[j];
+						if (xstrips[i] * ystrips[j] != 0) {
+							detImage[i][j] += 1;
+							detImagetime[i][j] = clock();}
 					}
 				}
 			}
-			//printf("\n");
-			pthread_mutex_lock( &timebinmutex);
-				current_timebin+=num_hits;
+			for(int i = 0; i < XSTRIPS; i++){printf("%u\t", ystrips[i]);}
+			printf("\n");
+			
+			pthread_mutex_lock(&timebinmutex);
+			current_timebin += num_hits;
 			pthread_mutex_unlock(&timebinmutex);
 		}
 	}
@@ -739,46 +756,99 @@ void data_update_display(unsigned short int *frame)
 		unsigned short int tmp;
 		unsigned voltage_status;
 		unsigned voltage;
+		unsigned short int strip_data;
+		unsigned short int strip_number;
+		int index = 0;
+		unsigned short int read_status;
 		// parse the buffer variable and update the display
-		// some example code is below
 		
-		struct strip_data  // 2 bytes
+		for( int l = 0; l < 4; l++)
 		{
-			unsigned data : 10;
-			unsigned number : 6;
-		};
+			if (buffer[index++] == 0xf628) {
+				
+				printf("checksum: %u\n", buffer[index+253]);
+				printf("eb90: %x\n", buffer[index+254]);
+				for( int m = 0; m < 254; m++ ){read_status ^= buffer[index+m];}
+				if( read_status == 1 ){
+					nreads++;
+					//printf("calc checksum: %u\n", checksum);
+					
+					printf("index = %u\n", index);
+					printf("time1(MSB): %u\n", buffer[index++]);
+					printf("time2: %u\n", buffer[index++]);
+					printf("tim3(LSB): %u\n", buffer[index++]);
+					printf("frame counter 1: %u\n", buffer[index++]);
+					printf("frame counter 2: %u\n", buffer[index++]);
+					gui->framenumOutput->value(buffer[index]);
+					printf("housekeeping 0: %u\n", buffer[index++]);
+					printf("cmd count: %u\n", buffer[index++]);
+					printf("command 1: %u\n", buffer[index++]);
+					printf("command 2: %u\n", buffer[index++]);
+					printf("Housekeeping 1: %u\n", buffer[index++]);
+					printf("FormatterStatus: %u\n", buffer[index++]);
+					printf("0: %u\n", buffer[index++]);
+					
+					voltage_status = buffer[13] & 0xF;
+					voltage = (buffer[13] >> 12) & 0xFFF;
+					index++;
+					voltage_status = buffer[index] & 0xF;
+					voltage = (buffer[index] >> 12) & 0xFFF;
+					gui->HVOutput->value(voltage);
+					
+					//printf("voltage: %i status: %i", voltage, voltage_status);
+					if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
+					if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
+					if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
+					
+					printf("Housekeeping 2: %u\n", buffer[index++]);
+					printf("Status 0: %u\n", buffer[index++]);
+					printf("Status 1: %u\n", buffer[index++]);
+					printf("Status 2: %u\n", buffer[index++]);
+					printf("Housekeeping 3: %u\n", buffer[index++]);
+					printf("Status 3: %u\n", buffer[index++]);
+					printf("Status 4: %u\n", buffer[index++]);
+					printf("Status 5: %u\n", buffer[index++]);
+					printf("Status 6: %u\n", buffer[index++]);
+					printf("index = %u\n", index);
+					
+					for(int j = 0; j < 7; j++){
+						printf("Detector %u time: %u\n", j, buffer[index++]);
+						for(int i = 0; i < 4; i++)
+						{
+							// 0ASIC0 mask0 
+							index++;
+							// 0ASIC0 mask1
+							index++;
+							// 0ASIC0 mask2
+							index++;
+							// 0ASIC0 mask3
+							index++;
+							for(int k = 0; k < 4; k++)
+							{
+								index++;
+								strip_data = buffer[index] & 0x3F;
+								strip_number = (buffer[index] >> 10) & 0x3FFF;
+								printf("%x\t", buffer[index]);
+							}
+							printf("\nindex = %u\n", index);
+						}
+					}
+					printf("checksum: %u\n", buffer[index++]);
+					printf("sync: %u\n", buffer[index++]);
+				} else {
+					index+=255;
+				}
+
+			}
+		}
 		
-		struct voltage_data {
-			unsigned value: 12;
-			unsigned status: 4;
-		};
-		
-		strip_data strip;
-		voltage_data volt;
-		
-		printf("sync: %x\n", buffer[0]);
-		printf("counter: %x\n", buffer[4]);
-		
-		memcpy(&strip,&buffer[29],2);
-		memcpy(&volt,&buffer[13],2);
-		
-		voltage_status = buffer[13] & 0xF;
-		voltage = (buffer[13] >> 12) & 0xFFF;
-		
+		nreads+=4;
 		gui->nEventsDone->value(nreads); 
 		
-		gui->framenumOutput->value(frame[5]);
-		//gui->ctsOutput->value(strip.number);
-		gui->HVOutput->value(voltage);
-		printf("voltage: %i status: %i", voltage, voltage_status);
-		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
-		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
-		if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
-		
-		HistogramFunction[strip.data]++;
-		tmp = arc4random() % 64 + 1;
-		detImage[tmp][strip.number] = 1;
-		detImagetime[tmp][strip.number] = clock();
+		//HistogramFunction[strip_data]++;
+		//tmp = arc4random() % 64 + 1;
+		//detImage[tmp][strip_number] = 1;
+		//detImagetime[tmp][strip_number] = clock();
 	}
 
 }
@@ -815,7 +885,10 @@ void data_set_datafilename(void)
 
 okCFrontPanel *data_initialize_formatter_FPGA(void)
 {
+	FILE *file;
 	bool bresult;
+	Fl_File_Chooser *chooser = NULL;
+	
 	// Open the first XEM - try all board types.
 	dev = new okCFrontPanel;
 	
@@ -827,7 +900,7 @@ okCFrontPanel *data_initialize_formatter_FPGA(void)
 	
 	switch (dev->GetBoardModel()) {
 		case okCFrontPanel::brdXEM3005:
-			printf("                                        Found a device: XEM3005\n");
+			printf("Found a device: XEM3005\n");
 			break;
 		default:
 			printf("Unsupported device.\n");
@@ -862,9 +935,20 @@ okCFrontPanel *data_initialize_formatter_FPGA(void)
 	printf("Device serial number: %s\n", dev->GetSerialNumber().c_str());
 	printf("Device ID string: %s\n", dev->GetDeviceID().c_str());
 	
+	gui->prefs->get("formatter_configuration_file", formatter_configuration_file, "/Users/schriste/");
+	
+	file = fopen(formatter_configuration_file, "r");
+	if (file == NULL){
+		gui->app->print_to_console("Could not find gsesync.bit file\nDid you set the location of gsesyn.bit in prefs?\n");
+		fclose(file);
+		delete dev;
+		return(0);
+	}
+	
 	// Download the configuration file.
-	if (okCFrontPanel::NoError != dev->ConfigureFPGA(FORMATTER_CONFIGURATION_FILE)) {
-		printf("FPGA configuration failed.\n");
+	if (okCFrontPanel::NoError != dev->ConfigureFPGA(formatter_configuration_file)) {
+		printf("formatter_configuration_file: %s\n", formatter_configuration_file);
+		gui->app->print_to_console("FPGA configuration failed.\nDid you set the location of gsesyn.bit in prefs?\n");
 		delete dev;
 		return(0);
 	}

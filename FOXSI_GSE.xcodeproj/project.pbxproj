@@ -13,7 +13,6 @@
 		86E4A437138C2AEC0004DBB3 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86E4A436138C2AEC0004DBB3 /* OpenGL.framework */; };
 		86E4A43C138C2B720004DBB3 /* Application.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A43A138C2B720004DBB3 /* Application.cxx */; };
 		86E4A44B138C2B900004DBB3 /* Foxsidata.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A43D138C2B900004DBB3 /* Foxsidata.cxx */; };
-		86E4A44C138C2B900004DBB3 /* mainChart.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A43F138C2B900004DBB3 /* mainChart.cxx */; };
 		86E4A44D138C2B900004DBB3 /* mainHistogram.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A441138C2B900004DBB3 /* mainHistogram.cxx */; };
 		86E4A44E138C2B900004DBB3 /* mainImage.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A443138C2B900004DBB3 /* mainImage.cxx */; };
 		86E4A44F138C2B900004DBB3 /* mainLightcurve.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A445138C2B900004DBB3 /* mainLightcurve.cxx */; };
@@ -64,8 +63,6 @@
 		86E4A43B138C2B720004DBB3 /* Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
 		86E4A43D138C2B900004DBB3 /* Foxsidata.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Foxsidata.cxx; sourceTree = "<group>"; };
 		86E4A43E138C2B900004DBB3 /* Foxsidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foxsidata.h; sourceTree = "<group>"; };
-		86E4A43F138C2B900004DBB3 /* mainChart.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainChart.cxx; sourceTree = "<group>"; };
-		86E4A440138C2B900004DBB3 /* mainChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mainChart.h; sourceTree = "<group>"; };
 		86E4A441138C2B900004DBB3 /* mainHistogram.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainHistogram.cxx; sourceTree = "<group>"; };
 		86E4A442138C2B900004DBB3 /* mainHistogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mainHistogram.h; sourceTree = "<group>"; };
 		86E4A443138C2B900004DBB3 /* mainImage.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainImage.cxx; sourceTree = "<group>"; };
@@ -178,8 +175,6 @@
 				86E4A43A138C2B720004DBB3 /* Application.cxx */,
 				86E4A43D138C2B900004DBB3 /* Foxsidata.cxx */,
 				86E4A43E138C2B900004DBB3 /* Foxsidata.h */,
-				86E4A43F138C2B900004DBB3 /* mainChart.cxx */,
-				86E4A440138C2B900004DBB3 /* mainChart.h */,
 				86E4A441138C2B900004DBB3 /* mainHistogram.cxx */,
 				86E4A442138C2B900004DBB3 /* mainHistogram.h */,
 				86E4A443138C2B900004DBB3 /* mainImage.cxx */,
@@ -298,7 +293,6 @@
 				C9601E9910B1FAED0018BADE /* main.cpp in Sources */,
 				86E4A43C138C2B720004DBB3 /* Application.cxx in Sources */,
 				86E4A44B138C2B900004DBB3 /* Foxsidata.cxx in Sources */,
-				86E4A44C138C2B900004DBB3 /* mainChart.cxx in Sources */,
 				86E4A44D138C2B900004DBB3 /* mainHistogram.cxx in Sources */,
 				86E4A44E138C2B900004DBB3 /* mainImage.cxx in Sources */,
 				86E4A44F138C2B900004DBB3 /* mainLightcurve.cxx in Sources */,

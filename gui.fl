@@ -92,12 +92,6 @@ exit(1);}
           code0 {\#include "mainImage.h"}
           class mainImage
         }
-        Fl_Box subImageWindow {
-          label {Image Zoom}
-          xywh {422 284 145 140} box GTK_UP_BOX
-          code0 {\#include "subImage.h"}
-          class subImage
-        }
         Fl_Output pixelNum {
           label Pixel
           xywh {457 464 80 25}
@@ -300,14 +294,29 @@ app->start_reading_data();}
           xywh {720 115 40 120} align 290 maximum 5000 step 100 textsize 14
         }
       }
-      Fl_Light_Button glitchBut {
-        label Glitch
-        xywh {275 155 75 25}
-      }
-      Fl_Button sendParamsBut {
-        label {Send Params}
-        callback {app->openSendParamsWindow()}
-        xywh {10 155 100 25}
+      Fl_Group {} {
+        label ASIC open
+        xywh {9 145 356 63} box THIN_DOWN_FRAME
+      } {
+        Fl_Button sendParamsBut {
+          label {Send Params}
+          callback {app->openSendParamsWindow()}
+          xywh {10 145 100 25}
+        }
+        Fl_Button setTrigBut {
+          label {Set Trigger Options}
+          callback {app->openSetTrigWindow()}
+          xywh {115 145 125 25}
+        }
+        Fl_Button setHoldBut {
+          label {Set Hold Time}
+          callback {app->openSetHoldTimeWindow()}
+          xywh {9 174 100 25}
+        }
+        Fl_Light_Button glitchBut {
+          label Glitch
+          xywh {245 145 65 25}
+        }
       }
       Fl_Value_Input nEvents {
         label events
@@ -340,51 +349,41 @@ app->start_reading_data();}
           xywh {1132 325 63 15} down_box DOWN_BOX
         }
       }
-      Fl_Button setHoldBut {
-        label {Set Hold Time}
-        callback {app->openSetHoldTimeWindow()}
-        xywh {10 190 100 25}
-      }
-      Fl_Button setTrigBut {
-        label {Set Trigger Options}
-        callback {app->openSetTrigWindow()}
-        xywh {115 155 125 25}
-      }
       Fl_Value_Output nEventsDone {
         label {read counter:}
         xywh {295 66 55 24}
       }
       Fl_Group detector_choice {
         label {Detectors to display} open
-        xywh {155 215 220 30} box DOWN_BOX align 4 deactivate
+        xywh {155 232 220 30} box DOWN_BOX align 4 deactivate
       } {
         Fl_Check_Button detector1_checkbox {
           label 1
-          xywh {160 215 35 30} down_box DOWN_BOX
+          xywh {160 232 35 30} down_box DOWN_BOX
         }
         Fl_Check_Button detector2_checkbox {
           label 2
-          xywh {190 215 35 30} down_box DOWN_BOX
+          xywh {190 232 35 30} down_box DOWN_BOX
         }
         Fl_Check_Button detector3_checkbox {
           label 3
-          xywh {220 215 35 30} down_box DOWN_BOX
+          xywh {220 232 35 30} down_box DOWN_BOX
         }
         Fl_Check_Button detector4_checkbox {
           label 4
-          xywh {250 215 35 30} down_box DOWN_BOX
+          xywh {250 232 35 30} down_box DOWN_BOX
         }
         Fl_Check_Button detector5_checkbox {
           label 5
-          xywh {280 215 35 30} down_box DOWN_BOX
+          xywh {280 232 35 30} down_box DOWN_BOX
         }
         Fl_Check_Button detector6_checkbox {
           label 6
-          xywh {310 215 35 30} down_box DOWN_BOX
+          xywh {310 232 35 30} down_box DOWN_BOX
         }
         Fl_Check_Button detector7_checkbox {
           label 7
-          xywh {340 215 35 30} down_box DOWN_BOX
+          xywh {340 232 35 30} down_box DOWN_BOX
         }
       }
       Fl_Value_Output inttimeOutput {
@@ -394,7 +393,7 @@ app->start_reading_data();}
     }
     Fl_Window sendParamsWindow {
       label {Send Parameters}
-      xywh {155 164 1053 524} type Double hide
+      xywh {155 164 1053 524} type Double visible
     } {
       Fl_Button sendParamsWindow_sendBut {
         label Send
@@ -1271,7 +1270,7 @@ app->send_params();
     }
     Fl_Window PreferenceWindow {
       label Preferences open
-      xywh {43 223 429 175} type Double visible
+      xywh {21 310 454 220} type Double visible
     } {
       Fl_Value_Input pixelhalflife_value {
         label {pixel half life (s)}
@@ -1294,12 +1293,12 @@ app->send_params();
         label OK
         callback {app->save_preferences();
 PreferenceWindow->hide();}
-        xywh {280 145 63 20}
+        xywh {310 186 63 20}
       }
       Fl_Button {} {
         label Cancel
         callback {PreferenceWindow->hide()}
-        xywh {350 145 63 20}
+        xywh {380 186 63 20}
       }
       Fl_Button {} {
         label Change
@@ -1332,8 +1331,17 @@ PreferenceWindow->hide();}
         }
       }
       Fl_Check_Button newControlRegisters_check {
-        label {new FPGA control registers} selected
-        xywh {25 120 63 20} down_box DOWN_BOX
+        label {new FPGA control registers}
+        xywh {25 115 63 20} down_box DOWN_BOX
+      }
+      Fl_Button {} {
+        label Change
+        callback {app->set_gsesync_file();}
+        xywh {345 150 75 25}
+      }
+      Fl_File_Input gsesyncfile_fileInput {
+        label {gsesync:}
+        xywh {75 141 260 34}
       }
     }
     code {app=new Application();} {}
@@ -1346,15 +1354,15 @@ consoleBuf->buffer(buff);} {}
 timebinsize_counter->step(0.1, 1);
 lightcurvexmax_counter->step(5, 10);
 histogramxmax_counter->step(5, 50);
-histogrambinsize_counter->step(1,5);} {}
+histogrambinsize_counter->step(1,5);} {selected
+    }
   }
   Function {show()} {open
   } {
     code {mainWindow->show();
 mainHistogramWindow->show();
 mainImageWindow->show();
-mainLightcurveWindow->show();
-subImageWindow->show();} {}
+mainLightcurveWindow->show();} {}
   }
   decl {Application *app;} {public local
   }

@@ -37,9 +37,6 @@ float GL_cursor[2];
 int mousePixel[2];
 int chosenPixel[2];
 
-extern float detsubImage[ZOOMNUM][ZOOMNUM];
-extern float detsubImagealpha[ZOOMNUM][ZOOMNUM];
-
 extern float pixel_half_life;
 
 extern Gui *gui;
@@ -101,33 +98,32 @@ void mainImage::draw()
    	glClearColor(0.0,0.0,0.0,0.0);
    	glClear(GL_COLOR_BUFFER_BIT);  
 	
-	for(int j=0;j<XSTRIPS;j++)
+	for(int j = 0; j < XSTRIPS; j++)
 	{
-		for(int i=0;i<YSTRIPS;i++)
+		for(int i = 0; i < YSTRIPS; i++)
 	   	{
-			if(detImage[i][j] > low_threshold){
-				grey = detImage[i][j]/ymax;
-				if (pixel_half_life != 0){
-					alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
-				} else {
-					alpha = 1;
-				}
-
-				detImagealpha[i][j] = alpha;
-				glColor4f(grey, grey, grey, alpha);
-				glBegin(GL_QUADS);
-				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
-				glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
-				glEnd();
+			grey = detImage[i][j]/ymax;
+			
+			if (pixel_half_life != 0){
+				alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+			} else {
+				alpha = 1.0;
 			}
+
+			detImagealpha[i][j] = alpha;
+			glColor4f(grey, grey, grey, alpha);
+			glBegin(GL_QUADS);
+			glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
+			glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
+			glEnd();
 			//now draw the mask
-			bleu = detImagemask[i][j];
-			if (bleu == 1){
-				glColor4f(0, 0, bleu, 1.0);
-				glBegin(GL_QUADS);
-				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
-				glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
-				glEnd();}
+			//bleu = detImagemask[i][j];
+			//if (bleu == 1){
+			//	glColor4f(0, 0, bleu, 1.0);
+			//	glBegin(GL_QUADS);
+			//	glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
+			//	glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
+			//	glEnd();}
 	   	}
 	}
 	//draw a border around the detector
@@ -140,23 +136,23 @@ void mainImage::draw()
 	// draw a cross under the cursor selection
 	glColor3f(1, 0, 0);
 	glBegin(GL_LINES);
-		glVertex2f(mousePixel[0] + XBORDER - 4, mousePixel[1] + YBORDER);
-		glVertex2f(mousePixel[0] + XBORDER + 4, mousePixel[1] + YBORDER);
+		glVertex2f(mousePixel[0] + XBORDER - 3.5, mousePixel[1] + YBORDER);
+		glVertex2f(mousePixel[0] + XBORDER + 4.5, mousePixel[1] + YBORDER);
 	glEnd();
 	
 	glBegin(GL_LINES);
-	glVertex2f(mousePixel[0] + XBORDER - 4, mousePixel[1] + YBORDER + 1);
-	glVertex2f(mousePixel[0] + XBORDER + 4, mousePixel[1] + YBORDER + 1);
+	glVertex2f(mousePixel[0] + XBORDER - 3.5, mousePixel[1] + YBORDER + 1);
+	glVertex2f(mousePixel[0] + XBORDER + 4.5, mousePixel[1] + YBORDER + 1);
 	glEnd();	
 	
 	glBegin(GL_LINES);
 		glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER - 3.5); 
-		glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER + 3.5); 
+		glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER + 4.5); 
 	glEnd();
 	
 	glBegin(GL_LINES);
 	glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER - 3.5); 
-	glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER + 3.5); 
+	glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER + 4.5); 
 	glEnd();
 	
 	//draw an expanded view

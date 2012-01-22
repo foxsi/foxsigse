@@ -96,7 +96,7 @@ public:
 	void save_histogram_to_file(void);
 	void save_image_to_file(void);
 	void set_lightcurve_ymax(void);
-	
+	void set_gsesync_file(void);
 	int elapsed_time_sec;
 private:
 	char filename[40];

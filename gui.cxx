@@ -197,7 +197,21 @@ void Gui::cb_sendParamsBut_i(Fl_Button*, void*) {
   app->openSendParamsWindow();
 }
 void Gui::cb_sendParamsBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_sendParamsBut_i(o,v);
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_sendParamsBut_i(o,v);
+}
+
+void Gui::cb_setTrigBut_i(Fl_Button*, void*) {
+  app->openSetTrigWindow();
+}
+void Gui::cb_setTrigBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_setTrigBut_i(o,v);
+}
+
+void Gui::cb_setHoldBut_i(Fl_Button*, void*) {
+  app->openSetHoldTimeWindow();
+}
+void Gui::cb_setHoldBut(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_setHoldBut_i(o,v);
 }
 
 void Gui::cb_writeFileBut_i(Fl_Light_Button*, void*) {
@@ -219,20 +233,6 @@ void Gui::cb_Clear_i(Fl_Button*, void*) {
 }
 void Gui::cb_Clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_Clear_i(o,v);
-}
-
-void Gui::cb_setHoldBut_i(Fl_Button*, void*) {
-  app->openSetHoldTimeWindow();
-}
-void Gui::cb_setHoldBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setHoldBut_i(o,v);
-}
-
-void Gui::cb_setTrigBut_i(Fl_Button*, void*) {
-  app->openSetTrigWindow();
-}
-void Gui::cb_setTrigBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->user_data()))->cb_setTrigBut_i(o,v);
 }
 
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
@@ -422,6 +422,13 @@ Fl_Menu_Item Gui::menu_DataSource_choice[] = {
  {0,0,0,0,0,0,0,0,0}
 };
 
+void Gui::cb_Change1_i(Fl_Button*, void*) {
+  app->set_gsesync_file();
+}
+void Gui::cb_Change1(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_Change1_i(o,v);
+}
+
 Gui::Gui() {
   { mainWindow = new Fl_Double_Window(1252, 686, "FOXSI GSE");
     mainWindow->color((Fl_Color)19);
@@ -444,17 +451,6 @@ Gui::Gui() {
         mainImageWindow->align(Fl_Align(FL_ALIGN_CENTER));
         mainImageWindow->when(FL_WHEN_RELEASE);
       } // mainImage* mainImageWindow
-      { subImageWindow = new subImage(422, 284, 145, 140, "Image Zoom");
-        subImageWindow->box(FL_GTK_UP_BOX);
-        subImageWindow->color(FL_BACKGROUND_COLOR);
-        subImageWindow->selection_color(FL_BACKGROUND_COLOR);
-        subImageWindow->labeltype(FL_NORMAL_LABEL);
-        subImageWindow->labelfont(0);
-        subImageWindow->labelsize(14);
-        subImageWindow->labelcolor(FL_FOREGROUND_COLOR);
-        subImageWindow->align(Fl_Align(FL_ALIGN_CENTER));
-        subImageWindow->when(FL_WHEN_RELEASE);
-      } // subImage* subImageWindow
       { pixelNum = new Fl_Output(457, 464, 80, 25, "Pixel");
       } // Fl_Output* pixelNum
       { pixelCounts = new Fl_Output(457, 434, 80, 25, "Cts");
@@ -614,11 +610,21 @@ Gui::Gui() {
       } // Fl_Value_Slider* mainLightcurve_ymaxslider
       o->end();
     } // Fl_Group* o
-    { glitchBut = new Fl_Light_Button(275, 155, 75, 25, "Glitch");
-    } // Fl_Light_Button* glitchBut
-    { sendParamsBut = new Fl_Button(10, 155, 100, 25, "Send Params");
-      sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
-    } // Fl_Button* sendParamsBut
+    { Fl_Group* o = new Fl_Group(9, 145, 356, 63, "ASIC");
+      o->box(FL_THIN_DOWN_FRAME);
+      { sendParamsBut = new Fl_Button(10, 145, 100, 25, "Send Params");
+        sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
+      } // Fl_Button* sendParamsBut
+      { setTrigBut = new Fl_Button(115, 145, 125, 25, "Set Trigger Options");
+        setTrigBut->callback((Fl_Callback*)cb_setTrigBut);
+      } // Fl_Button* setTrigBut
+      { setHoldBut = new Fl_Button(9, 174, 100, 25, "Set Hold Time");
+        setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
+      } // Fl_Button* setHoldBut
+      { glitchBut = new Fl_Light_Button(245, 145, 65, 25, "Glitch");
+      } // Fl_Light_Button* glitchBut
+      o->end();
+    } // Fl_Group* o
     { nEvents = new Fl_Value_Input(295, 35, 40, 24, "events");
     } // Fl_Value_Input* nEvents
     { writeFileBut = new Fl_Light_Button(10, 95, 95, 25, "Write to file");
@@ -641,37 +647,31 @@ Gui::Gui() {
       } // Fl_Check_Button* printasicframe_button
       o->end();
     } // Fl_Group* o
-    { setHoldBut = new Fl_Button(10, 190, 100, 25, "Set Hold Time");
-      setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
-    } // Fl_Button* setHoldBut
-    { setTrigBut = new Fl_Button(115, 155, 125, 25, "Set Trigger Options");
-      setTrigBut->callback((Fl_Callback*)cb_setTrigBut);
-    } // Fl_Button* setTrigBut
     { nEventsDone = new Fl_Value_Output(295, 66, 55, 24, "read counter:");
     } // Fl_Value_Output* nEventsDone
-    { detector_choice = new Fl_Group(155, 215, 220, 30, "Detectors to display");
+    { detector_choice = new Fl_Group(155, 232, 220, 30, "Detectors to display");
       detector_choice->box(FL_DOWN_BOX);
       detector_choice->align(Fl_Align(FL_ALIGN_LEFT));
       detector_choice->deactivate();
-      { detector1_checkbox = new Fl_Check_Button(160, 215, 35, 30, "1");
+      { detector1_checkbox = new Fl_Check_Button(160, 232, 35, 30, "1");
         detector1_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector1_checkbox
-      { detector2_checkbox = new Fl_Check_Button(190, 215, 35, 30, "2");
+      { detector2_checkbox = new Fl_Check_Button(190, 232, 35, 30, "2");
         detector2_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector2_checkbox
-      { detector3_checkbox = new Fl_Check_Button(220, 215, 35, 30, "3");
+      { detector3_checkbox = new Fl_Check_Button(220, 232, 35, 30, "3");
         detector3_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector3_checkbox
-      { detector4_checkbox = new Fl_Check_Button(250, 215, 35, 30, "4");
+      { detector4_checkbox = new Fl_Check_Button(250, 232, 35, 30, "4");
         detector4_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector4_checkbox
-      { detector5_checkbox = new Fl_Check_Button(280, 215, 35, 30, "5");
+      { detector5_checkbox = new Fl_Check_Button(280, 232, 35, 30, "5");
         detector5_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector5_checkbox
-      { detector6_checkbox = new Fl_Check_Button(310, 215, 35, 30, "6");
+      { detector6_checkbox = new Fl_Check_Button(310, 232, 35, 30, "6");
         detector6_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector6_checkbox
-      { detector7_checkbox = new Fl_Check_Button(340, 215, 35, 30, "7");
+      { detector7_checkbox = new Fl_Check_Button(340, 232, 35, 30, "7");
         detector7_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* detector7_checkbox
       detector_choice->end();
@@ -1241,7 +1241,7 @@ Gui::Gui() {
     } // Fl_Box* o
     AboutWindow->end();
   } // Fl_Double_Window* AboutWindow
-  { PreferenceWindow = new Fl_Double_Window(429, 175, "Preferences");
+  { PreferenceWindow = new Fl_Double_Window(454, 220, "Preferences");
     PreferenceWindow->user_data((void*)(this));
     { pixelhalflife_value = new Fl_Value_Input(295, 46, 70, 24, "pixel half life (s)");
       pixelhalflife_value->value(5);
@@ -1250,10 +1250,10 @@ Gui::Gui() {
       fileTypeChoice->down_box(FL_BORDER_BOX);
       fileTypeChoice->menu(menu_fileTypeChoice);
     } // Fl_Choice* fileTypeChoice
-    { Fl_Button* o = new Fl_Button(280, 145, 63, 20, "OK");
+    { Fl_Button* o = new Fl_Button(310, 186, 63, 20, "OK");
       o->callback((Fl_Callback*)cb_OK);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(350, 145, 63, 20, "Cancel");
+    { Fl_Button* o = new Fl_Button(380, 186, 63, 20, "Cancel");
       o->callback((Fl_Callback*)cb_Cancel);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(340, 15, 75, 25, "Change");
@@ -1268,9 +1268,14 @@ Gui::Gui() {
       DataSource_choice->down_box(FL_BORDER_BOX);
       DataSource_choice->menu(menu_DataSource_choice);
     } // Fl_Choice* DataSource_choice
-    { newControlRegisters_check = new Fl_Check_Button(25, 120, 63, 20, "new FPGA control registers");
+    { newControlRegisters_check = new Fl_Check_Button(25, 115, 63, 20, "new FPGA control registers");
       newControlRegisters_check->down_box(FL_DOWN_BOX);
     } // Fl_Check_Button* newControlRegisters_check
+    { Fl_Button* o = new Fl_Button(345, 150, 75, 25, "Change");
+      o->callback((Fl_Callback*)cb_Change1);
+    } // Fl_Button* o
+    { gsesyncfile_fileInput = new Fl_File_Input(75, 141, 260, 34, "gsesync:");
+    } // Fl_File_Input* gsesyncfile_fileInput
     PreferenceWindow->end();
   } // Fl_Double_Window* PreferenceWindow
   app=new Application();
@@ -1291,5 +1296,4 @@ void Gui::show() {
   mainHistogramWindow->show();
   mainImageWindow->show();
   mainLightcurveWindow->show();
-  subImageWindow->show();
 }

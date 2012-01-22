@@ -115,8 +115,7 @@ int USB_d2xx::open(void)
 	// Set read and write timeouts, in millisec.  (for now, arbitrary value of 1 second)
 	ftStatus = FT_SetTimeouts(ftHandle, 1000, 1000);
 	if(ftStatus != FT_OK){
-		sprintf(buffer, "Error FT_SetTimeouts(%d)\n", NULL, ftStatus);
-		gui->consoleBuf->insert(buffer);
+		app->printf_to_console("Error FT_SetTimeouts(%d)\n", NULL, ftStatus);
 		return -1;
 	}
 
@@ -130,10 +129,10 @@ int USB_d2xx::open(void)
 	// Set RTS/CTS flow control
 	ftStatus = FT_SetFlowControl(ftHandle, FT_FLOW_RTS_CTS, 0x11, 0x13); 
 	if (ftStatus == FT_OK) { 
-		cout << "SetFlowControl successful." << endl;
+		//cout << "SetFlowControl successful." << endl;
 		// FT_SetFlowControl OK 
 	} else {
-		cout << "SetFlowControl failed." << endl;
+		//cout << "SetFlowControl failed." << endl;
 		return -1;
 	} 
 	
@@ -167,7 +166,8 @@ int USB_d2xx::findSync(void)
 	ftStatus = FT_GetQueueStatus(ftHandle, &nBytesRead);
 	ftStatus = FT_SetTimeouts(ftHandle, 500, 500);
 
-//	if( nBytesRead < nBytesToRead )	return -1;
+	//if( nBytesRead < nBytesToRead )	return -1;
+	printf("\nfinding sync...\n");
 	
 	while (1) {
 		if (i == iMax){	
@@ -182,11 +182,11 @@ int USB_d2xx::findSync(void)
 			return -1;
 		}
 		ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
-		printf("%u\t", dataWord);
+		//printf("%u\t", dataWord);
 		// if the sync word is found, read again to see if the sync word is repeated.
 		if (dataWord == 0xEB90){
 			ftStatus = FT_Read(ftHandle, &dataWord, nBytes, &nBytesRead);
-			if (dataWord == 0xEB90) break;
+			if (dataWord == 0xEB90) {printf("found sync!\n"); break;}
 		}
 	}
 		return 1;
@@ -216,12 +216,11 @@ int USB_d2xx::readFrame(void)
 	
 	if(ftStatus == FT_OK) {
 		ftStatus = FT_Read(ftHandle, frameData, nBytesToRead, &nBytesRead);
+		memcpy((void *) buffer0,(void *) frameData, FRAME_SIZE_IN_BYTES);
 		
 		if((ftStatus) != FT_OK || nBytesRead != nBytesToRead){
 			app->printf_to_console("Error FT_Read(%d)\n", NULL, ftStatus);
 			return -1;
-		} else {
-			memcpy((void *) buffer0,(void *) frameData, FRAME_SIZE_IN_BYTES);
 		}
 	} else {
 		app->print_to_console("Could not get USB queue status.\n");
@@ -230,9 +229,9 @@ int USB_d2xx::readFrame(void)
 	
 	for(int i=0; i<nBytesToRead; i++){  
 		// initialize the frameData
-		printf("%i\t", frameData[i]);
+		//printf("%i\t", frameData[i]);
 	}
-	printf("\n");
+	//printf("\n");
 	return nBytesRead;	
 }
 
@@ -636,10 +635,9 @@ void USB_d2xx::setConfig(void)
 	}
 
 	cout << "Wrote " << dwBytesWritten << " bytes." << endl << endl;
-		free(cBufWrite);
+	free(cBufWrite);
 }
 
-// Added July 2011
 // Set global configuration
 void USB_d2xx::setGlobalConfig(int option)
 {
@@ -654,7 +652,6 @@ void USB_d2xx::setGlobalConfig(int option)
 	
 	cBufWrite = (char *)malloc(n * sizeof(char));
 	int value = 0;	
-	
 	DWORD 	dwBytesWritten;  // returns number of bytes written.
 
 	// initialize write buffer.

@@ -58,6 +58,7 @@ float pixel_half_life;
 int mainImage_minimum;
 int detector_display[7];
 int newFPGA_register;
+char *formatter_configuration_file;
 
 extern int low_threshold;
 extern int mainHistogram_binsize;
@@ -101,7 +102,7 @@ void Application::flush_image(void)
 		}
 	}
 	gui->mainImageWindow->redraw();
-	gui->subImageWindow->redraw();
+	//gui->subImageWindow->redraw();
 }
 
 void Application::save_preferences(void)
@@ -113,6 +114,7 @@ void Application::save_preferences(void)
 	gui->prefs->set("data_source", gui->DataSource_choice->value());
 	gui->prefs->set("mainImage_minimum", gui->mainImageMin_slider->value());
 	gui->prefs->set("newFPGA_register", gui->newControlRegisters_check->value());
+	gui->prefs->set("formatter_configuration_file", gui->gsesyncfile_fileInput->value());
 }
 
 void Application::read_preferences(void)
@@ -125,6 +127,7 @@ void Application::read_preferences(void)
 	gui->prefs->get("data_source", data_source, 0);
 	gui->prefs->get("mainImage_minimum", mainImage_minimum, 0);
 	gui->prefs->get("newFPGA_register", newFPGA_register,0);
+	gui->prefs->get("formatter_configuration_file", formatter_configuration_file, "/Users/schriste/");
 }
 
 void Application::update_preferencewindow(void)
@@ -136,6 +139,7 @@ void Application::update_preferencewindow(void)
 	gui->readdelay_value->value(read_delay);
 	gui->DataSource_choice->value(data_source);
 	gui->newControlRegisters_check->value(newFPGA_register);
+	gui->gsesyncfile_fileInput->value(formatter_configuration_file);
 }
 
 void Application::set_datafile_dir(void)
@@ -146,6 +150,14 @@ void Application::set_datafile_dir(void)
 	printf_to_console("Output directory set to %s.\n", data_file_save_dir, NULL);	
 }
 
+void Application::set_gsesync_file(void)
+{
+	char *temp = fl_file_chooser("Pick gsesync", "", 0);
+	strcpy(formatter_configuration_file, temp);
+	gui->gsesyncfile_fileInput->value(formatter_configuration_file);
+	printf_to_console("Output directory set to %s.\n", formatter_configuration_file, NULL);	
+}
+					
 void Application::start_file()
 {
 	data_start_file();
@@ -414,9 +426,13 @@ void Application::toggle_image_integrate(void)
 {
 	if (gui->mainImage_integrate_button->value() == 1){
 		pixel_half_life = 0;
+		printf("pixel_half_life = %f\n", pixel_half_life);
+		gui->mainImageWindow->redraw();
 	}
 	if (gui->mainImage_integrate_button->value() == 0){
-		gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
+		gui->prefs->get("pixel_half_life", pixel_half_life, 3.0);
+		printf("pixel_half_life = %f\n", pixel_half_life);
+		gui->mainImageWindow->redraw();
 	}
 }
 

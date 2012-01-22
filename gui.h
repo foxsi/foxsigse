@@ -11,7 +11,6 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Group.H>
 #include "mainImage.h"
-#include "subImage.h"
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Button.H>
@@ -55,7 +54,6 @@ private:
   static void cb_ACTEL(Fl_Menu_*, void*);
 public:
   mainImage *mainImageWindow;
-  subImage *subImageWindow;
   Fl_Output *pixelNum;
   Fl_Output *pixelCounts;
   Fl_Light_Button *subImageLockbut;
@@ -156,12 +154,22 @@ private:
   void cb_mainLightcurve_ymaxslider_i(Fl_Value_Slider*, void*);
   static void cb_mainLightcurve_ymaxslider(Fl_Value_Slider*, void*);
 public:
-  Fl_Light_Button *glitchBut;
   Fl_Button *sendParamsBut;
 private:
   void cb_sendParamsBut_i(Fl_Button*, void*);
   static void cb_sendParamsBut(Fl_Button*, void*);
 public:
+  Fl_Button *setTrigBut;
+private:
+  void cb_setTrigBut_i(Fl_Button*, void*);
+  static void cb_setTrigBut(Fl_Button*, void*);
+public:
+  Fl_Button *setHoldBut;
+private:
+  void cb_setHoldBut_i(Fl_Button*, void*);
+  static void cb_setHoldBut(Fl_Button*, void*);
+public:
+  Fl_Light_Button *glitchBut;
   Fl_Value_Input *nEvents;
   Fl_Light_Button *writeFileBut;
 private:
@@ -179,16 +187,6 @@ private:
   static void cb_Clear(Fl_Button*, void*);
 public:
   Fl_Check_Button *printasicframe_button;
-  Fl_Button *setHoldBut;
-private:
-  void cb_setHoldBut_i(Fl_Button*, void*);
-  static void cb_setHoldBut(Fl_Button*, void*);
-public:
-  Fl_Button *setTrigBut;
-private:
-  void cb_setTrigBut_i(Fl_Button*, void*);
-  static void cb_setTrigBut(Fl_Button*, void*);
-public:
   Fl_Value_Output *nEventsDone;
   Fl_Group *detector_choice;
   Fl_Check_Button *detector1_checkbox;
@@ -300,6 +298,11 @@ public:
   Fl_Choice *DataSource_choice;
   static Fl_Menu_Item menu_DataSource_choice[];
   Fl_Check_Button *newControlRegisters_check;
+private:
+  void cb_Change1_i(Fl_Button*, void*);
+  static void cb_Change1(Fl_Button*, void*);
+public:
+  Fl_File_Input *gsesyncfile_fileInput;
   void show();
   Application *app; 
   Foxsidata *data; 

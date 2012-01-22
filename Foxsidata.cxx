@@ -137,7 +137,7 @@ void Foxsidata::FlushImage(void)
 		}
 	}
 	gui->mainImageWindow->redraw();
-	gui->subImageWindow->redraw();
+	//gui->subImageWindow->redraw();
 }
 
 void Foxsidata::Properties(void) const
