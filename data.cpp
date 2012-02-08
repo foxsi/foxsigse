@@ -584,18 +584,18 @@ void data_update_display(unsigned short int *frame)
 	if (data_source == 0) {
 		// Parse simulated data
 
-		unsigned voltage_status;
-		unsigned voltage;
+		unsigned high_voltage_status;
+		unsigned high_voltage;
 
-		voltage_status = buffer[13] & 0xF;
-		voltage = (buffer[13] >> 12) & 0xFFF;
+		high_voltage_status = buffer[13] & 0xF;
+		high_voltage = (buffer[13] >> 12) & 0xFFF;
 		
 		gui->framenumOutput->value(frame[5]);
 		
-		gui->HVOutput->value(voltage);
-		if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
-		if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
-		if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
+		gui->HVOutput->value(high_voltage);
+		if (high_voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
+		if (high_voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
+		if (high_voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
 		
 		num_hits = arc4random() % 10;
 		for(int i = 0; i < num_hits; i++)
@@ -752,23 +752,43 @@ void data_update_display(unsigned short int *frame)
 	}
 	
 	if (data_source == 2) {
-		// parse and display the data from the USB/ASIC connection
+		// parse and display the data from the USB/Formatter connection
+		// 
+		// Notes
+		// -----
+		//
+		// * the order for asics n n then p p
+		// * the asic mask does not work
+		// * the data read in, contains four frames
+		// * the sync words are f628 at the beginning of the frame and eb90 at
+		//   the end of the frame.
+		// * the asic data contains the three max strips as well as the common
+		//   mode in the fourth data word.
+		// * the word right before the ending sync word is a checksum
+		
 		unsigned short int tmp;
-		unsigned voltage_status;
-		unsigned voltage;
+		unsigned high_voltage_status;
+		unsigned high_voltage;
 		unsigned short int strip_data;
 		unsigned short int strip_number;
 		int index = 0;
 		unsigned short int read_status;
+		int frameNumber;
+		float temperature_monitors[12];
+		float voltage_monitors[4];			// order is 5V, -5V, 1.5V, -3.3V
+		float temperature_values[12];
+		
 		// parse the buffer variable and update the display
 		
-		for( int l = 0; l < 4; l++)
+		for( int frame_number = 0; frame_number < 4; frame_number++)
 		{
 			if (buffer[index++] == 0xf628) {
 				
-				printf("checksum: %u\n", buffer[index+253]);
-				printf("eb90: %x\n", buffer[index+254]);
-				for( int m = 0; m < 254; m++ ){read_status ^= buffer[index+m];}
+				//printf("checksum: %u\n", buffer[index+253]);
+				//printf("eb90: %x\n", buffer[index+254]);
+				
+				// check the checksum
+				for( int word_number = 0; word_number < 254; word_number++ ){read_status ^= buffer[index+word_number];}
 				if( read_status == 1 ){
 					nreads++;
 					//printf("calc checksum: %u\n", checksum);
@@ -779,41 +799,113 @@ void data_update_display(unsigned short int *frame)
 					printf("tim3(LSB): %u\n", buffer[index++]);
 					printf("frame counter 1: %u\n", buffer[index++]);
 					printf("frame counter 2: %u\n", buffer[index++]);
-					gui->framenumOutput->value(buffer[index]);
-					printf("housekeeping 0: %u\n", buffer[index++]);
+					frameNumber = buffer[index];
+					
+					// Housekeeping 0
+					switch (frame_number) {
+						case 0:
+							// temperature reference
+							temperature_monitors[0] = buffer[index++];
+							break;
+						case 1:
+							//1.5 V monitor
+							voltage_monitors[2] = buffer[index++];
+							break;
+						case 2:
+							temperature_monitors[4] = buffer[index++];
+							break;
+						case 3:
+							temperature_monitors[8] = buffer[index++];
+							break;
+						default:
+							printf("housekeeping 0: %u\n", buffer[index++]);
+							break;
+					}
+					
 					printf("cmd count: %u\n", buffer[index++]);
 					printf("command 1: %u\n", buffer[index++]);
 					printf("command 2: %u\n", buffer[index++]);
-					printf("Housekeeping 1: %u\n", buffer[index++]);
+					
+					// Housekeeping 1
+					switch (frame_number) {
+						case 0:
+							// 5 V monitor
+							voltage_monitors[0] = buffer[index++];
+							break;
+						case 1:
+							temperature_monitors[1] = buffer[index++];
+							break;
+						case 2:
+							temperature_monitors[5] = buffer[index++];
+							break;
+						case 3:
+							temperature_monitors[9] = buffer[index++];
+							break;
+						default:
+							printf("Housekeeping 1: %u\n", buffer[index++]);
+							break;
+					}
+					
 					printf("FormatterStatus: %u\n", buffer[index++]);
-					printf("0: %u\n", buffer[index++]);
+					index++ // printf("0: %u\n", buffer[index++]);
 					
-					voltage_status = buffer[13] & 0xF;
-					voltage = (buffer[13] >> 12) & 0xFFF;
 					index++;
-					voltage_status = buffer[index] & 0xF;
-					voltage = (buffer[index] >> 12) & 0xFFF;
-					gui->HVOutput->value(voltage);
+					high_voltage_status = buffer[index] & 0xF;
+					high_voltage = (buffer[index] >> 12) & 0xFFF;
+										
+					// Housekeeping 2
+					switch (frame_number) {
+						case 0:
+							// -5 V monitor
+							voltage_monitors[1] = buffer[index++];
+							break;
+						case 1:
+							temperature_monitors[2] = buffer[index++];
+							break;
+						case 2:
+							temperature_monitors[6] = buffer[index++];
+							break;
+						case 3:
+							temperature_monitors[10] = buffer[index++];
+							break;
+						default:
+							printf("Housekeeping 2: %u\n", buffer[index++]);
+							break;
+					}
 					
-					//printf("voltage: %i status: %i", voltage, voltage_status);
-					if (voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
-					if (voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
-					if (voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
+					index++ // printf("Status 0: %u\n", buffer[index++]);
+					index++ // printf("Status 1: %u\n", buffer[index++]);
+					index++ //printf("Status 2: %u\n", buffer[index++]);
 					
-					printf("Housekeeping 2: %u\n", buffer[index++]);
-					printf("Status 0: %u\n", buffer[index++]);
-					printf("Status 1: %u\n", buffer[index++]);
-					printf("Status 2: %u\n", buffer[index++]);
-					printf("Housekeeping 3: %u\n", buffer[index++]);
+					// Housekeeping 3
+					switch (frame_number) {
+						case 0:
+							// 3.3 V monitor
+							voltage_monitors[3] = buffer[index++];
+							break;
+						case 1:
+							temperature_monitors[3] = buffer[index++];
+							break;
+						case 2:
+							temperature_monitors[7] = buffer[index++];
+							break;
+						case 3:
+							temperature_monitors[11] = buffer[index++];
+							break;
+						default:
+							printf("Housekeeping 3: %u\n", buffer[index++]);
+							break;
+					}
+					
 					printf("Status 3: %u\n", buffer[index++]);
 					printf("Status 4: %u\n", buffer[index++]);
 					printf("Status 5: %u\n", buffer[index++]);
 					printf("Status 6: %u\n", buffer[index++]);
 					printf("index = %u\n", index);
 					
-					for(int j = 0; j < 7; j++){
-						printf("Detector %u time: %u\n", j, buffer[index++]);
-						for(int i = 0; i < 4; i++)
+					for(int detector_number = 0; detector_number < 7; detector_number++){
+						printf("Detector %u time: %u\n", detector_number, buffer[index++]);
+						for(int asic_number = 0; asic_number < 4; asic_number++)
 						{
 							// 0ASIC0 mask0 
 							index++;
@@ -823,32 +915,90 @@ void data_update_display(unsigned short int *frame)
 							index++;
 							// 0ASIC0 mask3
 							index++;
-							for(int k = 0; k < 4; k++)
+							for(int strip_number = 0; strip_number < 4; strip_number++)
 							{
 								index++;
 								strip_data = buffer[index] & 0x3F;
 								strip_number = (buffer[index] >> 10) & 0x3FFF;
-								printf("%x\t", buffer[index]);
+								
+								if (strip_data >= low_threshold){
+									num_hits++;
+									
+									if (asic_number < 2) {
+										// n side asic
+										ystrips[strip_number + asic_number * 64] = 1;
+									}
+									if (asic_number > 1) {
+										// p side asic
+										xstrips[strip_number + (asic_number -2) * 64] = 1;
+										if (strip_data > 0){ HistogramFunction[strip_data]++; }
+									}
+									
+								}
+								//printf("%x\t", buffer[index]);
 							}
-							printf("\nindex = %u\n", index);
+							// printf("\nindex = %u\n", index);
 						}
+						
+						for(int i = 0; i < XSTRIPS; i++)
+						{
+							if (xstrips[i] >= low_threshold){
+								for(int j = 0; j < YSTRIPS; j++)
+								{
+									if (xstrips[i] * ystrips[j] != 0) {
+										detImage[i][j] += 1;
+										detImagetime[i][j] = clock();}
+								}
+							}
+						}
+					
 					}
 					printf("checksum: %u\n", buffer[index++]);
 					printf("sync: %u\n", buffer[index++]);
 				} else {
+					// bad checksum, skip this frame and go to the next
 					index+=255;
 				}
 
 			}
+			
+			// parsing for one frame done, now update the display
+			Fl::lock();
+			gui->HVOutput->value(high_voltage);										
+			//printf("voltage: %i status: %i", voltage, HVvoltage_status);
+			if (high_voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
+			if (high_voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
+			if (high_voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
+			gui->nEventsDone->value(nreads); 
+			gui->framenumOutput->value(frameNumber);
+			Fl::unlock();
 		}
+		//parsing for four frames (the whole data drop), now update
 		
-		nreads+=4;
-		gui->nEventsDone->value(nreads); 
+		//temperature_values[0] = convert_temperature(
+		for(int num = 1; num < 12; num++)
+		{temperature_values[num] = temperature_convert_ysi44031(temperature_monitor[num]);}
 		
-		//HistogramFunction[strip_data]++;
-		//tmp = arc4random() % 64 + 1;
-		//detImage[tmp][strip_number] = 1;
-		//detImagetime[tmp][strip_number] = clock();
+		Fl::lock();
+		gui->tempOutput->value(temperature_values[0]);
+		gui->tempOutput1->value(temperature_values[1]);
+		gui->tempOutput2->value(temperature_values[2]);
+		gui->tempOutput3->value(temperature_values[3]);
+		gui->tempOutput4->value(temperature_values[4]);
+		gui->tempOutput5->value(temperature_values[5]);
+		gui->tempOutput6->value(temperature_values[6]);
+		gui->tempOutput7->value(temperature_values[7]);
+		gui->tempOutput8->value(temperature_values[8]);
+		gui->tempOutput9->value(temperature_values[9]);
+		gui->tempOutput10->value(temperature_values[10]);
+		gui->tempOutput11->value(temperature_values[11]);
+		
+		gui->VoltageOutput0->value(voltage_monitors[0]);
+		gui->VoltageOutput1->value(voltage_monitors[1]);		
+		gui->VoltageOutput2->value(voltage_monitors[2]);
+		gui->VoltageOutput3->value(voltage_monitors[3]);
+		Fl::unlock();
+		
 	}
 
 }

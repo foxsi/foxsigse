@@ -152,19 +152,83 @@ exit(1);}
       }
       Fl_Group {} {
         label {Telemetry Info} open
-        xywh {424 121 255 55} box THIN_UP_FRAME
+        xywh {400 109 290 170} box THIN_UP_FRAME
       } {
         Fl_Value_Output shutterstateOutput {
           label {Shutter state}
-          xywh {597 122 37 27}
+          xywh {636 110 39 27}
         }
-        Fl_Value_Output tempOutput {
-          label Temp
-          xywh {467 122 40 24}
+        Fl_Value_Output tempOutput2 {
+          label T2
+          xywh {425 225 40 24}
         }
         Fl_Value_Output HVOutput {
           label HV
-          xywh {467 151 40 24}
+          xywh {635 140 40 24}
+        }
+        Fl_Value_Output tempOutput1 {
+          label T1
+          xywh {425 197 40 24}
+        }
+        Fl_Value_Output tempOutput0 {
+          label T0
+          xywh {425 169 40 24}
+        }
+        Fl_Value_Output tempOutput3 {
+          label T3
+          xywh {425 251 40 24}
+        }
+        Fl_Value_Output tempOutput {
+          label {Temp Ref}
+          xywh {467 139 40 24}
+        }
+        Fl_Value_Output tempOutput10 {
+          label T10
+          xywh {564 229 40 24}
+        }
+        Fl_Value_Output tempOutput9 {
+          label T9
+          xywh {564 199 40 24}
+        }
+        Fl_Value_Output tempOutput8 {
+          label T8
+          xywh {564 169 40 24}
+        }
+        Fl_Value_Output tempOutput6 {
+          label T6
+          xywh {492 226 40 24}
+        }
+        Fl_Value_Output tempOutput5 {
+          label T5
+          xywh {491 199 40 24}
+        }
+        Fl_Value_Output tempOutput4 {
+          label T4
+          xywh {491 169 40 24}
+        }
+        Fl_Value_Output tempOutput7 {
+          label T7
+          xywh {493 252 40 24}
+        }
+        Fl_Value_Output tempOutput11 {
+          label T11
+          xywh {564 254 40 24}
+        }
+        Fl_Value_Output VoltageOutput1 {
+          label {-5V}
+          xywh {644 198 40 24}
+        }
+        Fl_Value_Output VoltageOutput0 {
+          label 5V
+          xywh {644 169 40 24}
+        }
+        Fl_Value_Output VoltageOutput2 {
+          label {1.5V}
+          xywh {644 226 40 24}
+        }
+        Fl_Value_Output VoltageOutput3 {
+          label {-3.3V} selected
+          xywh {644 254 40 24}
         }
       }
       Fl_Group {} {
@@ -1354,8 +1418,7 @@ consoleBuf->buffer(buff);} {}
 timebinsize_counter->step(0.1, 1);
 lightcurvexmax_counter->step(5, 10);
 histogramxmax_counter->step(5, 50);
-histogrambinsize_counter->step(1,5);} {selected
-    }
+histogrambinsize_counter->step(1,5);} {}
   }
   Function {show()} {open
   } {

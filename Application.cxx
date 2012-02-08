@@ -287,7 +287,7 @@ void* Application::auto_run_sequence(void* variable)
 {
 	/*
 	for(int i=1; i<32; i++){
-		Fl::lock();
+			();
 		gui->nEventsDone->value(0);
 		gui->setHoldTimeWindow_holdTime->value(i);
 		Fl::unlock();

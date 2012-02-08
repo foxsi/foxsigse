@@ -493,14 +493,46 @@ Gui::Gui() {
     } // Fl_Output* rateOutput6
     { rateOutput7 = new Fl_Output(1085, 45, 45, 25);
     } // Fl_Output* rateOutput7
-    { Fl_Group* o = new Fl_Group(424, 121, 255, 55, "Telemetry Info");
+    { Fl_Group* o = new Fl_Group(400, 109, 290, 170, "Telemetry Info");
       o->box(FL_THIN_UP_FRAME);
-      { shutterstateOutput = new Fl_Value_Output(597, 122, 37, 27, "Shutter state");
+      { shutterstateOutput = new Fl_Value_Output(636, 110, 39, 27, "Shutter state");
       } // Fl_Value_Output* shutterstateOutput
-      { tempOutput = new Fl_Value_Output(467, 122, 40, 24, "Temp");
-      } // Fl_Value_Output* tempOutput
-      { HVOutput = new Fl_Value_Output(467, 151, 40, 24, "HV");
+      { tempOutput2 = new Fl_Value_Output(425, 225, 40, 24, "T2");
+      } // Fl_Value_Output* tempOutput2
+      { HVOutput = new Fl_Value_Output(635, 140, 40, 24, "HV");
       } // Fl_Value_Output* HVOutput
+      { tempOutput1 = new Fl_Value_Output(425, 197, 40, 24, "T1");
+      } // Fl_Value_Output* tempOutput1
+      { tempOutput0 = new Fl_Value_Output(425, 169, 40, 24, "T0");
+      } // Fl_Value_Output* tempOutput0
+      { tempOutput3 = new Fl_Value_Output(425, 251, 40, 24, "T3");
+      } // Fl_Value_Output* tempOutput3
+      { tempOutput = new Fl_Value_Output(467, 139, 40, 24, "Temp Ref");
+      } // Fl_Value_Output* tempOutput
+      { tempOutput10 = new Fl_Value_Output(564, 229, 40, 24, "T10");
+      } // Fl_Value_Output* tempOutput10
+      { tempOutput9 = new Fl_Value_Output(564, 199, 40, 24, "T9");
+      } // Fl_Value_Output* tempOutput9
+      { tempOutput8 = new Fl_Value_Output(564, 169, 40, 24, "T8");
+      } // Fl_Value_Output* tempOutput8
+      { tempOutput6 = new Fl_Value_Output(492, 226, 40, 24, "T6");
+      } // Fl_Value_Output* tempOutput6
+      { tempOutput5 = new Fl_Value_Output(491, 199, 40, 24, "T5");
+      } // Fl_Value_Output* tempOutput5
+      { tempOutput4 = new Fl_Value_Output(491, 169, 40, 24, "T4");
+      } // Fl_Value_Output* tempOutput4
+      { tempOutput7 = new Fl_Value_Output(493, 252, 40, 24, "T7");
+      } // Fl_Value_Output* tempOutput7
+      { tempOutput11 = new Fl_Value_Output(564, 254, 40, 24, "T11");
+      } // Fl_Value_Output* tempOutput11
+      { VoltageOutput1 = new Fl_Value_Output(644, 198, 40, 24, "-5V");
+      } // Fl_Value_Output* VoltageOutput1
+      { VoltageOutput0 = new Fl_Value_Output(644, 169, 40, 24, "5V");
+      } // Fl_Value_Output* VoltageOutput0
+      { VoltageOutput2 = new Fl_Value_Output(644, 226, 40, 24, "1.5V");
+      } // Fl_Value_Output* VoltageOutput2
+      { VoltageOutput3 = new Fl_Value_Output(644, 254, 40, 24, "-3.3V");
+      } // Fl_Value_Output* VoltageOutput3
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(605, 436, 505, 243, "Histogram");
