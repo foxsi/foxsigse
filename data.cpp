@@ -146,6 +146,9 @@ void data_initialize(void)
 			gui->startReadingDataButton->activate();
 			gui->closeBut->activate();
 			gui->detector_choice->activate();
+			gui->app->flush_image();
+			gui->app->flush_histogram();
+			gui->app->flush_timeseries();
 			gui->app->print_to_console("Done initializing.\n");
 		}
 	}
@@ -304,7 +307,8 @@ void* data_read_data(void *p)
 			// read from the USB/Formatter, reads 4 frames at a time.
 			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer);
 			// set the read status based on how len returned 
-			if (len == 2048){ read_status = 1; printf("read okay\n");}
+			if (len == 2048){ read_status = 1; // printf("read okay\n");}
+			}
 		}
 				
 		if (read_status == 1) {
@@ -324,8 +328,8 @@ void* data_read_data(void *p)
 					newdisplay = 1;
 				}
 				pthread_mutex_unlock(&mymutex);
-			} else {printf("failed to pass off data\n");}
-			
+			} else {// printf("failed to pass off data\n");}
+			}
 			// Check to see if if only a fixed number of frames should be read
 			// if so set the stop message
 			if ((maxreads != 0) && (nreads >= maxreads)){
@@ -782,23 +786,26 @@ void data_update_display(unsigned short int *frame)
 		
 		for( int frame_number = 0; frame_number < 4; frame_number++)
 		{
+			//printf("f628: %x\n", buffer[index++]);
 			if (buffer[index++] == 0xf628) {
-				
-				//printf("checksum: %u\n", buffer[index+253]);
-				//printf("eb90: %x\n", buffer[index+254]);
+				read_status = 1;
+				printf("checksum: %u\n", buffer[index+253]);
+				printf("eb90: %x\n", buffer[index+254]);
 				
 				// check the checksum
 				for( int word_number = 0; word_number < 254; word_number++ ){read_status ^= buffer[index+word_number];}
+				printf("read status: %u\n", read_status);
+				read_status = 1;
 				if( read_status == 1 ){
 					nreads++;
 					//printf("calc checksum: %u\n", checksum);
 					
 					printf("index = %u\n", index);
-					printf("time1(MSB): %u\n", buffer[index++]);
-					printf("time2: %u\n", buffer[index++]);
-					printf("tim3(LSB): %u\n", buffer[index++]);
-					printf("frame counter 1: %u\n", buffer[index++]);
-					printf("frame counter 2: %u\n", buffer[index++]);
+					printf("time1(MSB): %x\n", buffer[index++]);
+					printf("time2: %x\n", buffer[index++]);
+					printf("tim3(LSB): %x\n", buffer[index++]);
+					printf("frame counter 1: %x\n", buffer[index++]);
+					printf("frame counter 2: %x\n", buffer[index++]);
 					frameNumber = buffer[index];
 					
 					// Housekeeping 0
@@ -847,7 +854,7 @@ void data_update_display(unsigned short int *frame)
 					}
 					
 					printf("FormatterStatus: %u\n", buffer[index++]);
-					index++ // printf("0: %u\n", buffer[index++]);
+					printf("0: %u\n", buffer[index++]);
 					
 					index++;
 					high_voltage_status = buffer[index] & 0xF;
@@ -873,9 +880,9 @@ void data_update_display(unsigned short int *frame)
 							break;
 					}
 					
-					index++ // printf("Status 0: %u\n", buffer[index++]);
-					index++ // printf("Status 1: %u\n", buffer[index++]);
-					index++ //printf("Status 2: %u\n", buffer[index++]);
+					index++; // printf("Status 0: %u\n", buffer[index++]);
+					index++; // printf("Status 1: %u\n", buffer[index++]);
+					index++; //printf("Status 2: %u\n", buffer[index++]);
 					
 					// Housekeeping 3
 					switch (frame_number) {
@@ -901,7 +908,7 @@ void data_update_display(unsigned short int *frame)
 					printf("Status 4: %u\n", buffer[index++]);
 					printf("Status 5: %u\n", buffer[index++]);
 					printf("Status 6: %u\n", buffer[index++]);
-					printf("index = %u\n", index);
+					//printf("index = %u\n", index);
 					
 					for(int detector_number = 0; detector_number < 7; detector_number++){
 						printf("Detector %u time: %u\n", detector_number, buffer[index++]);
@@ -921,8 +928,9 @@ void data_update_display(unsigned short int *frame)
 								strip_data = buffer[index] & 0x3F;
 								strip_number = (buffer[index] >> 10) & 0x3FFF;
 								
-								if (strip_data >= low_threshold){
+								if ((strip_data >= low_threshold) && (strip_data < 1023)){
 									num_hits++;
+									printf("hit! strip value %u\n", strip_data);
 									
 									if (asic_number < 2) {
 										// n side asic
@@ -930,7 +938,7 @@ void data_update_display(unsigned short int *frame)
 									}
 									if (asic_number > 1) {
 										// p side asic
-										xstrips[strip_number + (asic_number -2) * 64] = 1;
+										xstrips[strip_number + (asic_number - 2) * 64] = 1;
 										if (strip_data > 0){ HistogramFunction[strip_data]++; }
 									}
 									
@@ -977,7 +985,7 @@ void data_update_display(unsigned short int *frame)
 		
 		//temperature_values[0] = convert_temperature(
 		for(int num = 1; num < 12; num++)
-		{temperature_values[num] = temperature_convert_ysi44031(temperature_monitor[num]);}
+		{temperature_values[num] = temperature_convert_ysi44031(temperature_monitors[num]);}
 		
 		Fl::lock();
 		gui->tempOutput->value(temperature_values[0]);

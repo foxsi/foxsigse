@@ -35,9 +35,9 @@ float temperature_convert_ysi44031(int value)
 	frac = value/4095.0;
 	voltage = 2.5*frac;
 	resistance = 10000.0 * frac/ ( 1.0 - frac );
-	printf("%f\n",resistance);
+	//printf("%f\n",resistance);
 	temperature = 1 / (c1 + c2 * log(resistance) + c3 * (pow(log(resistance),3))) - 273.15 - 9.73;
-	printf("%f\n", temperature);
+	//printf("%f\n", temperature);
 	return temperature;
 }
 
