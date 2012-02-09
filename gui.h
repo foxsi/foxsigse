@@ -73,14 +73,6 @@ private:
   void cb_Save_i(Fl_Button*, void*);
   static void cb_Save(Fl_Button*, void*);
 public:
-  Fl_Output *rateOutput0;
-  Fl_Output *rateOutput1;
-  Fl_Output *rateOutput2;
-  Fl_Output *rateOutput3;
-  Fl_Output *rateOutput4;
-  Fl_Output *rateOutput5;
-  Fl_Output *rateOutput6;
-  Fl_Output *rateOutput7;
   Fl_Value_Output *shutterstateOutput;
   Fl_Value_Output *tempOutput2;
   Fl_Value_Output *HVOutput;

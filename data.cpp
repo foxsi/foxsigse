@@ -771,16 +771,17 @@ void data_update_display(unsigned short int *frame)
 		// * the word right before the ending sync word is a checksum
 		
 		unsigned short int tmp;
-		unsigned high_voltage_status;
-		unsigned high_voltage;
+		unsigned short int high_voltage_status;
+		unsigned short int high_voltage;
 		unsigned short int strip_data;
 		unsigned short int strip_number;
+		unsigned short int formatter_status;
+		bool attenuator_actuating = 0;
 		int index = 0;
 		unsigned short int read_status;
 		int frameNumber;
-		float temperature_monitors[12];
-		float voltage_monitors[4];			// order is 5V, -5V, 1.5V, -3.3V
-		float temperature_values[12];
+		unsigned short int temperature_monitors[12];
+		unsigned short int voltage_monitors[4];			// order is 5V, -5V, 1.5V, -3.3V
 		
 		// parse the buffer variable and update the display
 		
@@ -853,7 +854,10 @@ void data_update_display(unsigned short int *frame)
 							break;
 					}
 					
-					printf("FormatterStatus: %u\n", buffer[index++]);
+					formatter_status = buffer[index++]; // printf("FormatterStatus: %u\n", buffer[index++]);
+					if (getbits(formatter_status, 2, 1)) {
+						attenuator_actuating = 1;
+					}
 					printf("0: %u\n", buffer[index++]);
 					
 					index++;
@@ -914,21 +918,30 @@ void data_update_display(unsigned short int *frame)
 						printf("Detector %u time: %u\n", detector_number, buffer[index++]);
 						for(int asic_number = 0; asic_number < 4; asic_number++)
 						{
-							// 0ASIC0 mask0 
-							index++;
+							// 0ASIC0 mask0
+							tmp = buffer[index++];
+							for(int position = 0, position < 8; position++)
+								xmask[position] = getbits(tmp, position, 1);
 							// 0ASIC0 mask1
-							index++;
+							tmp = buffer[index++];
+							for(int position = 0, position < 8; position++)
+								xmask[position+8] = getbits(tmp, position, 1);
 							// 0ASIC0 mask2
-							index++;
+							tmp = buffer[index++];
+							for(int position = 0, position < 8; position++)
+								ymask[position] = getbits(tmp, position, 1);
 							// 0ASIC0 mask3
-							index++;
+							tmp = buffer[index++];
+							for(int position = 0, position < 8; position++)
+								ymask[position+8] = getbits(tmp, position, 1);
+
 							for(int strip_number = 0; strip_number < 4; strip_number++)
 							{
 								index++;
 								strip_data = buffer[index] & 0x3F;
 								strip_number = (buffer[index] >> 10) & 0x3FFF;
 								
-								if ((strip_data >= low_threshold) && (strip_data < 1023)){
+								if ((strip_data >= low_threshold) && (strip_data != 0xFFFF)){
 									num_hits++;
 									printf("hit! strip value %u\n", strip_data);
 									
@@ -955,6 +968,7 @@ void data_update_display(unsigned short int *frame)
 								{
 									if (xstrips[i] * ystrips[j] != 0) {
 										detImage[i][j] += 1;
+										detImagemask[i][j] = xmask[i]*ymask[j];
 										detImagetime[i][j] = clock();}
 								}
 							}
@@ -974,37 +988,35 @@ void data_update_display(unsigned short int *frame)
 			Fl::lock();
 			gui->HVOutput->value(high_voltage);										
 			//printf("voltage: %i status: %i", voltage, HVvoltage_status);
-			if (high_voltage_status == 1){gui->HVOutput->textcolor(FL_RED);}
-			if (high_voltage_status == 2){gui->HVOutput->textcolor(FL_BLUE);}
-			if (high_voltage_status == 4){gui->HVOutput->textcolor(FL_BLACK);}
+			if (high_voltage_status == 1) {gui->HVOutput->textcolor(FL_RED);}
+			if (high_voltage_status == 2) {gui->HVOutput->textcolor(FL_BLUE);}
+			if (high_voltage_status == 4) {gui->HVOutput->textcolor(FL_BLACK);}
 			gui->nEventsDone->value(nreads); 
 			gui->framenumOutput->value(frameNumber);
+			if (attenuator_actuating == 1) {gui->shutterstateOutput->value(1);}
 			Fl::unlock();
 		}
 		//parsing for four frames (the whole data drop), now update
-		
-		//temperature_values[0] = convert_temperature(
-		for(int num = 1; num < 12; num++)
-		{temperature_values[num] = temperature_convert_ysi44031(temperature_monitors[num]);}
-		
+				
 		Fl::lock();
-		gui->tempOutput->value(temperature_values[0]);
-		gui->tempOutput1->value(temperature_values[1]);
-		gui->tempOutput2->value(temperature_values[2]);
-		gui->tempOutput3->value(temperature_values[3]);
-		gui->tempOutput4->value(temperature_values[4]);
-		gui->tempOutput5->value(temperature_values[5]);
-		gui->tempOutput6->value(temperature_values[6]);
-		gui->tempOutput7->value(temperature_values[7]);
-		gui->tempOutput8->value(temperature_values[8]);
-		gui->tempOutput9->value(temperature_values[9]);
-		gui->tempOutput10->value(temperature_values[10]);
-		gui->tempOutput11->value(temperature_values[11]);
+		gui->tempOutput->value(temperature_convert_ref(temperature_monitors[0]));
+		gui->tempOutput1->value(temperature_convert_ysi44031(temperature_monitors[1]));
+		gui->tempOutput2->value(temperature_convert_ysi44031(temperature_monitors[2]));
+		gui->tempOutput3->value(temperature_convert_ysi44031(temperature_monitors[3]));
+		gui->tempOutput4->value(temperature_convert_ysi44031(temperature_monitors[4]));
+		gui->tempOutput5->value(temperature_convert_ysi44031(temperature_monitors[5]));
+		gui->tempOutput6->value(temperature_convert_ysi44031(temperature_monitors[6]));
+		gui->tempOutput7->value(temperature_convert_ysi44031(temperature_monitors[7]));
+		gui->tempOutput8->value(temperature_convert_ysi44031(temperature_monitors[8]));
+		gui->tempOutput9->value(temperature_convert_ysi44031(temperature_monitors[9]));
+		gui->tempOutput10->value(temperature_convert_ysi44031(temperature_monitors[10]));
+		gui->tempOutput11->value(temperature_convert_ysi44031(temperature_monitors[11]));
 		
-		gui->VoltageOutput0->value(voltage_monitors[0]);
-		gui->VoltageOutput1->value(voltage_monitors[1]);		
-		gui->VoltageOutput2->value(voltage_monitors[2]);
-		gui->VoltageOutput3->value(voltage_monitors[3]);
+		// order is 5V, -5V, 1.5V, 3.3V
+		gui->VoltageOutput0->value(voltage_convert_5v(voltage_monitors[0]));
+		gui->VoltageOutput1->value(voltage_convert_m5v(voltage_monitors[1]));		
+		gui->VoltageOutput2->value(voltage_convert_15v(voltage_monitors[2]));
+		gui->VoltageOutput3->value(voltage_convert_33v(voltage_monitors[3]));
 		Fl::unlock();
 		
 	}
