@@ -15,6 +15,7 @@
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Value_Slider.H>
+#include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Value_Output.H>
 #include "mainHistogram.h"
 #include <FL/Fl_Choice.H>
@@ -22,7 +23,6 @@
 #include "mainLightcurve.h"
 #include <FL/Fl_Value_Input.H>
 #include <FL/Fl_Text_Display.H>
-#include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_File_Input.H>
 
@@ -72,6 +72,11 @@ private:
   static void cb_mainImage_integrate_button(Fl_Light_Button*, void*);
   void cb_Save_i(Fl_Button*, void*);
   static void cb_Save(Fl_Button*, void*);
+public:
+  Fl_Check_Button *showmask_checkbox;
+private:
+  void cb_showmask_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_showmask_checkbox(Fl_Check_Button*, void*);
 public:
   Fl_Value_Output *shutterstateOutput;
   Fl_Value_Output *tempOutput2;
@@ -198,12 +203,45 @@ public:
   Fl_Value_Output *nEventsDone;
   Fl_Group *detector_choice;
   Fl_Check_Button *detector1_checkbox;
+private:
+  void cb_detector1_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector1_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector2_checkbox;
+private:
+  void cb_detector2_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector2_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector3_checkbox;
+private:
+  void cb_detector3_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector3_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector4_checkbox;
+private:
+  void cb_detector4_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector4_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector5_checkbox;
+private:
+  void cb_detector5_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector5_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector6_checkbox;
+private:
+  void cb_detector6_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector6_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector7_checkbox;
+private:
+  void cb_detector7_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector7_checkbox(Fl_Check_Button*, void*);
+public:
+  Fl_Check_Button *detectorall_checkbox;
+private:
+  void cb_detectorall_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detectorall_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Value_Output *inttimeOutput;
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;

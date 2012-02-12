@@ -35,15 +35,24 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 	ymin = 0;
 	xmax = MAX_CHANNEL;
 	xmin = 0;
-	
+	detector_display[0] = 1;
+	detector_display[1] = 0;
+	detector_display[2] = 0;
+	detector_display[3] = 0;
+	detector_display[4] = 0;
+	detector_display[5] = 0;
+	detector_display[6] = 0;
+	detector_display[7] = 0;
 	/* initialize random seed: */
-	//srand ( time(NULL) );
 	
 	//initialize the histogram
 	for(int i=0; i < MAX_CHANNEL; i++)
 	{
 		HistogramFunction[i] = i*1;
 		displayHistogram[i] = HistogramFunction[i];
+		for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+			HistogramFunctionDetectors[i][detector_num] = i*2 + detector_num;
+			displayHistogramDetectors[i][detector_num] = HistogramFunctionDetectors[i][detector_num];}
 	}
 	FLHistcursorX[0] = 500;
 	mouseHistPixel = FLHistcursorX[0];
@@ -56,8 +65,9 @@ void mainHistogram::draw()
 	int y = 0;
 	int k = 0;
 	
-	ymax = maximumValue(displayHistogram, xmax/mainHistogram_binsize, 5);
-	if (ymax == 0){ ymax = 10; }
+	ymax = maximumValue(displayHistogram, xmax/mainHistogram_binsize, low_threshold/mainHistogram_binsize);
+
+	if (ymax == 0){ ymax = 100; }
 		
 	YTICKINTERVALM = (ymax-ymin)/YNUMTICKS;
 	YTICKINTERVAL = YTICKINTERVALM/2;
@@ -86,11 +96,7 @@ void mainHistogram::draw()
 	glLoadIdentity();
 	glClearColor(0.0,0.0,0.0,0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	
-	//draw the graph
-	glBegin(GL_LINES);
-	glColor3f(1.0, 0.0, 0.0);
-	
+		
 	// recalculate the displayed histogram (rebinned)
 	for(int i = 0; i < MAX_CHANNEL; i+=mainHistogram_binsize)
 	{
@@ -98,21 +104,53 @@ void mainHistogram::draw()
 		for (int j = 0; j < mainHistogram_binsize; j++) {
 			y += HistogramFunction[i+j];}
 		displayHistogram[k] = y;
+		
+		for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+			y = 0;
+			for (int j = 0; j < mainHistogram_binsize; j++) {
+				y += HistogramFunctionDetectors[i+j][detector_num];}
+			displayHistogramDetectors[k][detector_num] = y;
+		}
 		k++;
 	}
 	
-	for(int i = 0; i < MAX_CHANNEL/mainHistogram_binsize; i++)
+	if (detector_display[0] == 1)
 	{
-		glVertex2f(i, displayHistogram[i]);
-		glVertex2f(i+1, displayHistogram[i]);
+		//draw the total detector histogram
+		glBegin(GL_LINES);
+		glColor3f(1.0, 0.0, 0.0);	
 		
-		glVertex2f(i+0.5, displayHistogram[i] - sqrt(displayHistogram[i]));
-		glVertex2f(i+0.5, displayHistogram[i] + sqrt(displayHistogram[i]));
-	
+		for(int i = 0; i < MAX_CHANNEL/mainHistogram_binsize; i++)
+		{
+			glVertex2f(i, displayHistogram[i]);
+			glVertex2f(i+1, displayHistogram[i]);
+			
+			glVertex2f(i+0.5, displayHistogram[i] - sqrt(displayHistogram[i]));
+			glVertex2f(i+0.5, displayHistogram[i] + sqrt(displayHistogram[i]));
+		
+		}
+		//glVertex2f(MAX_CHANNEL+XBORDER, YBORDER);
+		//glVertex2f(XBORDER, YBORDER);
+		glEnd();
 	}
-	//glVertex2f(MAX_CHANNEL+XBORDER, YBORDER);
-	//glVertex2f(XBORDER, YBORDER);
-	glEnd();
+	
+	//draw the total detector histogram
+	for (int detector_num = 1; detector_num < NUM_DETECTORS+1; detector_num++)
+	{
+		if (detector_display[detector_num] == 1)
+		{
+			glBegin(GL_LINES);
+			glColor3f(0.0, 0.0, 1.0);	
+			for(int i = 0; i < MAX_CHANNEL/mainHistogram_binsize; i++)
+			{
+				glVertex2f(i, 7*displayHistogramDetectors[i][detector_num]);
+				glVertex2f(i+1, 7*displayHistogramDetectors[i][detector_num]);	
+				//glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num] - sqrt(displayHistogramDetectors[i][detector_num]));
+				//glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num] + sqrt(displayHistogramDetectors[i][detector_num]));
+			}
+			glEnd();
+		}
+	}	
 	
 	// draw vertival select line from mouse click
 	glBegin(GL_LINES);

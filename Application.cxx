@@ -77,6 +77,11 @@ void Application::flush_histogram(void)
 	{
 		HistogramFunction[i] = 0;
 		displayHistogram[i] = 0;
+		for(int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++)
+		{
+			gui->mainHistogramWindow->HistogramFunctionDetectors[i][detector_num] = 0;
+			gui->mainHistogramWindow->displayHistogramDetectors[i][detector_num] = 0;
+		}
 	}
 	gui->mainHistogramWindow->redraw();
 }
@@ -526,6 +531,29 @@ void Application::save_image_to_file(void)
 
 void Application::set_lightcurve_ymax(void)
 {
+	// update the max of the y range of the light curve
 	gui->mainLightcurveWindow->ymax = gui->mainLightcurve_ymaxslider->value();
+	gui->mainLightcurveWindow->redraw();
+}
+
+void Application::toggle_show_mask(void)
+{
+	// update whether to show the asic mask in the mainImage
+	gui->mainImageWindow->show_mask = gui->showmask_checkbox->value();
+}
+
+void Application::toggle_detector_display(void)
+{
+	// update which detectors to display 
+	gui->mainHistogramWindow->detector_display[0] = gui->detectorall_checkbox->value();
+	gui->mainHistogramWindow->detector_display[1] = gui->detector1_checkbox->value();
+	gui->mainHistogramWindow->detector_display[2] = gui->detector2_checkbox->value();
+	gui->mainHistogramWindow->detector_display[3] = gui->detector3_checkbox->value();
+	gui->mainHistogramWindow->detector_display[4] = gui->detector4_checkbox->value();
+	gui->mainHistogramWindow->detector_display[5] = gui->detector5_checkbox->value();
+	gui->mainHistogramWindow->detector_display[6] = gui->detector6_checkbox->value();
+	gui->mainHistogramWindow->detector_display[7] = gui->detector7_checkbox->value();
+	gui->mainHistogramWindow->redraw();
+	gui->mainImageWindow->redraw();
 	gui->mainLightcurveWindow->redraw();
 }

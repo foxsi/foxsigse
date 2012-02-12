@@ -17,12 +17,23 @@ mainLightcurve::mainLightcurve(int x,int y,int w,int h,const char *l)
 	ymin = 0;
 	xmax = 20;
 	xmin = 0;
-	
+
+	current_timebin_detectors[1] = 0;
+	current_timebin_detectors[2] = 0;
+	current_timebin_detectors[3] = 0;
+	current_timebin_detectors[4] = 0;
+	current_timebin_detectors[5] = 0;
+	current_timebin_detectors[6] = 0;
+	current_timebin_detectors[7] = 0;
+
 	for(int i=0; i < MAX_CHANNEL; i++)
 	{
 		CountcurveFunction[i] = i;
 		binsize[i] = 1;
 		CountRatecurveFunction[i] = i;
+		for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+			CountRatecurveDetectors[i][detector_num] = i;
+		}
 	}
 }
 
@@ -65,24 +76,46 @@ void mainLightcurve::draw()
    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//draw the graph
-	glBegin(GL_LINES);
-	glColor3f(1.0, 0.0, 0.0);
-	k = 0;
-	for (float x = 0; x < xmax; x+=binsize[k])
+	if (gui->mainHistogramWindow->detector_display[0] == 1)
 	{
-		CountRatecurveFunction[k] = CountcurveFunction[k]/binsize[k];
+		glBegin(GL_LINES);
+		glColor3f(1.0, 0.0, 0.0);
+		k = 0;
+		for (float x = 0; x < xmax; x+=binsize[k])
+		{
+			CountRatecurveFunction[k] = CountcurveFunction[k]/binsize[k];
 
-		count_error = sqrt((float) CountcurveFunction[k]);
-		
-		glVertex2f(x, CountRatecurveFunction[k]);
-		glVertex2f(x + binsize[k], CountRatecurveFunction[k]);
-		
-		glVertex2f(x + binsize[k]/2.0, (CountcurveFunction[k] + count_error)/binsize[k]);
-		glVertex2f(x + binsize[k]/2.0, (CountcurveFunction[k] - count_error)/binsize[k]);
-		k++;
+			count_error = sqrt((float) CountcurveFunction[k]);
+			
+			glVertex2f(x, CountRatecurveFunction[k]);
+			glVertex2f(x + binsize[k], CountRatecurveFunction[k]);
+			
+			glVertex2f(x + binsize[k]/2.0, (CountcurveFunction[k] + count_error)/binsize[k]);
+			glVertex2f(x + binsize[k]/2.0, (CountcurveFunction[k] - count_error)/binsize[k]);
+			
+			k++;
+		}
+		glEnd();
 	}
 	
-	glEnd();
+	for (int detector_num = 1; detector_num < NUM_DETECTORS+1; detector_num++)
+	{
+		if (gui->mainHistogramWindow->detector_display[detector_num] == 1) {
+			k = 0;
+			glBegin(GL_LINES);
+			glColor3f(0.0, 0.0, 1.0);
+			k = 0;
+			for (float x = 0; x < xmax; x+=binsize[k])
+			{
+				CountRatecurveDetectors[k][detector_num] = CountcurveDetectors[k][detector_num]/binsize[k];
+				glVertex2f(x, CountRatecurveDetectors[k][detector_num]);
+				glVertex2f(x + binsize[k], CountRatecurveDetectors[k][detector_num]);
+				k++;
+			}
+			glEnd();
+		}
+	}
+		
 	glPopMatrix();
 	glFinish();
 	

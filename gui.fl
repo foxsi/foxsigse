@@ -124,6 +124,11 @@ exit(1);}
           callback {app->save_image_to_file();}
           xywh {490 640 54 25}
         }
+        Fl_Check_Button showmask_checkbox {
+          label {show mask}
+          callback {app->toggle_show_mask();}
+          xywh {460 410 63 15} down_box DOWN_BOX
+        }
       }
       Fl_Group {} {
         label {Telemetry Info} open
@@ -131,79 +136,79 @@ exit(1);}
       } {
         Fl_Value_Output shutterstateOutput {
           label {Shutter state}
-          xywh {556 110 39 27}
+          xywh {555 110 39 27} step 1
         }
         Fl_Value_Output tempOutput2 {
           label T2
-          xywh {345 225 40 24}
+          xywh {345 225 40 24} step 0.1
         }
         Fl_Value_Output HVOutput {
           label HV
-          xywh {555 140 40 24}
+          xywh {555 140 40 24} step 1
         }
         Fl_Value_Output tempOutput1 {
           label T1
-          xywh {345 197 40 24}
+          xywh {345 197 40 24} step 0.1
         }
         Fl_Value_Output tempOutput0 {
           label T0
-          xywh {345 169 40 24}
+          xywh {345 169 40 24} step 0.1
         }
         Fl_Value_Output tempOutput3 {
           label T3
-          xywh {345 251 40 24}
+          xywh {345 251 40 24} step 0.1
         }
         Fl_Value_Output tempOutput {
           label {Temp Ref}
-          xywh {387 139 40 24}
+          xywh {387 139 40 24} step 0.1
         }
         Fl_Value_Output tempOutput10 {
           label T10
-          xywh {484 229 40 24}
+          xywh {484 229 40 24} step 0.1
         }
         Fl_Value_Output tempOutput9 {
           label T9
-          xywh {484 199 40 24}
+          xywh {484 199 40 24} step 0.1
         }
         Fl_Value_Output tempOutput8 {
           label T8
-          xywh {484 169 40 24}
+          xywh {484 169 40 24} step 0.1
         }
         Fl_Value_Output tempOutput6 {
           label T6
-          xywh {412 226 40 24}
+          xywh {412 226 40 24} step 0.1
         }
         Fl_Value_Output tempOutput5 {
           label T5
-          xywh {411 199 40 24}
+          xywh {411 199 40 24} step 0.1
         }
         Fl_Value_Output tempOutput4 {
           label T4
-          xywh {411 169 40 24}
+          xywh {411 169 40 24} step 0.1
         }
         Fl_Value_Output tempOutput7 {
           label T7
-          xywh {413 252 40 24}
+          xywh {413 252 40 24} step 0.1
         }
         Fl_Value_Output tempOutput11 {
           label T11
-          xywh {484 254 40 24}
+          xywh {484 254 40 24} step 0.1
         }
         Fl_Value_Output VoltageOutput1 {
           label {-5V}
-          xywh {564 198 40 24}
+          xywh {564 198 40 24} step 0.1
         }
         Fl_Value_Output VoltageOutput0 {
           label 5V
-          xywh {564 169 40 24}
+          xywh {564 169 40 24} step 0.1
         }
         Fl_Value_Output VoltageOutput2 {
           label {1.5V}
-          xywh {564 226 40 24}
+          xywh {564 226 40 24} step 0.1
         }
         Fl_Value_Output VoltageOutput3 {
           label {-3.3V}
-          xywh {564 254 40 24}
+          xywh {564 254 40 24} step 0.1
         }
       }
       Fl_Group {} {
@@ -217,10 +222,10 @@ exit(1);}
           class mainHistogram
         }
         Fl_Value_Output mainHistogramYlabelmid {
-          xywh {605 556 70 23} box THIN_UP_BOX
+          xywh {605 556 70 23} box THIN_UP_BOX step 1
         }
         Fl_Value_Output mainHistogramYlabelmax {
-          xywh {605 436 70 23} box THIN_UP_BOX
+          xywh {605 436 70 23} box THIN_UP_BOX step 1
         }
         Fl_Choice mainHistogram_choice {
           label {choice:} open
@@ -238,15 +243,15 @@ exit(1);}
         }
         Fl_Value_Output histLow {
           label {low threshold:}
-          xywh {1055 505 55 24}
+          xywh {1055 505 55 24} step 1
         }
         Fl_Value_Output histCounts {
           label {Counts:}
-          xywh {1055 475 55 24}
+          xywh {1055 475 55 24} step 1
         }
         Fl_Value_Output histEnergy {
           label {Chan/Energy:}
-          xywh {1055 445 55 24}
+          xywh {1055 445 55 24} step 1
         }
         Fl_Button {} {
           label Flush
@@ -299,7 +304,7 @@ app->start_reading_data();}
         xywh {10 65 80 25} deactivate
       }
       Fl_Group {} {
-        label LightCurve open selected
+        label LightCurve open
         xywh {625 270 501 150} box THIN_UP_FRAME
       } {
         Fl_Box mainLightcurveWindow {
@@ -314,8 +319,8 @@ app->start_reading_data();}
           xywh {1047 303 75 25}
         }
         Fl_Value_Output ctsOutput {
-          label {cts/s:}
-          xywh {1047 275 77 24}
+          label {cts/s:} selected
+          xywh {1047 275 77 24} step 0.1
         }
         Fl_Counter timebinsize_counter {
           label {bin size (s):}
@@ -335,26 +340,26 @@ app->start_reading_data();}
       }
       Fl_Group {} {
         label ASIC open
-        xywh {9 145 306 38} box THIN_DOWN_FRAME
+        xywh {9 145 306 58} box THIN_DOWN_FRAME
       } {
         Fl_Button sendParamsBut {
           label {Send Params}
           callback {app->openSendParamsWindow()}
-          xywh {10 145 100 13}
+          xywh {10 145 100 23}
         }
         Fl_Button setTrigBut {
           label {Set Trigger Options}
           callback {app->openSetTrigWindow()}
-          xywh {115 145 125 13}
+          xywh {115 145 125 23}
         }
         Fl_Button setHoldBut {
           label {Set Hold Time}
           callback {app->openSetHoldTimeWindow()}
-          xywh {9 158 100 16}
+          xywh {115 174 100 22}
         }
         Fl_Light_Button glitchBut {
           label Glitch
-          xywh {245 145 65 13}
+          xywh {245 145 65 23}
         }
       }
       Fl_Value_Input nEvents {
@@ -394,35 +399,47 @@ app->start_reading_data();}
       }
       Fl_Group detector_choice {
         label {Detectors to display} open
-        xywh {745 33 220 27} box DOWN_BOX align 4 deactivate
+        xywh {735 51 260 29} box DOWN_BOX align 4
       } {
         Fl_Check_Button detector1_checkbox {
           label 1
-          xywh {750 33 35 27} down_box DOWN_BOX
+          callback {app->toggle_detector_display();}
+          xywh {740 51 35 29} down_box DOWN_BOX
         }
         Fl_Check_Button detector2_checkbox {
           label 2
-          xywh {780 33 35 27} down_box DOWN_BOX
+          callback {app->toggle_detector_display();}
+          xywh {770 51 35 29} down_box DOWN_BOX
         }
         Fl_Check_Button detector3_checkbox {
           label 3
-          xywh {810 33 35 27} down_box DOWN_BOX
+          callback {app->toggle_detector_display();}
+          xywh {800 51 35 29} down_box DOWN_BOX
         }
         Fl_Check_Button detector4_checkbox {
           label 4
-          xywh {840 33 35 27} down_box DOWN_BOX
+          callback {app->toggle_detector_display();}
+          xywh {830 51 35 29} down_box DOWN_BOX
         }
         Fl_Check_Button detector5_checkbox {
           label 5
-          xywh {870 33 35 27} down_box DOWN_BOX
+          callback {app->toggle_detector_display();}
+          xywh {860 51 35 29} down_box DOWN_BOX
         }
         Fl_Check_Button detector6_checkbox {
           label 6
-          xywh {900 33 35 27} down_box DOWN_BOX
+          callback {app->toggle_detector_display();}
+          xywh {890 51 35 29} down_box DOWN_BOX
         }
         Fl_Check_Button detector7_checkbox {
           label 7
-          xywh {930 33 35 27} down_box DOWN_BOX
+          callback {app->toggle_detector_display();}
+          xywh {920 51 35 29} down_box DOWN_BOX
+        }
+        Fl_Check_Button detectorall_checkbox {
+          label All
+          callback {app->toggle_detector_display();}
+          xywh {955 51 40 29} down_box DOWN_BOX value 1
         }
       }
       Fl_Value_Output inttimeOutput {

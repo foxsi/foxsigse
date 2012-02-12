@@ -16,6 +16,7 @@
 #include "Application.h"
 
 #define MAX_CHANNEL 1024
+#define NUM_DETECTORS 7
 
 class mainLightcurve : public Fl_Gl_Window {
 public:
@@ -24,6 +25,11 @@ public:
 	float binsize[MAX_CHANNEL];
 	int xmax;
 	float CountRatecurveFunction[MAX_CHANNEL];
+	
+	int CountcurveDetectors[MAX_CHANNEL][NUM_DETECTORS+1];
+	float CountRatecurveDetectors[MAX_CHANNEL][NUM_DETECTORS+1];	
+	unsigned int current_timebin_detectors[NUM_DETECTORS+1];
+
 	int ymax;
 	int ymin;
 	int xmin;	

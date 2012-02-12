@@ -36,6 +36,7 @@ extern int HistogramFunction[MAX_CHANNEL];
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagetime[XSTRIPS][YSTRIPS];
 extern double detImagemask[XSTRIPS][YSTRIPS];
+extern double detImagemasktime[XSTRIPS][YSTRIPS];
 extern int low_threshold;
 
 // Note that an unsigned short int is 2 bytes
@@ -224,13 +225,30 @@ void* data_countrate(void *p)
 		pthread_mutex_lock(&timebinmutex);
 		
 		CountcurveFunction[0] = current_timebin;
+		for(int detector_num = 1; detector_num < NUM_DETECTORS+1; detector_num++)
+		{
+			gui->mainLightcurveWindow->CountcurveDetectors[0][detector_num] = gui->mainLightcurveWindow->current_timebin_detectors[detector_num];
+		}
 		
 		for(int j = MAX_CHANNEL-1; j > 0; j--){ 
 			CountcurveFunction[j] = CountcurveFunction[j-1];
 			gui->mainLightcurveWindow->binsize[j] = gui->mainLightcurveWindow->binsize[j-1];
 		}
 		
+		for(int detector_num = 1; detector_num < NUM_DETECTORS+1; detector_num++)
+		{
+			gui->mainLightcurveWindow->CountcurveDetectors[0][detector_num];
+
+			for(int j = MAX_CHANNEL-1; j > 0; j--){ 
+				gui->mainLightcurveWindow->CountcurveDetectors[0][j] = gui->mainLightcurveWindow->CountcurveDetectors[0][j-1];
+			}
+			
+		}
+		
 		current_timebin = 0;
+		for(int detector_num = 1; detector_num < NUM_DETECTORS+1; detector_num++)
+		{gui->mainLightcurveWindow->current_timebin_detectors[detector_num] = 0;}
+		
 		pthread_mutex_unlock(&timebinmutex);
 		
 		if (stop_message == 1){
@@ -307,8 +325,13 @@ void* data_read_data(void *p)
 			// read from the USB/Formatter, reads 4 frames at a time.
 			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer);
 			// set the read status based on how len returned 
-			if (len == 2048){ read_status = 1; // printf("read okay\n");}
+			if (len == 2048){ 
+				read_status = 1; 
+				//printf("read okay\n");
+			} else {
+				//printf("bad read\n");
 			}
+
 		}
 				
 		if (read_status == 1) {
@@ -324,7 +347,7 @@ void* data_read_data(void *p)
 			{
 				if (newdisplay == 0)
 				{
-					memcpy((void *) buffer0,(void *) buffer,FRAME_SIZE_IN_BYTES);
+					memcpy((void *) buffer0,(void *) buffer, FRAME_SIZE_IN_BYTES);
 					newdisplay = 1;
 				}
 				pthread_mutex_unlock(&mymutex);
@@ -608,15 +631,34 @@ void data_update_display(unsigned short int *frame)
 			// HistogramFunction[strip_data]++;
 			x = arc4random() % XSTRIPS + 1;
 			y = arc4random() % YSTRIPS + 1;
-			z = arc4random() % MAX_CHANNEL + 1;
-			HistogramFunction[z] += 1;
+			
+			for(int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++)
+			{
+				z = arc4random() % MAX_CHANNEL + 1;
+				HistogramFunction[z] += 1;
+				gui->mainHistogramWindow->HistogramFunctionDetectors[z][detector_num] += 1;
+			}
+			
 			detImage[x][y] = z;
 			detImagetime[x][y] = clock();
-			// detImagemask[i][j] = getbits(xmask, XSTRIPS/8 - i % (XSTRIPS/8)-1,1) * getbits(ymask, YSTRIPS/8 - j % (YSTRIPS/8)-1,1);		
+			x = arc4random() % XSTRIPS + 1;
+			y = arc4random() % YSTRIPS + 1;
+			detImagemask[x][y] = 1;
+			detImagemasktime[x][y] = clock();
+			
+			x = arc4random() % XSTRIPS + 1;
+			y = arc4random() % YSTRIPS + 1;
+			gui->mainImageWindow->detectorsImage[x][y][3] = 1;
+			//gui->mainImageWindow->detectorsImagetime[x][y][3] = clock();
+			
 		}
 		
 		pthread_mutex_lock( &timebinmutex);
-		current_timebin+=num_hits;
+		current_timebin += num_hits;
+		for(int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++)
+		{
+			gui->mainLightcurveWindow->current_timebin_detectors[detector_num] += num_hits;
+		}
 		pthread_mutex_unlock(&timebinmutex);
 	}
 	
@@ -779,38 +821,44 @@ void data_update_display(unsigned short int *frame)
 		bool attenuator_actuating = 0;
 		int index = 0;
 		unsigned short int read_status;
-		int frameNumber;
+		uint32_t frameNumber;
+
 		unsigned short int temperature_monitors[12];
 		unsigned short int voltage_monitors[4];			// order is 5V, -5V, 1.5V, -3.3V
+		unsigned short int frame_value;
 		
 		// parse the buffer variable and update the display
 		
-		for( int frame_number = 0; frame_number < 4; frame_number++)
+		for( int frame_num = 0; frame_num < 4; frame_num++)
 		{
 			//printf("f628: %x\n", buffer[index++]);
 			if (buffer[index++] == 0xf628) {
 				read_status = 1;
-				printf("checksum: %u\n", buffer[index+253]);
+				printf("-----Frame Start------\n");
+				printf("frame number = %u\n", frame_num);				
 				printf("eb90: %x\n", buffer[index+254]);
 				
 				// check the checksum
-				for( int word_number = 0; word_number < 254; word_number++ ){read_status ^= buffer[index+word_number];}
-				printf("read status: %u\n", read_status);
-				read_status = 1;
+				for( int word_number = 0; word_number < 256; word_number++ ){read_status ^= buffer[word_number];}
+				printf("read status: %x\n", read_status);
+				// TODO fix the checksum calculation, does not currently work
 				if( read_status == 1 ){
 					nreads++;
-					//printf("calc checksum: %u\n", checksum);
 					
 					printf("index = %u\n", index);
 					printf("time1(MSB): %x\n", buffer[index++]);
 					printf("time2: %x\n", buffer[index++]);
 					printf("tim3(LSB): %x\n", buffer[index++]);
-					printf("frame counter 1: %x\n", buffer[index++]);
-					printf("frame counter 2: %x\n", buffer[index++]);
-					frameNumber = buffer[index];
 					
+					index++;
+					frameNumber = ((uint32_t)(buffer[index] << 16) & 0xFFFF0000) | buffer[index+1];
+					frame_value = buffer[index+1] & 0x0003;
+					index++;
+					cout << "frameNumber = " << frameNumber << endl;
+					cout << "frame value = " << frame_value << endl;
+					printf("frame value = %x\n", frame_value);
 					// Housekeeping 0
-					switch (frame_number) {
+					switch (frame_value) {
 						case 0:
 							// temperature reference
 							temperature_monitors[0] = buffer[index++];
@@ -830,12 +878,12 @@ void data_update_display(unsigned short int *frame)
 							break;
 					}
 					
-					printf("cmd count: %u\n", buffer[index++]);
-					printf("command 1: %u\n", buffer[index++]);
-					printf("command 2: %u\n", buffer[index++]);
+					printf("cmd count: %x\n", buffer[index++]);
+					printf("command 1: %x\n", buffer[index++]);
+					printf("command 2: %x\n", buffer[index++]);
 					
 					// Housekeeping 1
-					switch (frame_number) {
+					switch (frame_value) {
 						case 0:
 							// 5 V monitor
 							voltage_monitors[0] = buffer[index++];
@@ -859,13 +907,12 @@ void data_update_display(unsigned short int *frame)
 						attenuator_actuating = 1;
 					}
 					printf("0: %u\n", buffer[index++]);
-					
-					index++;
+					//index++;
 					high_voltage_status = buffer[index] & 0xF;
-					high_voltage = (buffer[index] >> 12) & 0xFFF;
-										
+					high_voltage = ((buffer[index] >> 4) & 0xFFF)/8.0;
+
 					// Housekeeping 2
-					switch (frame_number) {
+					switch (frame_value) {
 						case 0:
 							// -5 V monitor
 							voltage_monitors[1] = buffer[index++];
@@ -889,7 +936,7 @@ void data_update_display(unsigned short int *frame)
 					index++; //printf("Status 2: %u\n", buffer[index++]);
 					
 					// Housekeeping 3
-					switch (frame_number) {
+					switch (frame_value) {
 						case 0:
 							// 3.3 V monitor
 							voltage_monitors[3] = buffer[index++];
@@ -908,75 +955,100 @@ void data_update_display(unsigned short int *frame)
 							break;
 					}
 					
-					printf("Status 3: %u\n", buffer[index++]);
-					printf("Status 4: %u\n", buffer[index++]);
-					printf("Status 5: %u\n", buffer[index++]);
-					printf("Status 6: %u\n", buffer[index++]);
-					//printf("index = %u\n", index);
+					printf("Status 3: %x\n", buffer[index++]);
+					printf("Status 4: %x\n", buffer[index++]);
+					printf("Status 5: %x\n", buffer[index++]);
+					printf("Status 6: %x\n", buffer[index++]);
 					
-					for(int detector_number = 0; detector_number < 7; detector_number++){
-						printf("Detector %u time: %u\n", detector_number, buffer[index++]);
+					for(int detector_num = 0; detector_num < 7; detector_num++){
+						index++;
+						printf("Detector %u time: %u\n", detector_num, buffer[index]);
+						
 						for(int asic_number = 0; asic_number < 4; asic_number++)
 						{
+							unsigned short int strip_data[3];
+							unsigned short int common_mode;
+							printf("asic %u\n", asic_number);
 							// 0ASIC0 mask0
 							tmp = buffer[index++];
-							for(int position = 0, position < 8; position++)
-								xmask[position] = getbits(tmp, position, 1);
+							for(int position = 0; position < 16; position++){
+								if (asic_number == 0) {xmask[position] = getbits(tmp, position, 1);}
+								if (asic_number == 1) {xmask[position+64] = getbits(tmp, position, 1);}
+								if (asic_number == 2) {ymask[position] = getbits(tmp, position, 1);}
+								if (asic_number == 3) {ymask[position+64] = getbits(tmp, position, 1);}	
+							}
 							// 0ASIC0 mask1
 							tmp = buffer[index++];
-							for(int position = 0, position < 8; position++)
-								xmask[position+8] = getbits(tmp, position, 1);
-							// 0ASIC0 mask2
+							for(int position = 0; position < 16; position++){
+								if (asic_number == 0) {xmask[position+16] = getbits(tmp, position, 1);}
+								if (asic_number == 1) {xmask[position+64+16] = getbits(tmp, position, 1);}
+								if (asic_number == 2) {ymask[position+16] = getbits(tmp, position, 1);}
+								if (asic_number == 3) {ymask[position+64+16] = getbits(tmp, position, 1);}	
+							}
+							// 0ASIC0 mask2tmp = buffer[index++];
 							tmp = buffer[index++];
-							for(int position = 0, position < 8; position++)
-								ymask[position] = getbits(tmp, position, 1);
+							for(int position = 0; position < 16; position++){
+								if (asic_number == 0) {xmask[position+32] = getbits(tmp, position, 1);}
+								if (asic_number == 1) {xmask[position+64+32] = getbits(tmp, position, 1);}
+								if (asic_number == 2) {ymask[position+32] = getbits(tmp, position, 1);}
+								if (asic_number == 3) {ymask[position+64+32] = getbits(tmp, position, 1);}	
+							}
 							// 0ASIC0 mask3
 							tmp = buffer[index++];
-							for(int position = 0, position < 8; position++)
-								ymask[position+8] = getbits(tmp, position, 1);
-
-							for(int strip_number = 0; strip_number < 4; strip_number++)
+							for(int position = 0; position < 16; position++){
+								if (asic_number == 0) {xmask[position+48] = getbits(tmp, position, 1);}
+								if (asic_number == 1) {xmask[position+64+48] = getbits(tmp, position, 1);}
+								if (asic_number == 2) {ymask[position+48] = getbits(tmp, position, 1);}
+								if (asic_number == 3) {ymask[position+64+48] = getbits(tmp, position, 1);}	
+							}
+							
+							for(int strip_num = 0; strip_num < 4; strip_num++)
 							{
 								index++;
-								strip_data = buffer[index] & 0x3F;
-								strip_number = (buffer[index] >> 10) & 0x3FFF;
-								
-								if ((strip_data >= low_threshold) && (strip_data != 0xFFFF)){
-									num_hits++;
-									printf("hit! strip value %u\n", strip_data);
-									
-									if (asic_number < 2) {
+								//printf("strip number%u\n", strip_number);
+								if (buffer[index] != 0xFFFF){
+									if (strip_num < 3) {							
+										strip_data[strip_num] = buffer[index] & 0x3FF;
+										strip_number = (buffer[index] >> 10) & 0x3FFF;
+										printf("hit! strip value %u, strip number %u\n", strip_data[strip_num], strip_number);
 										// n side asic
-										ystrips[strip_number + asic_number * 64] = 1;
-									}
-									if (asic_number > 1) {
+										if (asic_number < 2) {ystrips[strip_number + asic_number * 64] = strip_data[strip_num];}
 										// p side asic
-										xstrips[strip_number + (asic_number - 2) * 64] = 1;
-										if (strip_data > 0){ HistogramFunction[strip_data]++; }
+										if (asic_number > 1) {xstrips[strip_number + (asic_number - 2) * 64] = strip_data[strip_num];}
+										if (asic_number > 1) {HistogramFunction[strip_data[strip_num]] += 1;}
+										if (strip_data[strip_num] > low_threshold) {
+											num_hits++;
+										}
+										gui->mainHistogramWindow->HistogramFunctionDetectors[strip_data[strip_num]][detector_num];
+									} else {
+										common_mode = buffer[index];
+										printf("common mode: %u\n", common_mode);
 									}
-									
 								}
-								//printf("%x\t", buffer[index]);
 							}
-							// printf("\nindex = %u\n", index);
 						}
+						
+						//for(int i = 0; i < 3; i++){HistogramFunction[strip_data[i]] += 1;}
 						
 						for(int i = 0; i < XSTRIPS; i++)
 						{
-							if (xstrips[i] >= low_threshold){
-								for(int j = 0; j < YSTRIPS; j++)
-								{
-									if (xstrips[i] * ystrips[j] != 0) {
-										detImage[i][j] += 1;
-										detImagemask[i][j] = xmask[i]*ymask[j];
-										detImagetime[i][j] = clock();}
+							for(int j = 0; j < YSTRIPS; j++)
+							{
+								detImagemask[i][j] = xmask[i]*ymask[j];
+								if ((xstrips[i] * ystrips[j] != 0) && (xstrips[i] > low_threshold)){
+									detImage[i][j] += xstrips[i];
+									detImagetime[i][j] = clock();
 								}
 							}
 						}
 					
 					}
-					printf("checksum: %u\n", buffer[index++]);
-					printf("sync: %u\n", buffer[index++]);
+					index++;
+					//printf("checksum: %x\n", buffer[index]);
+					index++;
+					printf("sync: %x\n", buffer[index]);
+					printf("end of frame index: %u\n", index);
+					//printf("\n");
 				} else {
 					// bad checksum, skip this frame and go to the next
 					index+=255;
@@ -999,6 +1071,7 @@ void data_update_display(unsigned short int *frame)
 		//parsing for four frames (the whole data drop), now update
 				
 		Fl::lock();
+		for(int i = 0; i < 12; i++){printf("temp monitor %i:%i\n", i, temperature_monitors[i]);}
 		gui->tempOutput->value(temperature_convert_ref(temperature_monitors[0]));
 		gui->tempOutput1->value(temperature_convert_ysi44031(temperature_monitors[1]));
 		gui->tempOutput2->value(temperature_convert_ysi44031(temperature_monitors[2]));
@@ -1013,6 +1086,8 @@ void data_update_display(unsigned short int *frame)
 		gui->tempOutput11->value(temperature_convert_ysi44031(temperature_monitors[11]));
 		
 		// order is 5V, -5V, 1.5V, 3.3V
+		for(int i = 0; i < 4; i++){printf("voltage monitor %i:%i\n", i, voltage_monitors[i]);}
+		
 		gui->VoltageOutput0->value(voltage_convert_5v(voltage_monitors[0]));
 		gui->VoltageOutput1->value(voltage_convert_m5v(voltage_monitors[1]));		
 		gui->VoltageOutput2->value(voltage_convert_15v(voltage_monitors[2]));

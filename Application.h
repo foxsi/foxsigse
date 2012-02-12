@@ -97,6 +97,8 @@ public:
 	void save_image_to_file(void);
 	void set_lightcurve_ymax(void);
 	void set_gsesync_file(void);
+	void toggle_show_mask(void);
+	void toggle_detector_display(void);
 	int elapsed_time_sec;
 private:
 	char filename[40];

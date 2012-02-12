@@ -31,6 +31,7 @@ double detImage[XSTRIPS][YSTRIPS];
 double detImagemask[XSTRIPS][YSTRIPS];
 double detImagealpha[XSTRIPS][YSTRIPS];
 double detImagetime[XSTRIPS][YSTRIPS];
+double detImagemasktime[XSTRIPS][YSTRIPS];
 
 double ymax;
 float GL_cursor[2];
@@ -59,18 +60,26 @@ mainImage::mainImage(int x,int y,int w,int h,const char *l)
 			detImage[i][j] = 0;
 			detImagealpha[i][j] = 0;
 			detImagetime[i][j] = 0;
+			for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+				detectorsImage[i][j][detector_num] = 0;
+				detectorsImagealpha[i][j][detector_num] = 0;
+				detectorsImagetime[i][j][detector_num] = 0;
+			}
 		}
 	}
 	detImage[15][15] = 1.0;
 	detImage[75][75] = 0.5;
+	show_mask = 0;
+	for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+		detectorsImage[25][30][detector_num] = 1.0;
+		detectorsImagealpha[26][31][detector_num] = 1.0;
+	}
 }
 
 // the drawing method: draws the histFunc into the window
 void mainImage::draw() 
 {
-	double grey;
-	double bleu;
-	double alpha;
+	double grey, vert, bleu, alpha;
 	clock_t current_time;
 	double duration;
 	current_time = clock();
@@ -98,34 +107,69 @@ void mainImage::draw()
    	glClearColor(0.0,0.0,0.0,0.0);
    	glClear(GL_COLOR_BUFFER_BIT);  
 	
+	if (gui->mainHistogramWindow->detector_display[0] == 1) {
+		for(int j = 0; j < XSTRIPS; j++)
+		{
+			for(int i = 0; i < YSTRIPS; i++)
+			{
+				grey = detImage[i][j]/ymax;
+				
+				if (grey != 0)
+				{
+					if (pixel_half_life != 0){
+						alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+					} else {
+						alpha = 1.0;
+					}
+
+					detImagealpha[i][j] = alpha;
+					glColor4f(grey, grey, grey, alpha);
+					glBegin(GL_QUADS);
+					glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
+					glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
+					glEnd();
+				}
+				//now draw the mask
+				if (show_mask == 1)
+				{
+					vert = detImagemask[i][j];
+					
+					if (bleu == 1){
+						if (pixel_half_life != 0){
+							alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+						} else {
+							alpha = 1.0;
+						}
+						glColor4f(0, 0, bleu, alpha * 0.5);
+						glBegin(GL_QUADS);
+						glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
+						glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
+						glEnd();
+					}
+				}
+			}
+		}
+	}
+	
+	// draw individual detectors if needed
 	for(int j = 0; j < XSTRIPS; j++)
 	{
 		for(int i = 0; i < YSTRIPS; i++)
-	   	{
-			grey = detImage[i][j]/ymax;
-			
-			if (pixel_half_life != 0){
-				alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
-			} else {
-				alpha = 1.0;
+		{
+			for (int detector_num = 0; detector_num < NUM_DETECTORS + 1; detector_num++) {
+				if (gui->mainHistogramWindow->detector_display[detector_num] == 1) {
+					bleu = detectorsImage[i][j][detector_num]/ymax;
+					detectorsImagealpha[i][j][detector_num] = alpha;
+					glColor4f(0, 0, bleu, alpha);
+					glBegin(GL_QUADS);
+					glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
+					glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
+					glEnd();
+				}
 			}
-
-			detImagealpha[i][j] = alpha;
-			glColor4f(grey, grey, grey, alpha);
-			glBegin(GL_QUADS);
-			glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
-			glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
-			glEnd();
-			//now draw the mask
-			//bleu = detImagemask[i][j];
-			//if (bleu == 1){
-			//	glColor4f(0, 0, bleu, 1.0);
-			//	glBegin(GL_QUADS);
-			//	glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
-			//	glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
-			//	glEnd();}
-	   	}
+		}
 	}
+
 	//draw a border around the detector
 	glColor3f(1, 1, 1);
 	glBegin(GL_LINE_LOOP);

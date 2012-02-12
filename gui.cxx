@@ -95,6 +95,13 @@ void Gui::cb_Save(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_Save_i(o,v);
 }
 
+void Gui::cb_showmask_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_show_mask();
+}
+void Gui::cb_showmask_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_showmask_checkbox_i(o,v);
+}
+
 void Gui::cb_Energy_i(Fl_Menu_*, void*) {
   app->set_energy_histogram();
 }
@@ -233,6 +240,62 @@ void Gui::cb_Clear_i(Fl_Button*, void*) {
 }
 void Gui::cb_Clear(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_Clear_i(o,v);
+}
+
+void Gui::cb_detector1_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detector1_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detector1_checkbox_i(o,v);
+}
+
+void Gui::cb_detector2_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detector2_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detector2_checkbox_i(o,v);
+}
+
+void Gui::cb_detector3_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detector3_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detector3_checkbox_i(o,v);
+}
+
+void Gui::cb_detector4_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detector4_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detector4_checkbox_i(o,v);
+}
+
+void Gui::cb_detector5_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detector5_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detector5_checkbox_i(o,v);
+}
+
+void Gui::cb_detector6_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detector6_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detector6_checkbox_i(o,v);
+}
+
+void Gui::cb_detector7_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detector7_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detector7_checkbox_i(o,v);
+}
+
+void Gui::cb_detectorall_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detectorall_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detectorall_checkbox_i(o,v);
 }
 
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
@@ -475,47 +538,70 @@ Gui::Gui() {
       { Fl_Button* o = new Fl_Button(490, 640, 54, 25, "Save");
         o->callback((Fl_Callback*)cb_Save);
       } // Fl_Button* o
+      { showmask_checkbox = new Fl_Check_Button(460, 410, 63, 15, "show mask");
+        showmask_checkbox->down_box(FL_DOWN_BOX);
+        showmask_checkbox->callback((Fl_Callback*)cb_showmask_checkbox);
+      } // Fl_Check_Button* showmask_checkbox
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(320, 109, 290, 170, "Telemetry Info");
       o->box(FL_THIN_UP_FRAME);
-      { shutterstateOutput = new Fl_Value_Output(556, 110, 39, 27, "Shutter state");
+      { shutterstateOutput = new Fl_Value_Output(555, 110, 39, 27, "Shutter state");
+        shutterstateOutput->step(1);
       } // Fl_Value_Output* shutterstateOutput
       { tempOutput2 = new Fl_Value_Output(345, 225, 40, 24, "T2");
+        tempOutput2->step(0.1);
       } // Fl_Value_Output* tempOutput2
       { HVOutput = new Fl_Value_Output(555, 140, 40, 24, "HV");
+        HVOutput->step(1);
       } // Fl_Value_Output* HVOutput
       { tempOutput1 = new Fl_Value_Output(345, 197, 40, 24, "T1");
+        tempOutput1->step(0.1);
       } // Fl_Value_Output* tempOutput1
       { tempOutput0 = new Fl_Value_Output(345, 169, 40, 24, "T0");
+        tempOutput0->step(0.1);
       } // Fl_Value_Output* tempOutput0
       { tempOutput3 = new Fl_Value_Output(345, 251, 40, 24, "T3");
+        tempOutput3->step(0.1);
       } // Fl_Value_Output* tempOutput3
       { tempOutput = new Fl_Value_Output(387, 139, 40, 24, "Temp Ref");
+        tempOutput->step(0.1);
       } // Fl_Value_Output* tempOutput
       { tempOutput10 = new Fl_Value_Output(484, 229, 40, 24, "T10");
+        tempOutput10->step(0.1);
       } // Fl_Value_Output* tempOutput10
       { tempOutput9 = new Fl_Value_Output(484, 199, 40, 24, "T9");
+        tempOutput9->step(0.1);
       } // Fl_Value_Output* tempOutput9
       { tempOutput8 = new Fl_Value_Output(484, 169, 40, 24, "T8");
+        tempOutput8->step(0.1);
       } // Fl_Value_Output* tempOutput8
       { tempOutput6 = new Fl_Value_Output(412, 226, 40, 24, "T6");
+        tempOutput6->step(0.1);
       } // Fl_Value_Output* tempOutput6
       { tempOutput5 = new Fl_Value_Output(411, 199, 40, 24, "T5");
+        tempOutput5->step(0.1);
       } // Fl_Value_Output* tempOutput5
       { tempOutput4 = new Fl_Value_Output(411, 169, 40, 24, "T4");
+        tempOutput4->step(0.1);
       } // Fl_Value_Output* tempOutput4
       { tempOutput7 = new Fl_Value_Output(413, 252, 40, 24, "T7");
+        tempOutput7->step(0.1);
       } // Fl_Value_Output* tempOutput7
       { tempOutput11 = new Fl_Value_Output(484, 254, 40, 24, "T11");
+        tempOutput11->step(0.1);
       } // Fl_Value_Output* tempOutput11
       { VoltageOutput1 = new Fl_Value_Output(564, 198, 40, 24, "-5V");
+        VoltageOutput1->step(0.1);
       } // Fl_Value_Output* VoltageOutput1
       { VoltageOutput0 = new Fl_Value_Output(564, 169, 40, 24, "5V");
+        VoltageOutput0->step(0.1);
       } // Fl_Value_Output* VoltageOutput0
       { VoltageOutput2 = new Fl_Value_Output(564, 226, 40, 24, "1.5V");
+        VoltageOutput2->step(0.1);
       } // Fl_Value_Output* VoltageOutput2
       { VoltageOutput3 = new Fl_Value_Output(564, 254, 40, 24, "-3.3V");
+        VoltageOutput3->step(0.1);
       } // Fl_Value_Output* VoltageOutput3
       o->end();
     } // Fl_Group* o
@@ -535,19 +621,24 @@ Gui::Gui() {
       } // mainHistogram* mainHistogramWindow
       { mainHistogramYlabelmid = new Fl_Value_Output(605, 556, 70, 23);
         mainHistogramYlabelmid->box(FL_THIN_UP_BOX);
+        mainHistogramYlabelmid->step(1);
       } // Fl_Value_Output* mainHistogramYlabelmid
       { mainHistogramYlabelmax = new Fl_Value_Output(605, 436, 70, 23);
         mainHistogramYlabelmax->box(FL_THIN_UP_BOX);
+        mainHistogramYlabelmax->step(1);
       } // Fl_Value_Output* mainHistogramYlabelmax
       { mainHistogram_choice = new Fl_Choice(1025, 534, 85, 25, "choice:");
         mainHistogram_choice->down_box(FL_BORDER_BOX);
         mainHistogram_choice->menu(menu_mainHistogram_choice);
       } // Fl_Choice* mainHistogram_choice
       { histLow = new Fl_Value_Output(1055, 505, 55, 24, "low threshold:");
+        histLow->step(1);
       } // Fl_Value_Output* histLow
       { histCounts = new Fl_Value_Output(1055, 475, 55, 24, "Counts:");
+        histCounts->step(1);
       } // Fl_Value_Output* histCounts
       { histEnergy = new Fl_Value_Output(1055, 445, 55, 24, "Chan/Energy:");
+        histEnergy->step(1);
       } // Fl_Value_Output* histEnergy
       { Fl_Button* o = new Fl_Button(1030, 564, 80, 25, "Flush");
         o->callback((Fl_Callback*)cb_Flush1);
@@ -605,6 +696,7 @@ Gui::Gui() {
         o->callback((Fl_Callback*)cb_Flush2);
       } // Fl_Button* o
       { ctsOutput = new Fl_Value_Output(1047, 275, 77, 24, "cts/s:");
+        ctsOutput->step(0.1);
       } // Fl_Value_Output* ctsOutput
       { timebinsize_counter = new Fl_Counter(1002, 332, 120, 20, "bin size (s):");
         timebinsize_counter->minimum(0.1);
@@ -626,18 +718,18 @@ Gui::Gui() {
       } // Fl_Value_Slider* mainLightcurve_ymaxslider
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(9, 145, 306, 38, "ASIC");
+    { Fl_Group* o = new Fl_Group(9, 145, 306, 58, "ASIC");
       o->box(FL_THIN_DOWN_FRAME);
-      { sendParamsBut = new Fl_Button(10, 145, 100, 13, "Send Params");
+      { sendParamsBut = new Fl_Button(10, 145, 100, 23, "Send Params");
         sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
       } // Fl_Button* sendParamsBut
-      { setTrigBut = new Fl_Button(115, 145, 125, 13, "Set Trigger Options");
+      { setTrigBut = new Fl_Button(115, 145, 125, 23, "Set Trigger Options");
         setTrigBut->callback((Fl_Callback*)cb_setTrigBut);
       } // Fl_Button* setTrigBut
-      { setHoldBut = new Fl_Button(9, 158, 100, 16, "Set Hold Time");
+      { setHoldBut = new Fl_Button(115, 174, 100, 22, "Set Hold Time");
         setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
       } // Fl_Button* setHoldBut
-      { glitchBut = new Fl_Light_Button(245, 145, 65, 13, "Glitch");
+      { glitchBut = new Fl_Light_Button(245, 145, 65, 23, "Glitch");
       } // Fl_Light_Button* glitchBut
       o->end();
     } // Fl_Group* o
@@ -665,31 +757,42 @@ Gui::Gui() {
     } // Fl_Group* o
     { nEventsDone = new Fl_Value_Output(295, 66, 55, 24, "read counter:");
     } // Fl_Value_Output* nEventsDone
-    { detector_choice = new Fl_Group(745, 33, 220, 27, "Detectors to display");
+    { detector_choice = new Fl_Group(735, 51, 260, 29, "Detectors to display");
       detector_choice->box(FL_DOWN_BOX);
       detector_choice->align(Fl_Align(FL_ALIGN_LEFT));
-      detector_choice->deactivate();
-      { detector1_checkbox = new Fl_Check_Button(750, 33, 35, 27, "1");
+      { detector1_checkbox = new Fl_Check_Button(740, 51, 35, 29, "1");
         detector1_checkbox->down_box(FL_DOWN_BOX);
+        detector1_checkbox->callback((Fl_Callback*)cb_detector1_checkbox);
       } // Fl_Check_Button* detector1_checkbox
-      { detector2_checkbox = new Fl_Check_Button(780, 33, 35, 27, "2");
+      { detector2_checkbox = new Fl_Check_Button(770, 51, 35, 29, "2");
         detector2_checkbox->down_box(FL_DOWN_BOX);
+        detector2_checkbox->callback((Fl_Callback*)cb_detector2_checkbox);
       } // Fl_Check_Button* detector2_checkbox
-      { detector3_checkbox = new Fl_Check_Button(810, 33, 35, 27, "3");
+      { detector3_checkbox = new Fl_Check_Button(800, 51, 35, 29, "3");
         detector3_checkbox->down_box(FL_DOWN_BOX);
+        detector3_checkbox->callback((Fl_Callback*)cb_detector3_checkbox);
       } // Fl_Check_Button* detector3_checkbox
-      { detector4_checkbox = new Fl_Check_Button(840, 33, 35, 27, "4");
+      { detector4_checkbox = new Fl_Check_Button(830, 51, 35, 29, "4");
         detector4_checkbox->down_box(FL_DOWN_BOX);
+        detector4_checkbox->callback((Fl_Callback*)cb_detector4_checkbox);
       } // Fl_Check_Button* detector4_checkbox
-      { detector5_checkbox = new Fl_Check_Button(870, 33, 35, 27, "5");
+      { detector5_checkbox = new Fl_Check_Button(860, 51, 35, 29, "5");
         detector5_checkbox->down_box(FL_DOWN_BOX);
+        detector5_checkbox->callback((Fl_Callback*)cb_detector5_checkbox);
       } // Fl_Check_Button* detector5_checkbox
-      { detector6_checkbox = new Fl_Check_Button(900, 33, 35, 27, "6");
+      { detector6_checkbox = new Fl_Check_Button(890, 51, 35, 29, "6");
         detector6_checkbox->down_box(FL_DOWN_BOX);
+        detector6_checkbox->callback((Fl_Callback*)cb_detector6_checkbox);
       } // Fl_Check_Button* detector6_checkbox
-      { detector7_checkbox = new Fl_Check_Button(930, 33, 35, 27, "7");
+      { detector7_checkbox = new Fl_Check_Button(920, 51, 35, 29, "7");
         detector7_checkbox->down_box(FL_DOWN_BOX);
+        detector7_checkbox->callback((Fl_Callback*)cb_detector7_checkbox);
       } // Fl_Check_Button* detector7_checkbox
+      { detectorall_checkbox = new Fl_Check_Button(955, 51, 40, 29, "All");
+        detectorall_checkbox->down_box(FL_DOWN_BOX);
+        detectorall_checkbox->value(1);
+        detectorall_checkbox->callback((Fl_Callback*)cb_detectorall_checkbox);
+      } // Fl_Check_Button* detectorall_checkbox
       detector_choice->end();
     } // Fl_Group* detector_choice
     { inttimeOutput = new Fl_Value_Output(535, 66, 65, 24, "time (s):");
