@@ -53,7 +53,7 @@ void subImage::draw()
    	glClear(GL_COLOR_BUFFER_BIT);  
 	
 	//draw the pixels
-	if(gui->subImageLockbut->value() == 0)
+	if(gui->Lockbut->value() == 0)
 	{
 		for(int j=0;j<ZOOMNUM;j++)
 		{

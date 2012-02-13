@@ -27,15 +27,23 @@ public:
  	void draw();
 	int handle(int eventType);
 	void glPrint(float x, float y, char *string );
-	int xmax;
 	int HistogramFunctionDetectors[MAX_CHANNEL][NUM_DETECTORS];
 	double displayHistogramDetectors[MAX_CHANNEL][NUM_DETECTORS];
-	int detector_display[NUM_DETECTORS+1];
+	void update_detector_display(void);
+	int get_detector_display(int detector_number);
+	void set_binsize(int newbinsize);
+	void set_xmax(int newxmax);
 private:
 	double ymax;
 	double ymin;
 	int xmin;
 	float chan_to_energy;
+	float FLHistcursorX[2];
+	float FLHistcursorY[2];
+	int mouseHistPixel;
+	int detector_display[8];
+	int binsize;
+	int xmax;
 };
 
 #endif

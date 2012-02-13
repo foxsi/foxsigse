@@ -38,8 +38,6 @@ float GL_cursor[2];
 int mousePixel[2];
 int chosenPixel[2];
 
-extern float pixel_half_life;
-
 extern Gui *gui;
 extern Foxsidata *data;
 
@@ -60,7 +58,7 @@ mainImage::mainImage(int x,int y,int w,int h,const char *l)
 			detImage[i][j] = 0;
 			detImagealpha[i][j] = 0;
 			detImagetime[i][j] = 0;
-			for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+			for (int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++) {
 				detectorsImage[i][j][detector_num] = 0;
 				detectorsImagealpha[i][j][detector_num] = 0;
 				detectorsImagetime[i][j][detector_num] = 0;
@@ -70,7 +68,7 @@ mainImage::mainImage(int x,int y,int w,int h,const char *l)
 	detImage[15][15] = 1.0;
 	detImage[75][75] = 0.5;
 	show_mask = 0;
-	for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+	for (int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++) {
 		detectorsImage[25][30][detector_num] = 1.0;
 		detectorsImagealpha[26][31][detector_num] = 1.0;
 	}
@@ -107,7 +105,7 @@ void mainImage::draw()
    	glClearColor(0.0,0.0,0.0,0.0);
    	glClear(GL_COLOR_BUFFER_BIT);  
 	
-	if (gui->mainHistogramWindow->detector_display[0] == 1) {
+	if (gui->mainHistogramWindow->get_detector_display(0) == 1) {
 		for(int j = 0; j < XSTRIPS; j++)
 		{
 			for(int i = 0; i < YSTRIPS; i++)
@@ -116,8 +114,8 @@ void mainImage::draw()
 				
 				if (grey != 0)
 				{
-					if (pixel_half_life != 0){
-						alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
+					if (gui->app->get_pixel_half_life() != 0){
+						alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * gui->app->get_pixel_half_life() ));
 					} else {
 						alpha = 1.0;
 					}
@@ -135,12 +133,8 @@ void mainImage::draw()
 					vert = detImagemask[i][j];
 					
 					if (bleu == 1){
-						if (pixel_half_life != 0){
-							alpha = exp(-(current_time - detImagetime[i][j])/(CLOCKS_PER_SEC * pixel_half_life));
-						} else {
-							alpha = 1.0;
-						}
-						glColor4f(0, 0, bleu, alpha * 0.5);
+						
+						glColor4f(0, vert, 0, alpha * 0.5);
 						glBegin(GL_QUADS);
 						glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
 						glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
@@ -151,20 +145,30 @@ void mainImage::draw()
 		}
 	}
 	
+	//ymax = maximumValue(*detectorsImage);
+	
 	// draw individual detectors if needed
 	for(int j = 0; j < XSTRIPS; j++)
 	{
 		for(int i = 0; i < YSTRIPS; i++)
 		{
-			for (int detector_num = 0; detector_num < NUM_DETECTORS + 1; detector_num++) {
-				if (gui->mainHistogramWindow->detector_display[detector_num] == 1) {
-					bleu = detectorsImage[i][j][detector_num]/ymax;
-					detectorsImagealpha[i][j][detector_num] = alpha;
-					glColor4f(0, 0, bleu, alpha);
-					glBegin(GL_QUADS);
-					glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
-					glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
-					glEnd();
+			for (int detector_num = 1; detector_num < NUM_DETECTORS + 1; detector_num++) {
+				if (gui->mainHistogramWindow->get_detector_display(detector_num) == 1) {
+					bleu = 7*detectorsImage[i][j][detector_num]/ymax;
+					if (bleu != 0)
+					{
+						if (gui->app->get_pixel_half_life() != 0){
+							alpha = exp(-(current_time - detectorsImagetime[i][j][detector_num])/(CLOCKS_PER_SEC * gui->app->get_pixel_half_life()));
+						} else {
+							alpha = 1.0;
+						}
+						detectorsImagealpha[i][j][detector_num] = alpha;
+						glColor4f(0, 0, bleu, alpha);
+						glBegin(GL_QUADS);
+						glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 
+						glVertex2f(i+1+XBORDER, j+1+YBORDER); glVertex2f(i+XBORDER, j+1+YBORDER);
+						glEnd();
+					}
 				}
 			}
 		}
@@ -178,52 +182,58 @@ void mainImage::draw()
 	glEnd();
 	
 	// draw a cross under the cursor selection
-	glColor3f(1, 0, 0);
-	glBegin(GL_LINES);
-		glVertex2f(mousePixel[0] + XBORDER - 3.5, mousePixel[1] + YBORDER);
-		glVertex2f(mousePixel[0] + XBORDER + 4.5, mousePixel[1] + YBORDER);
-	glEnd();
-	
-	glBegin(GL_LINES);
-	glVertex2f(mousePixel[0] + XBORDER - 3.5, mousePixel[1] + YBORDER + 1);
-	glVertex2f(mousePixel[0] + XBORDER + 4.5, mousePixel[1] + YBORDER + 1);
-	glEnd();	
-	
-	glBegin(GL_LINES);
-		glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER - 3.5); 
-		glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER + 4.5); 
-	glEnd();
-	
-	glBegin(GL_LINES);
-	glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER - 3.5); 
-	glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER + 4.5); 
-	glEnd();
-	
-	//draw an expanded view
-	/*if ((FLcursorX[1]!=0)&&(FLcursorY[1]!=0))
-	 {
-	 for(int j=0;j<zoomNum;j++)
-	 {
-	 for(int i=0;i<zoomNum;i++)
-	 {
-	 int curPixel[2];
-	 
-	 curPixel[0] = chosenPixel[0] + i - zoomNum/2;
-	 curPixel[1] = chosenPixel[1] + j - zoomNum/2;
-	 if ((curPixel[0] < 0)||(curPixel[1] < 0)){ grey = 0.0; } else { grey = detImage[curPixel[0]][curPixel[1]]; }
-	 
-	 glColor3f(grey, grey, grey);
-	 glBegin(GL_QUADS);
-	 glVertex2f(FLcursorX[1]+i*zoomPixSize - zoomNum/2*zoomPixSize, FLcursorY[1]+j*zoomPixSize - zoomNum/2*zoomPixSize); 
-	 glVertex2f(FLcursorX[1]+(i+1)*zoomPixSize - zoomNum/2*zoomPixSize, FLcursorY[1]+j*zoomPixSize - zoomNum/2*zoomPixSize); 
-	 glVertex2f(FLcursorX[1]+(i+1)*zoomPixSize - zoomNum/2*zoomPixSize, FLcursorY[1]+(j+1)*zoomPixSize - zoomNum/2*zoomPixSize); 
-	 glVertex2f(FLcursorX[1]+i*zoomPixSize - zoomNum/2*zoomPixSize, FLcursorY[1]+(j+1)*zoomPixSize - zoomNum/2*zoomPixSize);
-	 glEnd();
-	 }
-	 }
-	 }
-	 */
-	glPopMatrix();
+	if(gui->Lockbut->value() == 0)
+	{
+		glColor3f(1, 0, 0);
+		glBegin(GL_LINES);
+			glVertex2f(mousePixel[0] + XBORDER - 3.5, mousePixel[1] + YBORDER);
+			glVertex2f(mousePixel[0] + XBORDER + 4.5, mousePixel[1] + YBORDER);
+		glEnd();
+		
+		glBegin(GL_LINES);
+		glVertex2f(mousePixel[0] + XBORDER - 3.5, mousePixel[1] + YBORDER + 1);
+		glVertex2f(mousePixel[0] + XBORDER + 4.5, mousePixel[1] + YBORDER + 1);
+		glEnd();	
+		
+		glBegin(GL_LINES);
+			glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER - 3.5); 
+			glVertex2f(mousePixel[0] + XBORDER, mousePixel[1] + YBORDER + 4.5); 
+		glEnd();
+		
+		glBegin(GL_LINES);
+		glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER - 3.5); 
+		glVertex2f(mousePixel[0] + XBORDER + 1, mousePixel[1] + YBORDER + 4.5); 
+		glEnd();
+	} else {
+		glColor3f(1, 0, 0);
+		glBegin(GL_LINES);
+		glVertex2f(chosenPixel[0] + XBORDER - 3.5, chosenPixel[1] + YBORDER);
+		glVertex2f(chosenPixel[0] + XBORDER + 4.5, chosenPixel[1] + YBORDER);
+		glEnd();
+		
+		glBegin(GL_LINES);
+		glVertex2f(chosenPixel[0] + XBORDER - 3.5, chosenPixel[1] + YBORDER + 1);
+		glVertex2f(chosenPixel[0] + XBORDER + 4.5, chosenPixel[1] + YBORDER + 1);
+		glEnd();	
+		
+		glBegin(GL_LINES);
+		glVertex2f(chosenPixel[0] + XBORDER, chosenPixel[1] + YBORDER - 3.5); 
+		glVertex2f(chosenPixel[0] + XBORDER, chosenPixel[1] + YBORDER + 4.5); 
+		glEnd();
+		
+		glBegin(GL_LINES);
+		glVertex2f(chosenPixel[0] + XBORDER + 1, chosenPixel[1] + YBORDER - 3.5); 
+		glVertex2f(chosenPixel[0] + XBORDER + 1, chosenPixel[1] + YBORDER + 4.5); 
+		glEnd();
+		
+		//now update the text box with the current chosen pixel
+		Fl::lock();
+		gui->pixelCounts->value(detImage[chosenPixel[0]][chosenPixel[1]]);
+		Fl::unlock();
+		
+	}
+
+	glPopMatrix();	
 }
 
 int mainImage::handle(int eventType)
@@ -247,38 +257,19 @@ int mainImage::handle(int eventType)
 	if((eventType==FL_PUSH)&&(button==1))
 	{
 		//set the view lock button to ON
-		gui->subImageLockbut->set();
+		gui->Lockbut->set();
 		//save the location
 		chosenPixel[0] = mousePixel[0];	chosenPixel[1] = mousePixel[1];
 	}
 	
-	/* //save the current view 
-		for(int j=0;j<ZOOMNUM;j++)
-		{
-			for(int i=0;i<ZOOMNUM;i++)
-			{
-				int curPixel[2];
-				
-				curPixel[0] = mousePixel[0] + i - ZOOMNUM/2;
-				curPixel[1] = mousePixel[1] + j - ZOOMNUM/2;
-				if ((curPixel[0] < 0)||(curPixel[1] < 0)||(curPixel[0] > XSTRIPS)||(curPixel[1] > YSTRIPS))
-				{ detsubImage[i][j] = 0.0; } 
-				else { 
-					detsubImage[i][j] = detImage[curPixel[0]][curPixel[1]];
-					detsubImagealpha[i][j] = detImagealpha[curPixel[0]][curPixel[1]];
-				}
-			}
-		}
-	 */	
-	
 	//now update the text box with the current chosen pixel
-	if(gui->subImageLockbut->value() == 0)
-	{
+	Fl::lock();
+	if (gui->Lockbut->value() == 0) {
+		gui->pixelCounts->value(detImage[mousePixel[0]][mousePixel[1]]);
 		sprintf( text, "%d,%d", mousePixel[0], mousePixel[1]);
 		gui->pixelNum->value(text);
-		sprintf( text, "%4.2f", detImage[mousePixel[0]][mousePixel[1]]);
-		gui->pixelCounts->value(text);
 	}
+	Fl::unlock();
 	redraw();
 	
 	return(1);

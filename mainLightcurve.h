@@ -23,17 +23,18 @@ public:
 	mainLightcurve(int x,int y,int w,int h,const char *l=0);
 	void draw();
 	float binsize[MAX_CHANNEL];
-	int xmax;
 	float CountRatecurveFunction[MAX_CHANNEL];
-	
 	int CountcurveDetectors[MAX_CHANNEL][NUM_DETECTORS+1];
 	float CountRatecurveDetectors[MAX_CHANNEL][NUM_DETECTORS+1];	
 	unsigned int current_timebin_detectors[NUM_DETECTORS+1];
-
-	int ymax;
-	int ymin;
-	int xmin;	
+	void set_xmax(int newxmax);
+	void set_ymax(int newymax);
 private:
+	int xmax;
+	int xmin;
+	int ymin;
+	int ymax;
+
 };
 
 #endif

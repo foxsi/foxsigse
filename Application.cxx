@@ -54,19 +54,18 @@ int file_type;
 char *data_file_save_dir;
 int read_delay;
 int data_source;	// 0 means simulation, 1 means ASIC, 2 means Formatter
-float pixel_half_life;
 int mainImage_minimum;
-int detector_display[7];
 int newFPGA_register;
 char *formatter_configuration_file;
 
 extern int low_threshold;
-extern int mainHistogram_binsize;
+//extern int mainHistogram_binsize;
 
 Application::Application()
 {
 	// Constructor method for the Application class
 	// Add initialization here:
+	pixel_half_life = 5;
 	
 }
 
@@ -77,10 +76,10 @@ void Application::flush_histogram(void)
 	{
 		HistogramFunction[i] = 0;
 		displayHistogram[i] = 0;
-		for(int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++)
+		for(int j = 0; j < (NUM_DETECTORS+1); j++)
 		{
-			gui->mainHistogramWindow->HistogramFunctionDetectors[i][detector_num] = 0;
-			gui->mainHistogramWindow->displayHistogramDetectors[i][detector_num] = 0;
+			gui->mainHistogramWindow->HistogramFunctionDetectors[i][j] = 0;
+			gui->mainHistogramWindow->displayHistogramDetectors[i][j] = 0;
 		}
 	}
 	gui->mainHistogramWindow->redraw();
@@ -195,6 +194,7 @@ void Application::initialize(void)
 {
 	data_initialize();
 	gui->initializeBut->deactivate();
+	toggle_detector_display();
 	gui->closeBut->activate();
 }
 
@@ -382,7 +382,8 @@ void Application::reset_read_counter(void)
 
 void Application::update_histogrambinsize(void)
 {
-	mainHistogram_binsize = gui->histogrambinsize_counter->value();
+	//mainHistogram_binsize = gui->histogrambinsize_counter->value();
+	gui->mainHistogramWindow->set_binsize(gui->histogrambinsize_counter->value());
 	gui->mainHistogramWindow->redraw();
 }
 
@@ -394,13 +395,13 @@ void Application::update_timebinsize(void)
 
 void Application::update_lightcurvexmax(void)
 {
-	gui->mainLightcurveWindow->xmax = gui->lightcurvexmax_counter->value();
+	gui->mainLightcurveWindow->set_xmax(gui->lightcurvexmax_counter->value());
 	gui->mainLightcurveWindow->redraw();
 }
 
 void Application::update_histogramxmax(void)
 {
-	gui->mainHistogramWindow->xmax = gui->histogramxmax_counter->value();
+	gui->mainHistogramWindow->set_xmax(gui->histogramxmax_counter->value());
 	gui->mainHistogramWindow->redraw();
 }
 
@@ -430,13 +431,14 @@ void Application::set_channel_histogram(void)
 void Application::toggle_image_integrate(void)
 {
 	if (gui->mainImage_integrate_button->value() == 1){
+		gui->prefs->set("pixel_half_life", pixel_half_life);
 		pixel_half_life = 0;
-		printf("pixel_half_life = %f\n", pixel_half_life);
+		printf_to_console("pixel_half_life = %f\n", "", pixel_half_life);
 		gui->mainImageWindow->redraw();
 	}
 	if (gui->mainImage_integrate_button->value() == 0){
 		gui->prefs->get("pixel_half_life", pixel_half_life, 3.0);
-		printf("pixel_half_life = %f\n", pixel_half_life);
+		printf_to_console("pixel_half_life = %f\n", "", pixel_half_life);
 		gui->mainImageWindow->redraw();
 	}
 }
@@ -532,7 +534,7 @@ void Application::save_image_to_file(void)
 void Application::set_lightcurve_ymax(void)
 {
 	// update the max of the y range of the light curve
-	gui->mainLightcurveWindow->ymax = gui->mainLightcurve_ymaxslider->value();
+	gui->mainLightcurveWindow->set_ymax(gui->mainLightcurve_ymaxslider->value());
 	gui->mainLightcurveWindow->redraw();
 }
 
@@ -544,16 +546,28 @@ void Application::toggle_show_mask(void)
 
 void Application::toggle_detector_display(void)
 {
-	// update which detectors to display 
-	gui->mainHistogramWindow->detector_display[0] = gui->detectorall_checkbox->value();
-	gui->mainHistogramWindow->detector_display[1] = gui->detector1_checkbox->value();
-	gui->mainHistogramWindow->detector_display[2] = gui->detector2_checkbox->value();
-	gui->mainHistogramWindow->detector_display[3] = gui->detector3_checkbox->value();
-	gui->mainHistogramWindow->detector_display[4] = gui->detector4_checkbox->value();
-	gui->mainHistogramWindow->detector_display[5] = gui->detector5_checkbox->value();
-	gui->mainHistogramWindow->detector_display[6] = gui->detector6_checkbox->value();
-	gui->mainHistogramWindow->detector_display[7] = gui->detector7_checkbox->value();
+	gui->mainHistogramWindow->update_detector_display();
 	gui->mainHistogramWindow->redraw();
 	gui->mainImageWindow->redraw();
 	gui->mainLightcurveWindow->redraw();
+}
+
+void Application::testfunction(void)
+{
+	//gui->mainHistogramWindow->detector_display[0] = gui->detectorall_checkbox->value();
+	//for (int i = 0; i < 8; i++) {
+	//	cout << gui->mainHistogramWindow->detector_display[i] << endl;
+	//}
+	//cout << endl;
+	gui->mainHistogramWindow->redraw();
+	gui->mainImageWindow->redraw();
+	gui->mainLightcurveWindow->redraw();
+}
+
+float Application::get_pixel_half_life(void){
+	return pixel_half_life;
+}
+
+void Application::set_pixel_half_life(float new_value){
+	pixel_half_life = new_value;
 }

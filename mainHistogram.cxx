@@ -16,15 +16,7 @@
 int HistogramFunction[MAX_CHANNEL];
 extern double displayHistogram[MAX_CHANNEL];
 
-int chosenHistPixel;
-int mouseHistPixel;
 int low_threshold = 5;
-int mainHistogram_binsize = 25;
-
-float FLHistcursorX[2], FLHistcursorY[2];
-
-float YTICKINTERVAL;
-float YTICKINTERVALM;
 
 extern Gui *gui;
 
@@ -50,13 +42,14 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 	{
 		HistogramFunction[i] = i*1;
 		displayHistogram[i] = HistogramFunction[i];
-		for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+		for (int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++) {
 			HistogramFunctionDetectors[i][detector_num] = i*2 + detector_num;
 			displayHistogramDetectors[i][detector_num] = HistogramFunctionDetectors[i][detector_num];}
 	}
 	FLHistcursorX[0] = 500;
 	mouseHistPixel = FLHistcursorX[0];
 	chan_to_energy = 10.0;
+	binsize = 25;
 }
 
 void mainHistogram::draw()
@@ -65,13 +58,10 @@ void mainHistogram::draw()
 	int y = 0;
 	int k = 0;
 	
-	ymax = maximumValue(displayHistogram, xmax/mainHistogram_binsize, low_threshold/mainHistogram_binsize);
+	ymax = maximumValue(displayHistogram, xmax/binsize, low_threshold/binsize);
 
 	if (ymax == 0){ ymax = 100; }
 		
-	YTICKINTERVALM = (ymax-ymin)/YNUMTICKS;
-	YTICKINTERVAL = YTICKINTERVALM/2;
-	
 	if (!valid()) {
 		make_current();
 	}
@@ -86,7 +76,7 @@ void mainHistogram::draw()
 	glLoadIdentity();
 	
 	glViewport(0,0,w(),h());
-	gluOrtho2D(0,xmax/mainHistogram_binsize, 0, ymax);
+	gluOrtho2D(0,xmax/binsize, 0, ymax);
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -98,18 +88,26 @@ void mainHistogram::draw()
 	glClear(GL_COLOR_BUFFER_BIT);
 		
 	// recalculate the displayed histogram (rebinned)
-	for(int i = 0; i < MAX_CHANNEL; i+=mainHistogram_binsize)
+	for(int i = 0; i < MAX_CHANNEL; i+=binsize)
 	{
 		y = 0;
-		for (int j = 0; j < mainHistogram_binsize; j++) {
-			y += HistogramFunction[i+j];}
+		if (binsize > 1) {		
+			for (int j = 0; j < binsize; j++) {
+				y += HistogramFunction[i+j];}} 
+		else { y = HistogramFunction[i]; }
 		displayHistogram[k] = y;
 		
-		for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+		for (int dnum = 0; dnum < (NUM_DETECTORS+1); dnum++) 
+		{
 			y = 0;
-			for (int j = 0; j < mainHistogram_binsize; j++) {
-				y += HistogramFunctionDetectors[i+j][detector_num];}
-			displayHistogramDetectors[k][detector_num] = y;
+			if (binsize > 1) {				
+				for (int j = 0; j < binsize; j++) {
+					y += HistogramFunctionDetectors[i+j][dnum];}
+			} else {
+				y = HistogramFunctionDetectors[i][dnum];
+			}
+
+			displayHistogramDetectors[k][dnum] = y;
 		}
 		k++;
 	}
@@ -120,14 +118,13 @@ void mainHistogram::draw()
 		glBegin(GL_LINES);
 		glColor3f(1.0, 0.0, 0.0);	
 		
-		for(int i = 0; i < MAX_CHANNEL/mainHistogram_binsize; i++)
+		for(int i = 0; i < MAX_CHANNEL/binsize; i++)
 		{
 			glVertex2f(i, displayHistogram[i]);
 			glVertex2f(i+1, displayHistogram[i]);
 			
 			glVertex2f(i+0.5, displayHistogram[i] - sqrt(displayHistogram[i]));
 			glVertex2f(i+0.5, displayHistogram[i] + sqrt(displayHistogram[i]));
-		
 		}
 		//glVertex2f(MAX_CHANNEL+XBORDER, YBORDER);
 		//glVertex2f(XBORDER, YBORDER);
@@ -135,13 +132,13 @@ void mainHistogram::draw()
 	}
 	
 	//draw the total detector histogram
-	for (int detector_num = 1; detector_num < NUM_DETECTORS+1; detector_num++)
+	for (int detector_num = 1; detector_num < (NUM_DETECTORS+1); detector_num++)
 	{
 		if (detector_display[detector_num] == 1)
 		{
 			glBegin(GL_LINES);
 			glColor3f(0.0, 0.0, 1.0);	
-			for(int i = 0; i < MAX_CHANNEL/mainHistogram_binsize; i++)
+			for(int i = 0; i < MAX_CHANNEL/binsize; i++)
 			{
 				glVertex2f(i, 7*displayHistogramDetectors[i][detector_num]);
 				glVertex2f(i+1, 7*displayHistogramDetectors[i][detector_num]);	
@@ -161,12 +158,12 @@ void mainHistogram::draw()
 	
 	// draw the line showing the low energy cutoff
 	glColor4f(0.0, 0.0, 1.0, 0.5);
-	glRectf(0, 0, (int) low_threshold/mainHistogram_binsize, ymax);
+	glRectf(0, 0, (int) low_threshold/binsize, ymax);
 	
 	glBegin(GL_LINES);
 	glColor3f(0.0, 0.0, 1.0);
-	glVertex2f((int) low_threshold/mainHistogram_binsize, 0);
-	glVertex2f((int) low_threshold/mainHistogram_binsize, ymax);
+	glVertex2f((int) low_threshold/binsize, 0);
+	glVertex2f((int) low_threshold/binsize, ymax);
 	glEnd();
 	
 	glPopMatrix();
@@ -187,7 +184,7 @@ int mainHistogram::handle(int eventType)
 	if(eventType == FL_PUSH)
 	{
 		//convert between fltk coordinates and opengl coordinates
-		FLHistcursorX[0] = floor(Fl::event_x()*(xmax/mainHistogram_binsize)/w());
+		FLHistcursorX[0] = floor(Fl::event_x()*(xmax/binsize)/w());
 		FLHistcursorY[0] = floor((h()-Fl::event_y())*(ymax)/h());
 
 		mouseHistPixel = FLHistcursorX[0];
@@ -195,10 +192,10 @@ int mainHistogram::handle(int eventType)
 	
 	// now update the value displayed
 	if( gui->mainHistogram_choice->value() == 0 ){
-		gui->histEnergy->value(mouseHistPixel*mainHistogram_binsize);	
+		gui->histEnergy->value(mouseHistPixel*binsize);	
 	}
 	if( gui->mainHistogram_choice->value() == 1 ){
-		gui->histEnergy->value(mouseHistPixel*mainHistogram_binsize/chan_to_energy);	
+		gui->histEnergy->value(mouseHistPixel*binsize/chan_to_energy);	
 	}
 	gui->histCounts->value(displayHistogram[mouseHistPixel]);
 	
@@ -222,6 +219,31 @@ int mainHistogram::handle(int eventType)
 	//      //redraw();
 	//
 	return(1);
+}
+
+void mainHistogram::update_detector_display(void)
+{
+	// update which detectors to display 
+	detector_display[0] = gui->detectorall_checkbox->value();
+	detector_display[1] = gui->detector1_checkbox->value();
+	detector_display[2] = gui->detector2_checkbox->value();
+	detector_display[3] = gui->detector3_checkbox->value();
+	detector_display[4] = gui->detector4_checkbox->value();
+	detector_display[5] = gui->detector5_checkbox->value();
+	detector_display[6] = gui->detector6_checkbox->value();
+	detector_display[7] = gui->detector7_checkbox->value();
+}
+
+int mainHistogram::get_detector_display(int detector_number){
+	return detector_display[detector_number];
+}
+
+void mainHistogram::set_binsize(int newbinsize){
+	binsize = newbinsize;
+}
+
+void mainHistogram::set_xmax(int newxmax){
+	xmax = newxmax;
 }
 
 //void mainHistogram::glPrint(float x, float y, char *string )

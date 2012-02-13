@@ -31,7 +31,7 @@ mainLightcurve::mainLightcurve(int x,int y,int w,int h,const char *l)
 		CountcurveFunction[i] = i;
 		binsize[i] = 1;
 		CountRatecurveFunction[i] = i;
-		for (int detector_num = 0; detector_num < NUM_DETECTORS+1; detector_num++) {
+		for (int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++) {
 			CountRatecurveDetectors[i][detector_num] = i;
 		}
 	}
@@ -76,7 +76,7 @@ void mainLightcurve::draw()
    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//draw the graph
-	if (gui->mainHistogramWindow->detector_display[0] == 1)
+	if (gui->mainHistogramWindow->get_detector_display(0) == 1)
 	{
 		glBegin(GL_LINES);
 		glColor3f(1.0, 0.0, 0.0);
@@ -98,9 +98,9 @@ void mainLightcurve::draw()
 		glEnd();
 	}
 	
-	for (int detector_num = 1; detector_num < NUM_DETECTORS+1; detector_num++)
+	for (int detector_num = 1; detector_num < (NUM_DETECTORS+1); detector_num++)
 	{
-		if (gui->mainHistogramWindow->detector_display[detector_num] == 1) {
+		if (gui->mainHistogramWindow->get_detector_display(detector_num) == 1) {
 			k = 0;
 			glBegin(GL_LINES);
 			glColor3f(0.0, 0.0, 1.0);
@@ -121,4 +121,12 @@ void mainLightcurve::draw()
 	
 	// update the display of the current count rate
 	gui->ctsOutput->value(CountcurveFunction[0]/binsize[0]);
+}
+
+void mainLightcurve::set_xmax(int newxmax){
+	xmax = newxmax;
+}
+
+void mainLightcurve::set_ymax(int newymax){
+	ymax = newymax;
 }

@@ -83,7 +83,7 @@ exit(1);}
         }
       }
       Fl_Group {} {
-        label Image open
+        label Image open selected
         xywh {15 282 555 404} box THIN_UP_FRAME
       } {
         Fl_Box mainImageWindow {
@@ -95,14 +95,6 @@ exit(1);}
         Fl_Output pixelNum {
           label Pixel
           xywh {457 464 80 25}
-        }
-        Fl_Output pixelCounts {
-          label Cts
-          xywh {457 434 80 25}
-        }
-        Fl_Light_Button subImageLockbut {
-          label {Unlock View}
-          xywh {432 494 105 25} selection_color 1
         }
         Fl_Button {} {
           label Flush
@@ -127,7 +119,15 @@ exit(1);}
         Fl_Check_Button showmask_checkbox {
           label {show mask}
           callback {app->toggle_show_mask();}
-          xywh {460 410 63 15} down_box DOWN_BOX
+          xywh {440 415 63 15} down_box DOWN_BOX
+        }
+        Fl_Value_Output pixelCounts {
+          label {Cts:}
+          xywh {460 436 75 24} step 1
+        }
+        Fl_Light_Button Lockbut {
+          label {lock position}
+          xywh {432 493 105 25}
         }
       }
       Fl_Group {} {
@@ -207,7 +207,7 @@ exit(1);}
           xywh {564 226 40 24} step 0.1
         }
         Fl_Value_Output VoltageOutput3 {
-          label {-3.3V}
+          label {3.3V}
           xywh {564 254 40 24} step 0.1
         }
       }
@@ -319,7 +319,7 @@ app->start_reading_data();}
           xywh {1047 303 75 25}
         }
         Fl_Value_Output ctsOutput {
-          label {cts/s:} selected
+          label {cts/s:}
           xywh {1047 275 77 24} step 0.1
         }
         Fl_Counter timebinsize_counter {
@@ -445,6 +445,11 @@ app->start_reading_data();}
       Fl_Value_Output inttimeOutput {
         label {time (s):}
         xywh {535 66 65 24}
+      }
+      Fl_Button test_button {
+        label test
+        callback {app->testfunction();}
+        xywh {100 220 70 25}
       }
     }
     Fl_Window sendParamsWindow {
@@ -1262,8 +1267,8 @@ app->send_params();
       }
     }
     Fl_Window sendCommandsWindow {
-      label {Send Commands}
-      xywh {436 54 364 175} type Double hide
+      label {Send Commands} open
+      xywh {436 54 364 175} type Double visible
     } {
       Fl_Button {} {
         label Send
@@ -1291,7 +1296,7 @@ app->send_params();
         xywh {70 130 180 25} box THIN_UP_BOX labelcolor 1
       }
       Fl_Value_Input highVoltage_input {
-        label {HV Set (0-4095):}
+        label {HV Set:}
         xywh {175 11 75 24}
       }
       Fl_Value_Input clockLow_input {

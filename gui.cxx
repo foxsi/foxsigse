@@ -298,6 +298,13 @@ void Gui::cb_detectorall_checkbox(Fl_Check_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_detectorall_checkbox_i(o,v);
 }
 
+void Gui::cb_test_button_i(Fl_Button*, void*) {
+  app->testfunction();
+}
+void Gui::cb_test_button(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_test_button_i(o,v);
+}
+
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
   app->save_settings();
 app->send_params();
@@ -516,11 +523,6 @@ Gui::Gui() {
       } // mainImage* mainImageWindow
       { pixelNum = new Fl_Output(457, 464, 80, 25, "Pixel");
       } // Fl_Output* pixelNum
-      { pixelCounts = new Fl_Output(457, 434, 80, 25, "Cts");
-      } // Fl_Output* pixelCounts
-      { subImageLockbut = new Fl_Light_Button(432, 494, 105, 25, "Unlock View");
-        subImageLockbut->selection_color((Fl_Color)1);
-      } // Fl_Light_Button* subImageLockbut
       { Fl_Button* o = new Fl_Button(481, 523, 80, 25, "Flush");
         o->callback((Fl_Callback*)cb_Flush);
       } // Fl_Button* o
@@ -538,10 +540,15 @@ Gui::Gui() {
       { Fl_Button* o = new Fl_Button(490, 640, 54, 25, "Save");
         o->callback((Fl_Callback*)cb_Save);
       } // Fl_Button* o
-      { showmask_checkbox = new Fl_Check_Button(460, 410, 63, 15, "show mask");
+      { showmask_checkbox = new Fl_Check_Button(440, 415, 63, 15, "show mask");
         showmask_checkbox->down_box(FL_DOWN_BOX);
         showmask_checkbox->callback((Fl_Callback*)cb_showmask_checkbox);
       } // Fl_Check_Button* showmask_checkbox
+      { pixelCounts = new Fl_Value_Output(460, 436, 75, 24, "Cts:");
+        pixelCounts->step(1);
+      } // Fl_Value_Output* pixelCounts
+      { Lockbut = new Fl_Light_Button(432, 493, 105, 25, "lock position");
+      } // Fl_Light_Button* Lockbut
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(320, 109, 290, 170, "Telemetry Info");
@@ -600,7 +607,7 @@ Gui::Gui() {
       { VoltageOutput2 = new Fl_Value_Output(564, 226, 40, 24, "1.5V");
         VoltageOutput2->step(0.1);
       } // Fl_Value_Output* VoltageOutput2
-      { VoltageOutput3 = new Fl_Value_Output(564, 254, 40, 24, "-3.3V");
+      { VoltageOutput3 = new Fl_Value_Output(564, 254, 40, 24, "3.3V");
         VoltageOutput3->step(0.1);
       } // Fl_Value_Output* VoltageOutput3
       o->end();
@@ -797,6 +804,9 @@ Gui::Gui() {
     } // Fl_Group* detector_choice
     { inttimeOutput = new Fl_Value_Output(535, 66, 65, 24, "time (s):");
     } // Fl_Value_Output* inttimeOutput
+    { test_button = new Fl_Button(100, 220, 70, 25, "test");
+      test_button->callback((Fl_Callback*)cb_test_button);
+    } // Fl_Button* test_button
     mainWindow->end();
     mainWindow->resizable(mainWindow);
   } // Fl_Double_Window* mainWindow
@@ -1339,7 +1349,7 @@ Gui::Gui() {
       o->labelcolor((Fl_Color)1);
       o->callback((Fl_Callback*)cb_Strobe1);
     } // Fl_Button* o
-    { highVoltage_input = new Fl_Value_Input(175, 11, 75, 24, "HV Set (0-4095):");
+    { highVoltage_input = new Fl_Value_Input(175, 11, 75, 24, "HV Set:");
     } // Fl_Value_Input* highVoltage_input
     { clockLow_input = new Fl_Value_Input(175, 40, 75, 24, "Clock Set Low:");
     } // Fl_Value_Input* clockLow_input

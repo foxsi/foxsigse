@@ -81,6 +81,7 @@ public:
 	static void printf_to_console(const char *string1, char *string2, int number);
 	static void print_to_console(const char *text);
 	float get_pixel_half_life(void);
+	void set_pixel_half_life(float new_value);
 	void reset_read_counter(void);
 	void set_lowthreshold(void);
 	void flush_histogram(void);
@@ -100,10 +101,13 @@ public:
 	void toggle_show_mask(void);
 	void toggle_detector_display(void);
 	int elapsed_time_sec;
+	void testfunction(void);
 private:
 	char filename[40];
+	float pixel_half_life;
 	static void *read_data(void *variable);		// Begin reading data from a data stream
 	static void *auto_run_sequence(void *variable);	// auto-run sequence of acquisitions with varying hold times
+	
 };
 
 #endif

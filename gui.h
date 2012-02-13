@@ -12,9 +12,9 @@
 #include <FL/Fl_Group.H>
 #include "mainImage.h"
 #include <FL/Fl_Output.H>
-#include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Value_Slider.H>
+#include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Value_Output.H>
 #include "mainHistogram.h"
@@ -55,8 +55,6 @@ private:
 public:
   mainImage *mainImageWindow;
   Fl_Output *pixelNum;
-  Fl_Output *pixelCounts;
-  Fl_Light_Button *subImageLockbut;
 private:
   void cb_Flush_i(Fl_Button*, void*);
   static void cb_Flush(Fl_Button*, void*);
@@ -78,6 +76,8 @@ private:
   void cb_showmask_checkbox_i(Fl_Check_Button*, void*);
   static void cb_showmask_checkbox(Fl_Check_Button*, void*);
 public:
+  Fl_Value_Output *pixelCounts;
+  Fl_Light_Button *Lockbut;
   Fl_Value_Output *shutterstateOutput;
   Fl_Value_Output *tempOutput2;
   Fl_Value_Output *HVOutput;
@@ -243,6 +243,11 @@ private:
   static void cb_detectorall_checkbox(Fl_Check_Button*, void*);
 public:
   Fl_Value_Output *inttimeOutput;
+  Fl_Button *test_button;
+private:
+  void cb_test_button_i(Fl_Button*, void*);
+  static void cb_test_button(Fl_Button*, void*);
+public:
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:
