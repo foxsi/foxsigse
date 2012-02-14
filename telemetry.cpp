@@ -22,7 +22,7 @@ float voltage_convert_5v(unsigned short int value)
 
 float voltage_convert_m5v(unsigned short int  value)
 {
-	return 2.5 - 15. * ( value / 4095.);
+	return 2.5 - 15.0 * ( value / 4095.);
 }
 
 float voltage_convert_33v(unsigned short int  value)

@@ -186,8 +186,8 @@ int mainHistogram::handle(int eventType)
 		//convert between fltk coordinates and opengl coordinates
 		FLHistcursorX[0] = floor(Fl::event_x()*(xmax/binsize)/w());
 		FLHistcursorY[0] = floor((h()-Fl::event_y())*(ymax)/h());
-
 		mouseHistPixel = FLHistcursorX[0];
+		redraw();	
 	}
 	
 	// now update the value displayed
@@ -199,25 +199,6 @@ int mainHistogram::handle(int eventType)
 	}
 	gui->histCounts->value(displayHistogram[mouseHistPixel]);
 	
-	redraw();
-	
-	      //if((eventType==FL_PUSH)&&(button==1))
-	      //{
-	//      //      FLHistcursorX[1]=FLHistcursorX[0];
-	//      //      FLHistcursorY[1]=FLHistcursorY[0];
-	//      //      gui->mainHistogramLockbut->set();
-	//      //}
-	//      //if((eventType==FL_PUSH)&&(button==2))
-	//      //{
-	//      //      FLHistcursorX[1]=0;
-	//      //      FLHistcursorY[1]=0;
-	//      //}
-	//
-	//      //if(gui->mainHistogramLockbut->value() == 0){chosenHistPixel = FLHistcursorX[1] - XBORDER;}
-	//
-	//      //if(gui->mainHistogramLockbut->value() == 0){gui->mainHistogramWindow->redraw();}
-	//      //redraw();
-	//
 	return(1);
 }
 

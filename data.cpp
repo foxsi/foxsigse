@@ -827,51 +827,52 @@ void data_update_display(unsigned short int *frame)
 		unsigned short int read_status;
 		uint32_t frameNumber;
 
+		// parse the buffer variable and update the display
 		unsigned short int temperature_monitors[12] = {0};
 		unsigned short int voltage_monitors[4] = {0};			// order is 5V, -5V, 1.5V, -3.3V
 		unsigned short int frame_value;					// to know which frame are provided what telemetry data
 		
-		// parse the buffer variable and update the display
-		
 		for( int frame_num = 0; frame_num < 4; frame_num++)
 		{
+			
 			//printf("f628: %x\n", buffer[index++]);
 			if (buffer[index++] == 0xf628) {
 				read_status = 1;
 				printf("-----Frame Start------\n");
 				printf("frame number = %u\n", frame_num);				
 				printf("eb90: %x\n", buffer[index+254]);
-				
+				for(int blah = 0; blah < 16; blah++){printf("%i-%04hX: %i\n", blah, buffer[index+blah-1], buffer[index+blah-1]);}
+
 				// check the checksum
 				for( int word_number = 0; word_number < 256; word_number++ ){read_status ^= buffer[word_number];}
-				printf("read status: %x\n", read_status);
-				// TODO fix the checksum calculation, does not currently work
 				if( read_status == 1 ){
 					nreads++;
 					
-					printf("index = %u\n", index);
-					printf("time1(MSB): %x\n", buffer[index++]);
-					printf("time2: %x\n", buffer[index++]);
-					printf("tim3(LSB): %x\n", buffer[index++]);
+					//printf("index = %u\n", index);
+					index++;
+					//printf("time1(MSB): %x\n", buffer[index++]);
+					index++;
+					//printf("time2: %x\n", buffer[index++]);
+					index++;
+					//printf("tim3(LSB): %x\n", buffer[index++]);
 					
 					index++;
 					frameNumber = ((uint32_t)(buffer[index] << 16) & 0xFFFF0000) | buffer[index+1];
-					frame_value = buffer[index+1] & 0x3;
-					cout << "frame number 2  = " << buffer[index+1] << endl;
+					frame_value = buffer[index] & 0x3;
+					cout << "frame number 2  = " << buffer[index] << endl;
+					printf("frame number 2: %04hX\n", buffer[index]);
+					
 					index++;
-					cout << "frameNumber = " << frameNumber << endl;
+					//cout << "frameNumber = " << frameNumber << endl;
 					cout << "frame value = " << frame_value << endl;
-					cout << "index = " << index << endl;
+					//cout << "index = " << index << endl;
 					// Housekeeping 0
 
-					printf("housekeeping 0: %x\n", buffer[index]);
-
+					printf("%i, housekeeping 0: %x\n", index, buffer[index]);
 					switch (frame_value) {
 						case 0:
 							// temperature reference
 							temperature_monitors[0] = buffer[index++];
-							printf("temp ref = %x\n", temperature_monitors[0]);
-							printf("temp ref = %f\n", temperature_convert_ref(temperature_monitors[0]));
 							break;
 						case 1:
 							//1.5 V monitor
@@ -887,12 +888,13 @@ void data_update_display(unsigned short int *frame)
 							printf("housekeeping 0: %u\n", buffer[index++]);
 							break;
 					}
-					
+
 					printf("cmd count: %x\n", buffer[index++]);
 					printf("command 1: %x\n", buffer[index++]);
 					printf("command 2: %x\n", buffer[index++]);
-					
+
 					// Housekeeping 1
+					printf("%i, housekeeping 1: %x\n", index, buffer[index]);
 					switch (frame_value) {
 						case 0:
 							// 5 V monitor
@@ -916,12 +918,13 @@ void data_update_display(unsigned short int *frame)
 					if (getbits(formatter_status, 2, 1)) {
 						attenuator_actuating = 1;
 					}
-					printf("0: %u\n", buffer[index++]);
-					//index++;
+					index++;
+					printf("HV index %i\n", index);
 					high_voltage_status = buffer[index] & 0xF;
 					high_voltage = ((buffer[index] >> 4) & 0xFFF)/8.0;
-
+					index++;
 					// Housekeeping 2
+					printf("%i, housekeeping 2: %x\n", index, buffer[index]);
 					switch (frame_value) {
 						case 0:
 							// -5 V monitor
@@ -941,11 +944,12 @@ void data_update_display(unsigned short int *frame)
 							break;
 					}
 					
-					index++; // printf("Status 0: %u\n", buffer[index++]);
-					index++; // printf("Status 1: %u\n", buffer[index++]);
-					index++; //printf("Status 2: %u\n", buffer[index++]);
+					printf("Status 0: %u\n", buffer[index++]);
+					printf("Status 1: %u\n", buffer[index++]);
+					printf("Status 2: %u\n", buffer[index++]);
 					
 					// Housekeeping 3
+					printf("%i, housekeeping 3: %x\n", index, buffer[index]);
 					switch (frame_value) {
 						case 0:
 							// 3.3 V monitor
@@ -968,8 +972,8 @@ void data_update_display(unsigned short int *frame)
 					printf("Status 3: %x\n", buffer[index++]);
 					printf("Status 4: %x\n", buffer[index++]);
 					printf("Status 5: %x\n", buffer[index++]);
-					printf("Status 6: %x\n", buffer[index++]);
-					
+					printf("Status 6: %x\n", buffer[index]);
+
 					for(int detector_num = 0; detector_num < 7; detector_num++){
 						unsigned short int ymask[128] = {0};
 						unsigned short int xmask[128] = {0};
@@ -977,9 +981,8 @@ void data_update_display(unsigned short int *frame)
 						unsigned short int xstrips[128] = {0};
 						// ystrips are defined as n strips
 						unsigned short int ystrips[128] = {0};
-						
 						index++;
-						printf("Detector %u time: %u\n", detector_num, buffer[index]);
+						printf("Detector %u time, index %i: %u\n", detector_num, buffer[index], index);
 						
 						for(int asic_number = 0; asic_number < 4; asic_number++)
 						{
@@ -1028,14 +1031,14 @@ void data_update_display(unsigned short int *frame)
 								unsigned short int common_mode = {0};
 								index++;
 								//printf("strip number%u\n", strip_number);
-								if (buffer[index] != 0xFFFF){
+								if ((buffer[index] != 0xFFFF) && (buffer[index] != 0)){
 									if (strip_num < 3) {							
 										strip_data[strip_num] = buffer[index] & 0x3FF;
 										strip_number = (buffer[index] >> 10) & 0x3FFF;
 										//printf("hit! strip value %u, strip number %u\n", strip_data[strip_num], strip_number);
 										// n side asic
 										if (asic_number == 0) {ystrips[strip_number] = strip_data[strip_num];}
-										if (asic_number == 1) {ystrips[strip_number + 63)] = strip_data[strip_num];}
+										if (asic_number == 1) {ystrips[strip_number + 63] = strip_data[strip_num];}
 										// p side asic
 										if (asic_number == 2) {xstrips[63 - strip_number] = strip_data[strip_num];}
 										if (asic_number == 3) {xstrips[127 - strip_number] = strip_data[strip_num];}
@@ -1076,7 +1079,7 @@ void data_update_display(unsigned short int *frame)
 					//printf("checksum: %x\n", buffer[index]);
 					index++;
 					printf("sync: %x\n", buffer[index]);
-					//printf("end of frame index: %u\n", index);
+					printf("end of frame index: %u\n", index);
 					//printf("\n");
 				} else {
 					// bad checksum, skip this frame and go to the next
@@ -1100,7 +1103,6 @@ void data_update_display(unsigned short int *frame)
 		//parsing for four frames (the whole data drop), now update
 				
 		Fl::lock();
-		for(int i = 0; i < 12; i++){printf("temp monitor %i:%i\n", i, temperature_monitors[i]);}
 		gui->tempOutput->value(temperature_convert_ref(temperature_monitors[0]));
 		gui->tempOutput1->value(temperature_convert_ysi44031(temperature_monitors[1]));
 		gui->tempOutput2->value(temperature_convert_ysi44031(temperature_monitors[2]));
@@ -1114,9 +1116,7 @@ void data_update_display(unsigned short int *frame)
 		gui->tempOutput10->value(temperature_convert_ysi44031(temperature_monitors[10]));
 		gui->tempOutput11->value(temperature_convert_ysi44031(temperature_monitors[11]));
 		
-		// order is 5V, -5V, 1.5V, 3.3V
-		for(int i = 0; i < 4; i++){printf("voltage monitor %i:%i\n", i, voltage_monitors[i]);}
-		
+		// order is 5V, -5V, 1.5V, 3.3V		
 		gui->VoltageOutput0->value(voltage_convert_5v(voltage_monitors[0]));
 		gui->VoltageOutput1->value(voltage_convert_m5v(voltage_monitors[1]));		
 		gui->VoltageOutput2->value(voltage_convert_15v(voltage_monitors[2]));
