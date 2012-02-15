@@ -83,7 +83,7 @@ exit(1);}
         }
       }
       Fl_Group {} {
-        label Image open selected
+        label Image open
         xywh {15 282 555 404} box THIN_UP_FRAME
       } {
         Fl_Box mainImageWindow {
@@ -140,7 +140,7 @@ exit(1);}
         }
         Fl_Value_Output tempOutput2 {
           label T2
-          xywh {345 225 40 24} step 0.1
+          tooltip {ACTEL on formatter board} xywh {345 225 40 24} step 0.1
         }
         Fl_Value_Output HVOutput {
           label HV
@@ -148,7 +148,7 @@ exit(1);}
         }
         Fl_Value_Output tempOutput1 {
           label T1
-          xywh {345 197 40 24} step 0.1
+          tooltip {power board} xywh {345 197 40 24} step 0.1
         }
         Fl_Value_Output tempOutput0 {
           label T0
@@ -156,15 +156,15 @@ exit(1);}
         }
         Fl_Value_Output tempOutput3 {
           label T3
-          xywh {345 251 40 24} step 0.1
+          tooltip {Clock on formatter board} xywh {345 251 40 24} step 0.1
         }
         Fl_Value_Output tempOutput {
           label {Temp Ref}
           xywh {387 139 40 24} step 0.1
         }
         Fl_Value_Output tempOutput10 {
-          label T10
-          xywh {484 229 40 24} step 0.1
+          label T10 selected
+          tooltip {Detector Housing} xywh {484 229 40 24} step 0.1
         }
         Fl_Value_Output tempOutput9 {
           label T9
@@ -180,15 +180,15 @@ exit(1);}
         }
         Fl_Value_Output tempOutput5 {
           label T5
-          xywh {411 199 40 24} step 0.1
-        }
-        Fl_Value_Output tempOutput4 {
-          label T4
-          xywh {411 169 40 24} step 0.1
+          tooltip {ACTEL board} xywh {411 199 40 24} step 0.1
         }
         Fl_Value_Output tempOutput7 {
           label T7
           xywh {413 252 40 24} step 0.1
+        }
+        Fl_Value_Output tempOutput4 {
+          label T4
+          tooltip {ACTEL on ACTEL board} xywh {411 169 40 24} step 0.1
         }
         Fl_Value_Output tempOutput11 {
           label T11
