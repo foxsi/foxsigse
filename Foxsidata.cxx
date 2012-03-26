@@ -32,9 +32,6 @@ using namespace std;
 #define NUM_STRIPS 64
 
 extern Gui *gui;
-extern int HistogramFunction[XSTRIPS];
-extern double detImage[XSTRIPS][YSTRIPS];
-extern double detImagemask[XSTRIPS][YSTRIPS];
 
 Foxsidata::Foxsidata() 
 {
@@ -119,23 +116,12 @@ int Foxsidata::EnergytoChannel(double energy)
 
 void Foxsidata::FlushHistogram(void)
 {
-	for(int i=0;i<XSTRIPS;i++)
-	{
-		HistogramFunction[i] = 0;
-	}
+	gui->mainHistogramWindow->flush(7);
 	gui->mainHistogramWindow->redraw();
 }
 
 void Foxsidata::FlushImage(void)
 {
-	for(int i=0;i<XSTRIPS;i++)
-	{
-		for(int j=0;j<YSTRIPS;j++)
-		{
-			detImage[i][j] = 0;
-			detImagemask[i][j] = 0;
-		}
-	}
 	gui->mainImageWindow->redraw();
 	//gui->subImageWindow->redraw();
 }
@@ -335,7 +321,6 @@ void Foxsidata::parseBuffer()
 				current_ASICframe.adata[i].sdata[j].data = strip.data;
 				
 				//now update the functions
-				HistogramFunction[strip.data]++;
 			}
 			current_ASICframe.adata[i].pedestal = ASICfile_wordbuffer[ASIC_FRAMESIZE*i + 11 + NUM_STRIPS + currentPosition];
 		}

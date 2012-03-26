@@ -33,7 +33,6 @@ extern Application *app;
 #define FRAME_SIZE_IN_SHORTINTS 784
 #define FRAME_SIZE_IN_BYTES 1568
 
-extern int HistogramFunction[CHANNELS];
 extern double detImage[XSTRIPS][YSTRIPS];
 extern double detImagemask[XSTRIPS][YSTRIPS];
 
@@ -314,7 +313,7 @@ void USB_d2xx::printFrame(void)
 			
 			// Update the Histogram but limit values to 1024
 			// only update for the first two ASICs (p-side)
-			if (j == 0 || j == 1){HistogramFunction[pixel_value < 1024 ? pixel_value : 1024]++;}
+			if (j == 0 || j == 1){gui->mainHistogramWindow->add_count(0, pixel_value < 1024 ? pixel_value : 1024);}
 			
 			//// update for both p-side and n-side
 			//HistogramFunction[pixel_value < 1024 ? pixel_value : 1024]++;
@@ -381,19 +380,19 @@ void USB_d2xx::printFrame(void)
 */
 	}
 		
-	for (int i = 0; i<XSTRIPS; i++) {
-		for (int j = 0; j<YSTRIPS; j++) {
-			detImage[i][j] = xdata[i]*ydata[j];
+	//for (int i = 0; i<XSTRIPS; i++) {
+	//	for (int j = 0; j<YSTRIPS; j++) {
+	//		detImage[i][j] = xdata[i]*ydata[j];
 			// If the glitch button is not ON then multiply the image by the 
 			// mask image to kill the bad pixel data
-			if (gui->glitchBut->value() == 0) {
+	//		if (gui->glitchBut->value() == 0) {
 			//detImage[i][j] *= xmask[i]*ymask[j];}
-			detImage[i][j] *= xmask[i]*ymask[j];}
-			if(i == 0 && j == 0) detImage[i][j]=10;  // set scale of intensity plot
-		}
-	}
+	//		detImage[i][j] *= xmask[i]*ymask[j];}
+	//		if(i == 0 && j == 0) detImage[i][j]=10;  // set scale of intensity plot
+	//	}
+	//}
 		
-	cout << "good = " << good << endl << endl;
+	//cout << "good = " << good << endl << endl;
 	
 //	if(good >= 3){
 		gui->mainHistogramWindow->redraw();

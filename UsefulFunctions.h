@@ -35,7 +35,7 @@ unsigned int median(unsigned int *array, int n);
 
 // find the maximum value of an array of size n
 // ignore elements below min_index
-double maximumValue(double *array, int n, int min_index);
+unsigned long maximumValue(unsigned long *array, int n, int min_index);
 
 
 #endif

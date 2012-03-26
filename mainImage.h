@@ -13,13 +13,14 @@ public:
 	mainImage(int x,int y,int w,int h,const char *l=0);
 	void draw();
 	int handle(int eventType);
-	double maximumValue(double *array);
-	clock_t start_time;
 	bool show_mask;
-	
-	double detectorsImage[XSTRIPS][YSTRIPS][NUM_DETECTORS];
-	double detectorsImagealpha[XSTRIPS][YSTRIPS][NUM_DETECTORS];
-	double detectorsImagetime[XSTRIPS][YSTRIPS][NUM_DETECTORS];
+		
+	void set_ymax(double value);
+	double get_ymax(void);
+	void set_detector_to_display(int detector_number);
+private:
+	int detector_to_display;
+	double ymax;
 };
 
 #endif

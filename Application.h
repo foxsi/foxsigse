@@ -101,8 +101,23 @@ public:
 	void toggle_show_mask(void);
 	void toggle_detector_display(void);
 	int elapsed_time_sec;
+	void set_imagemax(void);
+	void set_histogram_max(void);
 	void testfunction(void);
+	void set_detector_to_display(int detector_number);
+	unsigned long long frame_display_count;
+	unsigned long long frame_miss_count;
+	unsigned long long bad_check_sum_count;
+	unsigned long long frame_read_count;
+	unsigned long long no_trigger_count;
+	unsigned long long formatter_start_time;
+	
+	int get_data_source(void);
+	void set_data_source(int value);
+	uint32_t frame_number;
+	
 private:
+	int data_source;
 	char filename[40];
 	float pixel_half_life;
 	static void *read_data(void *variable);		// Begin reading data from a data stream

@@ -1,7 +1,6 @@
 // application class
 
 #include "Application.h"
-#include <FL/Fl_File_Chooser.H>
 #include "data.h"
 #include "commands.h"
 #include "gui.h"
@@ -10,6 +9,7 @@
 #include "mainLightcurve.h"
 #include <pthread.h>
 #include <sched.h>
+#include <FL/Fl_File_Chooser.H>
 
 #include <sys/time.h>
 #include <time.h>
@@ -21,33 +21,16 @@
 #define MAXPATH 128
 
 extern Gui *gui;
-extern int HistogramFunction[MAX_CHANNEL];
 
-extern double detImage[XSTRIPS][YSTRIPS];
-extern double detImagemask[XSTRIPS][YSTRIPS];
 unsigned int CountcurveFunction[MAX_CHANNEL];
-double displayHistogram[MAX_CHANNEL];
 
 extern int stop_message;
 extern FILE *dataFile;
 extern int fout;
-extern int nreads;
 
 // filename is set automatically with local time
 extern char dataFilename[MAXPATH];
 extern char dataFileDir[MAXPATH];
-
-// these are declared in transFunc.cpp
-//extern HistogramFunction histFunc[4];
-//extern int maxHistFunc;              
-//extern int activeHistFunc;       
-//extern float histFuncColor[4][3]; 
- 
-//variables for Application
-//int imgx=0, imgy=0; //dimensions of the image
-//int nchan;	//the number of color channels an image has
-//char *imgname;	//name of the image
-//GLubyte *imgpix;	//pixel buffer for image
 
 // Preference variables
 int file_type;
@@ -58,7 +41,6 @@ int mainImage_minimum;
 int newFPGA_register;
 char *formatter_configuration_file;
 
-extern int low_threshold;
 //extern int mainHistogram_binsize;
 
 Application::Application()
@@ -66,23 +48,27 @@ Application::Application()
 	// Constructor method for the Application class
 	// Add initialization here:
 	pixel_half_life = 5;
-	
+	frame_miss_count = 0;
+	frame_number = 0;
+	bad_check_sum_count = 0;
+	no_trigger_count = 0;
+	formatter_start_time = 0;
+}
+
+int Application::get_data_source(void){
+	return data_source;
+}
+
+void Application::set_data_source(int value){
+	if ((data_source == 0) || (data_source == 1) || (data_source == 2)){
+		data_source = value;
+	}
 }
 
 void Application::flush_histogram(void)
 {	
 	// Zero the Histogram
-	for(int i = 0;i < MAX_CHANNEL; i++)
-	{
-		HistogramFunction[i] = 0;
-		displayHistogram[i] = 0;
-		for(int j = 0; j < (NUM_DETECTORS+1); j++)
-		{
-			gui->mainHistogramWindow->HistogramFunctionDetectors[i][j] = 0;
-			gui->mainHistogramWindow->displayHistogramDetectors[i][j] = 0;
-		}
-	}
-	gui->mainHistogramWindow->redraw();
+	gui->mainHistogramWindow->flush(7);
 }
 
 void Application::flush_timeseries(void)
@@ -97,16 +83,9 @@ void Application::flush_timeseries(void)
 
 void Application::flush_image(void)
 {
-	for(int i=0;i<XSTRIPS;i++)
-	{
-		for(int j=0;j<YSTRIPS;j++)
-		{
-			detImage[i][j] = 0;
-			detImagemask[i][j] = 0;
-		}
-	}
+	gui->detectorsImageWindow->flush_image(7);
 	gui->mainImageWindow->redraw();
-	//gui->subImageWindow->redraw();
+	gui->detectorsImageWindow->redraw();
 }
 
 void Application::save_preferences(void)
@@ -194,7 +173,7 @@ void Application::initialize(void)
 {
 	data_initialize();
 	gui->initializeBut->deactivate();
-	toggle_detector_display();
+	//toggle_detector_display();
 	gui->closeBut->activate();
 }
 
@@ -259,72 +238,6 @@ void Application::send_global_params(int option)
 	gui->consoleBuf->insert("Sending global Params to controller.\n");
 }
 
-void Application::start_auto_run(void)
-{
-	print_to_console("Can't autorun; disabled.\n");
-
-	/*
-	pthread_t thread;
-    struct sched_param param;
-    pthread_attr_t tattr;
-	
-	int *variable;
-	int ret;
-	
-	stop_message = 0;
-	
-	variable = (int *) malloc(sizeof(int));
-	*variable = 6;
-	
-	// define the custom priority for one of the threads
-    int newprio = -10;
-	param.sched_priority = newprio;
-	ret = pthread_attr_init(&tattr);
-	ret = pthread_attr_setschedparam (&tattr, &param);
-	
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	
-	ret = pthread_create(&thread, &tattr, auto_run_sequence, (void *) variable);
-	*/
-}
-
-void* Application::auto_run_sequence(void* variable)
-{
-	/*
-	for(int i=1; i<32; i++){
-			();
-		gui->nEventsDone->value(0);
-		gui->setHoldTimeWindow_holdTime->value(i);
-		Fl::unlock();
-		gui->app->send_global_params(0);
-		gui->app->send_global_params(0);
-		gui->writeFileBut->value(1);
-		gui->app->start_file();
-		gui->app->start_reading_data();
-		
-		while(1){
-
-			Fl::lock();
-			int nCtr  = gui->nEventsDone->value();
-			int nEvts = gui->nEvents->value();
-			Fl::unlock();
-
-			if(nCtr == (nEvts-1) ) break;
-			sleep(1);			
-		}
-		
-	}	
-	return 0;
-	*/	
-	return 0;
-}
-
-
-//void Application::break_acq(int data)
-//{
-//	gui->usb->breakAcq(data);
-//}
-
 void Application::save_settings(void)
 {
 	gui->usb->saveSettings();
@@ -376,8 +289,14 @@ void Application::stop_reading_data(void)
 
 void Application::reset_read_counter(void)
 {
-	nreads = 0;
 	gui->nEventsDone->value(0);
+	
+	frame_display_count = 0;
+	frame_miss_count = 0;
+	bad_check_sum_count = 0;
+	frame_read_count = 0;
+	no_trigger_count = 0;
+	formatter_start_time = 0;
 }
 
 void Application::update_histogrambinsize(void)
@@ -407,10 +326,22 @@ void Application::update_histogramxmax(void)
 
 void Application::set_lowthreshold(void)
 {
-	low_threshold = gui->mainImageMin_slider->value();
-	gui->histLow->value(low_threshold);
+	gui->mainHistogramWindow->set_lowthreshold(gui->mainImageMin_slider->value());
 	gui->mainHistogramWindow->redraw();
-	gui->histLow->redraw();
+}
+
+void Application::set_imagemax(void)
+{
+	gui->mainImageWindow->set_ymax(gui->mainImageMax_slider->value());
+	gui->detectorsImageWindow->set_ymax(gui->mainImageMax_slider->value());
+	
+	gui->mainImageWindow->redraw();
+	gui->detectorsImageWindow->redraw();
+}
+
+void Application::set_histogram_max(void)
+{
+	gui->mainHistogramWindow->set_ymax(gui->mainHistogram_ymax_slider->value());
 }
 
 void Application::set_energy_histogram(void)
@@ -431,104 +362,28 @@ void Application::set_channel_histogram(void)
 void Application::toggle_image_integrate(void)
 {
 	if (gui->mainImage_integrate_button->value() == 1){
-		gui->prefs->set("pixel_half_life", pixel_half_life);
-		pixel_half_life = 0;
-		printf_to_console("pixel_half_life = %f\n", "", pixel_half_life);
+		//gui->prefs->set("pixel_half_life", pixel_half_life);
+		//pixel_half_life = 0;
+		//printf_to_console("pixel_half_life = %f\n", "", pixel_half_life);
+		gui->pixel_halflife_slider->value(0);
 		gui->mainImageWindow->redraw();
 	}
 	if (gui->mainImage_integrate_button->value() == 0){
-		gui->prefs->get("pixel_half_life", pixel_half_life, 3.0);
-		printf_to_console("pixel_half_life = %f\n", "", pixel_half_life);
+		//gui->prefs->get("pixel_half_life", pixel_half_life, 3.0);
+		//printf_to_console("pixel_half_life = %f\n", "", pixel_half_life);
+		gui->pixel_halflife_slider->value(1);
 		gui->mainImageWindow->redraw();
 	}
 }
 
 void Application::save_histogram_to_file(void)
 {
-	Fl_File_Chooser *chooser    = NULL;
-	FILE *file;
-	
-	chooser = new Fl_File_Chooser("", "", Fl_File_Chooser::CREATE, "Save File");
-	
-    chooser->show();
-	
-	while(chooser->shown()) {
-        Fl::wait();
-    }
-	
-	if ( chooser->value() != NULL ) {		
-		file = fopen(chooser->value(), "w");
-		if(file != NULL){
-			
-			struct tm *times;
-			time_t ltime;
-			char stringtemp[80];
-			
-			time(&ltime);
-			times = localtime(&ltime);
-			
-			strftime(stringtemp,25,"%Y/%m/%d %H:%M:%S\0",times);
-			
-			fprintf(file, "FOXSI Histogram\n");
-			fprintf(file, "Created %s\n", stringtemp);
-			fprintf(file, "---------------\n");
-			fprintf(file, "channel, counts\n");
-			for (int i; i<MAX_CHANNEL; i++) {
-				fprintf(file, "%i, %i\n", i, HistogramFunction[i]);
-			}
-			
-			fclose(file);
-		} else {
-			print_to_console("Could not open file\n");
-		}
-
-    }	
+	gui->mainHistogramWindow->save();
 }
 
 void Application::save_image_to_file(void)
 {
-	Fl_File_Chooser *chooser    = NULL;
-	FILE *file;
-	
-	chooser = new Fl_File_Chooser("", "", Fl_File_Chooser::CREATE, "Save File");
-	
-    chooser->show();
-	
-	while(chooser->shown()) {
-        Fl::wait();
-    }
-	
-	if ( chooser->value() != NULL ) {		
-		file = fopen(chooser->value(), "w");
-		if(file != NULL){
-			
-			struct tm *times;
-			time_t ltime;
-			char stringtemp[80];
-			
-			time(&ltime);
-			times = localtime(&ltime);
-			
-			strftime(stringtemp,25,"%Y/%m/%d %H:%M:%S\0",times);
-			
-			fprintf(file, "FOXSI Image\n");
-			fprintf(file, "Created %s\n", stringtemp);
-			fprintf(file, "128 x 128\n");
-			fprintf(file, "-----------\n");
-			
-			for (int j=0; j<YSTRIPS; j++) {
-				for (int i=0; i<XSTRIPS; i++) 
-				{	
-					fprintf(file, "%f, ", detImage[i][j]);
-				}
-				fprintf(file, "\n");
-			}
-			
-			fclose(file);
-		} else {
-			print_to_console("Could not open file\n");
-		}
-    }	
+	gui->detectorsImageWindow->save();
 }
 
 void Application::set_lightcurve_ymax(void)
@@ -545,8 +400,15 @@ void Application::toggle_show_mask(void)
 }
 
 void Application::toggle_detector_display(void)
-{
-	gui->mainHistogramWindow->update_detector_display();
+{	
+	gui->mainHistogramWindow->update_detector_display(gui->detector0_checkbox->value(), 0);
+	gui->mainHistogramWindow->update_detector_display(gui->detector1_checkbox->value(), 1);
+	gui->mainHistogramWindow->update_detector_display(gui->detector2_checkbox->value(), 2);
+	gui->mainHistogramWindow->update_detector_display(gui->detector3_checkbox->value(), 3);
+	gui->mainHistogramWindow->update_detector_display(gui->detector4_checkbox->value(), 4);
+	gui->mainHistogramWindow->update_detector_display(gui->detector5_checkbox->value(), 5);
+	gui->mainHistogramWindow->update_detector_display(gui->detector6_checkbox->value(), 6);
+	
 	gui->mainHistogramWindow->redraw();
 	gui->mainImageWindow->redraw();
 	gui->mainLightcurveWindow->redraw();
@@ -559,6 +421,7 @@ void Application::testfunction(void)
 	//	cout << gui->mainHistogramWindow->detector_display[i] << endl;
 	//}
 	//cout << endl;
+		
 	gui->mainHistogramWindow->redraw();
 	gui->mainImageWindow->redraw();
 	gui->mainLightcurveWindow->redraw();
@@ -570,4 +433,9 @@ float Application::get_pixel_half_life(void){
 
 void Application::set_pixel_half_life(float new_value){
 	pixel_half_life = new_value;
+}
+
+void Application::set_detector_to_display(int detector_number)
+{
+	gui->mainImageWindow->set_detector_to_display(detector_number);
 }

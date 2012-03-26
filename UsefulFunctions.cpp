@@ -82,12 +82,11 @@ unsigned int median(unsigned int *a, int n)
 		return a[n/2];
 }
 
-double maximumValue(double *array, int n, int min_index)
+unsigned long maximumValue(unsigned long *array, int n, int min_index)
 {
 	// find the maximum value in an array of size n
 	// ignore elements below min_index
-	
-	double max = array[min_index];       // start with max = first element
+	long max = array[min_index];       // start with max = first element
 	for(int i = min_index+1; i < n; i++)
 	{
 		if(array[i] > max){

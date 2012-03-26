@@ -2,6 +2,7 @@
 #include "gui.h"
 #include <math.h>
 #include "UsefulFunctions.h"
+#include <FL/Fl_File_Chooser.H>
 
 #define XSTRIPS 128
 #define YSTRIPS 128
@@ -12,11 +13,6 @@
 #define NUM_DETECTORS 7
 #define XMIN 1
 #define MAX_CHANNEL 1024
-
-int HistogramFunction[MAX_CHANNEL];
-extern double displayHistogram[MAX_CHANNEL];
-
-int low_threshold = 5;
 
 extern Gui *gui;
 
@@ -34,32 +30,58 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 	detector_display[4] = 0;
 	detector_display[5] = 0;
 	detector_display[6] = 0;
-	detector_display[7] = 0;
 	/* initialize random seed: */
 	
 	//initialize the histogram
 	for(int i=0; i < MAX_CHANNEL; i++)
 	{
-		HistogramFunction[i] = i*1;
-		displayHistogram[i] = HistogramFunction[i];
-		for (int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++) {
-			HistogramFunctionDetectors[i][detector_num] = i*2 + detector_num;
-			displayHistogramDetectors[i][detector_num] = HistogramFunctionDetectors[i][detector_num];}
+		HistogramFunction[i] = 7*i;
+		for (int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++) {
+			HistogramFunctionDetectors[i][detector_num] = i;
+		}
 	}
 	FLHistcursorX[0] = 500;
 	mouseHistPixel = FLHistcursorX[0];
 	chan_to_energy = 10.0;
 	binsize = 25;
+	
+	low_threshold = 100;
 }
 
 void mainHistogram::draw()
 {
 	// the drawing method: draws the histFunc into the window
-	int y = 0;
-	int k = 0;
+	int sum = 0;
+	int index = 0;
 	
-	ymax = maximumValue(displayHistogram, xmax/binsize, low_threshold/binsize);
-
+	// recalculate the displayed histogram (rebinned)
+	for(int i = 0; i < MAX_CHANNEL; i+=binsize)
+	{
+		sum = 0;
+		if (binsize > 1) {		
+			for (int j = 0; j < binsize; j++) {
+				sum += HistogramFunction[i+j];}}
+		else { sum = HistogramFunction[i]; }
+		displayHistogramFunction[index] = sum;
+		
+		for (int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++) 
+		{
+			sum = 0;
+			if (binsize > 1) {				
+				for (int j = 0; j < binsize; j++) {
+					sum += HistogramFunctionDetectors[i+j][detector_num];}
+			} else {
+				sum = HistogramFunctionDetectors[i][detector_num];
+			}
+			displayHistogramDetectors[index][detector_num] = sum;
+		}
+		index++;
+	}
+	
+	if (gui->mainHistogram_ymax_slider->value() == 0) {	
+		ymax = maximumValue(displayHistogramFunction, xmax/binsize, low_threshold/binsize);
+	} 
+	
 	if (ymax == 0){ ymax = 100; }
 		
 	if (!valid()) {
@@ -86,68 +108,36 @@ void mainHistogram::draw()
 	glLoadIdentity();
 	glClearColor(0.0,0.0,0.0,0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-		
-	// recalculate the displayed histogram (rebinned)
-	for(int i = 0; i < MAX_CHANNEL; i+=binsize)
-	{
-		y = 0;
-		if (binsize > 1) {		
-			for (int j = 0; j < binsize; j++) {
-				y += HistogramFunction[i+j];}} 
-		else { y = HistogramFunction[i]; }
-		displayHistogram[k] = y;
-		
-		for (int dnum = 0; dnum < (NUM_DETECTORS+1); dnum++) 
-		{
-			y = 0;
-			if (binsize > 1) {				
-				for (int j = 0; j < binsize; j++) {
-					y += HistogramFunctionDetectors[i+j][dnum];}
-			} else {
-				y = HistogramFunctionDetectors[i][dnum];
-			}
-
-			displayHistogramDetectors[k][dnum] = y;
-		}
-		k++;
-	}
 	
-	if (detector_display[0] == 1)
-	{
-		//draw the total detector histogram
-		glBegin(GL_LINES);
-		glColor3f(1.0, 0.0, 0.0);	
-		
-		for(int i = 0; i < MAX_CHANNEL/binsize; i++)
-		{
-			glVertex2f(i, displayHistogram[i]);
-			glVertex2f(i+1, displayHistogram[i]);
-			
-			glVertex2f(i+0.5, displayHistogram[i] - sqrt(displayHistogram[i]));
-			glVertex2f(i+0.5, displayHistogram[i] + sqrt(displayHistogram[i]));
-		}
-		//glVertex2f(MAX_CHANNEL+XBORDER, YBORDER);
-		//glVertex2f(XBORDER, YBORDER);
-		glEnd();
-	}
+	// draw the total histogram
+	glColor3f(1.0, 0.0, 0.0);
 	
-	//draw the total detector histogram
-	for (int detector_num = 1; detector_num < (NUM_DETECTORS+1); detector_num++)
+	glBegin(GL_LINES);
+	for(int i = 0; i < MAX_CHANNEL/binsize; i++)
 	{
-		if (detector_display[detector_num] == 1)
-		{
+		glVertex2f(i, displayHistogramFunction[i]);
+		glVertex2f(i+1, displayHistogramFunction[i]);	
+		glVertex2f(i+0.5, displayHistogramFunction[i] - sqrt(displayHistogramFunction[i]));
+		glVertex2f(i+0.5, displayHistogramFunction[i] + sqrt(displayHistogramFunction[i]));
+	}
+	glEnd();
+	
+	//draw the detectors histogram
+	for (int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++)
+	{
+		if (detector_display[detector_num] == 1) {
+			glColor3f(0.0, 1.0, 0.0);
 			glBegin(GL_LINES);
-			glColor3f(0.0, 0.0, 1.0);	
 			for(int i = 0; i < MAX_CHANNEL/binsize; i++)
 			{
 				glVertex2f(i, 7*displayHistogramDetectors[i][detector_num]);
 				glVertex2f(i+1, 7*displayHistogramDetectors[i][detector_num]);	
-				//glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num] - sqrt(displayHistogramDetectors[i][detector_num]));
-				//glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num] + sqrt(displayHistogramDetectors[i][detector_num]));
+				//glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num] - 7*sqrt(displayHistogramDetectors[i][detector_num]));
+				//glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num] + 7*sqrt(displayHistogramDetectors[i][detector_num]));
 			}
 			glEnd();
 		}
-	}	
+	}
 	
 	// draw vertival select line from mouse click
 	glBegin(GL_LINES);
@@ -166,13 +156,15 @@ void mainHistogram::draw()
 	glVertex2f((int) low_threshold/binsize, ymax);
 	glEnd();
 	
+	glColor3f(0.0, 1.0, 0.0);
+	char buffer [50];
+	sprintf(buffer, "%u", ymax);
+	text_output(xmax/binsize*0.8, ymax*0.8, buffer);
+	
 	glPopMatrix();
 	glFinish();
 	
-	//update the axis labels
-	gui->mainHistogramYlabelmax->value(ymax);
-	gui->mainHistogramYlabelmid->value(ymax/2.0);
-	gui->histCounts->value(displayHistogram[mouseHistPixel]);
+	gui->histCounts->value(displayHistogramFunction[mouseHistPixel]);
 
 }
 
@@ -197,43 +189,148 @@ int mainHistogram::handle(int eventType)
 	if( gui->mainHistogram_choice->value() == 1 ){
 		gui->histEnergy->value(mouseHistPixel*binsize/chan_to_energy);	
 	}
-	gui->histCounts->value(displayHistogram[mouseHistPixel]);
+	gui->histCounts->value(displayHistogramFunction[mouseHistPixel]);
 	
 	return(1);
 }
 
-void mainHistogram::update_detector_display(void)
+void mainHistogram::update_detector_display(bool on, int detector_number)
 {
-	// update which detectors to display 
-	detector_display[0] = gui->detectorall_checkbox->value();
-	detector_display[1] = gui->detector1_checkbox->value();
-	detector_display[2] = gui->detector2_checkbox->value();
-	detector_display[3] = gui->detector3_checkbox->value();
-	detector_display[4] = gui->detector4_checkbox->value();
-	detector_display[5] = gui->detector5_checkbox->value();
-	detector_display[6] = gui->detector6_checkbox->value();
-	detector_display[7] = gui->detector7_checkbox->value();
+	if ((detector_number >= 0) && (detector_number < NUM_DETECTORS)){
+		detector_display[detector_number] = on;
+	}
 }
 
 int mainHistogram::get_detector_display(int detector_number){
 	return detector_display[detector_number];
 }
 
+int mainHistogram::get_binsize(void){
+	return binsize;
+}
+
 void mainHistogram::set_binsize(int newbinsize){
 	binsize = newbinsize;
 }
 
-void mainHistogram::set_xmax(int newxmax){
-	xmax = newxmax;
+void mainHistogram::set_xmax(int value){
+	xmax = value;
 }
 
-//void mainHistogram::glPrint(float x, float y, char *string )
-//{
-//      int len, i;
-//      glRasterPos2f(x, y);
-//      //find the length of the string
-//      len = (int) strlen(string);
-//      //print each character individually
-//      for ( i = 0; i < len; i++){ glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, string[i]);
-//      }
-//}
+int mainHistogram::get_ymax(void){
+	return ymax;
+}
+
+void mainHistogram::add_count(int bin_number, int detector_number){
+	if ((bin_number > 0) && (bin_number < 1024) && (detector_number < NUM_DETECTORS) && (detector_number >= 0)){
+		HistogramFunctionDetectors[bin_number][detector_number] += 1;
+		HistogramFunction[bin_number] += 1;
+	}
+}
+
+void mainHistogram::flush(int detector_number)
+{
+	if( (detector_number < NUM_DETECTORS) && (detector_number >= 0) ){
+		for(int i = 0; i < MAX_CHANNEL; i++){
+			HistogramFunctionDetectors[i][detector_number] = 0;
+			HistogramFunction[i] = 0;}}
+	if (detector_number == 7) {
+		for (int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++) {
+			for(int i = 0; i < MAX_CHANNEL; i++){
+				HistogramFunctionDetectors[i][detector_num] = 0;
+				HistogramFunction[i] = 0;
+			}
+		}
+	}
+	redraw();
+}
+
+void mainHistogram::save(void)
+{
+	Fl_File_Chooser *chooser    = NULL;
+	FILE *file;
+	
+	chooser = new Fl_File_Chooser("", "", Fl_File_Chooser::CREATE, "Save File");
+	
+	chooser->show();
+	
+	while(chooser->shown()) {
+		Fl::wait();
+	}
+	
+	if ( chooser->value() != NULL ) {		
+		file = fopen(chooser->value(), "w");
+		if(file != NULL){
+			
+			struct tm *times;
+			time_t ltime;
+			char stringtemp[80];
+			
+			time(&ltime);
+			times = localtime(&ltime);
+			
+			strftime(stringtemp,25,"%Y/%m/%d %H:%M:%S\0",times);
+			
+			fprintf(file, "FOXSI Histogram\n");
+			fprintf(file, "Created %s\n", stringtemp);
+			fprintf(file, "---------------\n");
+			fprintf(file, "channel, counts\n");
+			for (int i; i<MAX_CHANNEL; i++) {
+				fprintf(file, "%i, %d\n", i, HistogramFunction[i]);
+			}
+			
+			fclose(file);
+		} else {
+			gui->app->print_to_console("Could not open file\n");
+		}
+		
+	}	
+}
+
+void mainHistogram::set_ymax(unsigned long value){
+	if (value != 0) {
+		ymax = value;
+	}
+	redraw();
+	gui->detectorsImageWindow->redraw();
+}
+
+void mainHistogram::text_output(int x, int y, char *string)
+{
+	int len, i;
+	glRasterPos2f(x, y);
+	len = (int) strlen(string);
+	for (i = 0; i < len; i++)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string[i]);
+	}
+}
+
+long mainHistogram::get_detectorDisplayHistogram(int bin, int detector_number)
+{
+	if ((bin < MAX_CHANNEL) && (detector_number < NUM_DETECTORS)){
+		return displayHistogramDetectors[bin][detector_number];
+	} else {
+		return 0;
+	}
+}
+
+long mainHistogram::get_detectorHistogram(int bin, int detector_number)
+{
+	if ((bin < MAX_CHANNEL) && (detector_number < NUM_DETECTORS)){
+		return HistogramFunctionDetectors[bin][detector_number];
+	} else {
+		return 0;
+	}
+}
+
+void mainHistogram::set_lowthreshold(int value)
+{
+	if ((low_threshold > 0) && (low_threshold < 1024)) {low_threshold = value;}
+}
+
+int mainHistogram::get_lowthreshold(void)
+{
+	return low_threshold;
+}
+
