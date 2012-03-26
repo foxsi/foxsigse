@@ -58,19 +58,22 @@ void command_voltage_set(int hv_value)
 	
 	//sscanf(hv_value,"%u",&hvvalue);
 	
-	if( hv_value > 4095)
+	if( hv_value > 210)
 	{
-		printf (" HV value greater than 4095, too large %d \n",hv_value);
+		printf ("HV value greater than 210, too large %d!\n",hv_value);
+	} else {
+		printf("Setting HV to %u, %x \n",hv_value, hv_value*8);
+		
+		// to convert to a temperature command multiply actual voltage by 8
+		create_cmd_hv(hv_value*8);
+		
+		fsercmd = command_initialize_serial();
+		
+		if (fsercmd > 0){write(fsercmd,&cmd[0],4);}
+		printf("Sending bytes %02x %02x %02x %02x \n",cmd[0],cmd[1],cmd[2],cmd[3]);
+		sleep(1);		
 	}
-	printf("Setting HV to %u  , %x \n",hv_value,hv_value);
-	
-	create_cmd_hv(hv_value);
-	
-	fsercmd = command_initialize_serial();
-	
-	if (fsercmd > 0){write(fsercmd,&cmd[0],4);}
-	printf("Sending bytes %02x %02x %02x %02x \n",cmd[0],cmd[1],cmd[2],cmd[3]);
-	sleep(1);
+
 }
 
 void command_clock_set(int clockhi, int clocklo)

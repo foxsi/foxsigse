@@ -22,9 +22,6 @@ extern int chosenPixel[2];
 int subImageMousePixel[2];
 int subImageChosenPixel[2];
 
-float detsubImage[ZOOMNUM][ZOOMNUM];
-float detsubImagealpha[ZOOMNUM][ZOOMNUM];
-
 float GL_subImageCursor[2]; 
 
 subImage::subImage(int x,int y,int w,int h,const char *l)
@@ -56,7 +53,7 @@ void subImage::draw()
    	glClear(GL_COLOR_BUFFER_BIT);  
 	
 	//draw the pixels
-	if(gui->subImageLockbut->value() == 0)
+	if(gui->Lockbut->value() == 0)
 	{
 		for(int j=0;j<ZOOMNUM;j++)
 		{
@@ -67,8 +64,8 @@ void subImage::draw()
 				curPixel[1] = mousePixel[1] + j - ZOOMNUM/2;
 				//if ((curPixel[0] < 0)||(curPixel[1] < 0)){ grey = 0.0; } else { grey = detImage[curPixel[0]][curPixel[1]]; }
 				//grey = detImage[curPixel[0]][curPixel[1]];
-				grey = detsubImage[i][j];
-				alpha = detsubImagealpha[i][j];
+				//grey = detsubImage[i][j];
+				//alpha = detsubImagealpha[i][j];
 				//grey = detImage[i][j];
 				glColor4f(grey, grey, grey,alpha);
 				glBegin(GL_QUADS);
@@ -83,8 +80,8 @@ void subImage::draw()
 		{
 			for(int i=0;i<ZOOMNUM;i++)
 			{
-				grey = detsubImage[i][j];
-				alpha = detsubImagealpha[i][j];
+				//grey = detsubImage[i][j];
+				//alpha = detsubImagealpha[i][j];
 				glColor4f(grey, grey, grey,alpha);
 				glBegin(GL_QUADS);
 				glVertex2f(i+XBORDER, j+YBORDER); glVertex2f(i+1+XBORDER, j+YBORDER); 

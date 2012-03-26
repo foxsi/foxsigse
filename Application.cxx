@@ -1,7 +1,6 @@
 // application class
 
 #include "Application.h"
-#include <FL/Fl_File_Chooser.H>
 #include "data.h"
 #include "commands.h"
 #include "gui.h"
@@ -10,6 +9,7 @@
 #include "mainLightcurve.h"
 #include <pthread.h>
 #include <sched.h>
+#include <FL/Fl_File_Chooser.H>
 
 #include <sys/time.h>
 #include <time.h>
@@ -21,62 +21,54 @@
 #define MAXPATH 128
 
 extern Gui *gui;
-extern int HistogramFunction[MAX_CHANNEL];
 
-extern double detImage[XSTRIPS][YSTRIPS];
-extern double detImagemask[XSTRIPS][YSTRIPS];
-unsigned int LightcurveFunction[MAX_CHANNEL];
-double displayHistogram[MAX_CHANNEL];
+unsigned int CountcurveFunction[MAX_CHANNEL];
 
 extern int stop_message;
 extern FILE *dataFile;
 extern int fout;
-extern int nreads;
 
 // filename is set automatically with local time
 extern char dataFilename[MAXPATH];
 extern char dataFileDir[MAXPATH];
-
-// these are declared in transFunc.cpp
-//extern HistogramFunction histFunc[4];
-//extern int maxHistFunc;              
-//extern int activeHistFunc;       
-//extern float histFuncColor[4][3]; 
- 
-//variables for Application
-//int imgx=0, imgy=0; //dimensions of the image
-//int nchan;	//the number of color channels an image has
-//char *imgname;	//name of the image
-//GLubyte *imgpix;	//pixel buffer for image
 
 // Preference variables
 int file_type;
 char *data_file_save_dir;
 int read_delay;
 int data_source;	// 0 means simulation, 1 means ASIC, 2 means Formatter
-float pixel_half_life;
 int mainImage_minimum;
-int detector_display[7];
+int newFPGA_register;
+char *formatter_configuration_file;
 
-extern int low_threshold;
-extern int mainHistogram_binsize;
+//extern int mainHistogram_binsize;
 
 Application::Application()
 {
 	// Constructor method for the Application class
 	// Add initialization here:
-	
+	pixel_half_life = 5;
+	frame_miss_count = 0;
+	frame_number = 0;
+	bad_check_sum_count = 0;
+	no_trigger_count = 0;
+	formatter_start_time = 0;
+}
+
+int Application::get_data_source(void){
+	return data_source;
+}
+
+void Application::set_data_source(int value){
+	if ((data_source == 0) || (data_source == 1) || (data_source == 2)){
+		data_source = value;
+	}
 }
 
 void Application::flush_histogram(void)
 {	
 	// Zero the Histogram
-	for(int i = 0;i < MAX_CHANNEL; i++)
-	{
-		HistogramFunction[i] = 0;
-		displayHistogram[i] = 0;
-	}
-	gui->mainHistogramWindow->redraw();
+	gui->mainHistogramWindow->flush(7);
 }
 
 void Application::flush_timeseries(void)
@@ -84,23 +76,16 @@ void Application::flush_timeseries(void)
 	// Zero the time series
 	for(int i = 0;i < MAX_CHANNEL; i++)
 	{
-		LightcurveFunction[i] = 0;
+		CountcurveFunction[i] = 0;
 	}
 	gui->mainLightcurveWindow->redraw();
 }
 
 void Application::flush_image(void)
 {
-	for(int i=0;i<XSTRIPS;i++)
-	{
-		for(int j=0;j<YSTRIPS;j++)
-		{
-			detImage[i][j] = 0;
-			detImagemask[i][j] = 0;
-		}
-	}
+	gui->detectorsImageWindow->flush_image(7);
 	gui->mainImageWindow->redraw();
-	gui->subImageWindow->redraw();
+	gui->detectorsImageWindow->redraw();
 }
 
 void Application::save_preferences(void)
@@ -111,6 +96,8 @@ void Application::save_preferences(void)
 	gui->prefs->set("read_delay", gui->readdelay_value->value());
 	gui->prefs->set("data_source", gui->DataSource_choice->value());
 	gui->prefs->set("mainImage_minimum", gui->mainImageMin_slider->value());
+	gui->prefs->set("newFPGA_register", gui->newControlRegisters_check->value());
+	gui->prefs->set("formatter_configuration_file", gui->gsesyncfile_fileInput->value());
 }
 
 void Application::read_preferences(void)
@@ -121,8 +108,9 @@ void Application::read_preferences(void)
 	gui->prefs->get("data_file_save_dir", data_file_save_dir, "/Users/schriste/");
 	gui->prefs->get("read_delay", read_delay, 10000);
 	gui->prefs->get("data_source", data_source, 0);
-	
 	gui->prefs->get("mainImage_minimum", mainImage_minimum, 0);
+	gui->prefs->get("newFPGA_register", newFPGA_register,0);
+	gui->prefs->get("formatter_configuration_file", formatter_configuration_file, "/Users/schriste/");
 }
 
 void Application::update_preferencewindow(void)
@@ -132,7 +120,9 @@ void Application::update_preferencewindow(void)
 	gui->fileTypeChoice->value(file_type);
 	gui->datafilesavedir_fileInput->value(data_file_save_dir);
 	gui->readdelay_value->value(read_delay);
-	gui->DataSource_choice->value(data_source);	
+	gui->DataSource_choice->value(data_source);
+	gui->newControlRegisters_check->value(newFPGA_register);
+	gui->gsesyncfile_fileInput->value(formatter_configuration_file);
 }
 
 void Application::set_datafile_dir(void)
@@ -143,6 +133,14 @@ void Application::set_datafile_dir(void)
 	printf_to_console("Output directory set to %s.\n", data_file_save_dir, NULL);	
 }
 
+void Application::set_gsesync_file(void)
+{
+	char *temp = fl_file_chooser("Pick gsesync", "", 0);
+	strcpy(formatter_configuration_file, temp);
+	gui->gsesyncfile_fileInput->value(formatter_configuration_file);
+	printf_to_console("Output directory set to %s.\n", formatter_configuration_file, NULL);	
+}
+					
 void Application::start_file()
 {
 	data_start_file();
@@ -174,14 +172,17 @@ void Application::readFile()
 void Application::initialize(void)
 {
 	data_initialize();
+	gui->initializeBut->deactivate();
+	//toggle_detector_display();
+	gui->closeBut->activate();
 }
 
 void Application::close_data(void)
 {
 	// Close a connection to a data stream
 	gui->usb->close();
-	gui->initializeBut->value(0);
-	gui->closeBut->value(1);
+	gui->initializeBut->activate();
+	gui->closeBut->deactivate();
 	gui->startReadingDataButton->deactivate();
 }
 
@@ -209,105 +210,6 @@ void Application::print_to_console(const char *text)
 	gui->consoleBuf->show_insert_position();
 }
 
-/*
-void* Application::read_data(void* variable)
-{
-	char buffer[50];
-	int badSync = 0;
-	int badRead = 0;
-	int status = 0;
-	
-	Fl::lock();
-	gui->stopReadingDataButton->activate();
-//	gui->stopReadingDataButton->value(0);
-	gui->startReadingDataButton->deactivate();
-	Fl::unlock();
-	
-	// data file should be open as long as the "Write to file" has been clicked
-	//if (gui->writeFileBut->value() == 1){
-	// Open data file
-	//dataFile = fopen(gui->filenameInput->value(), "a+");	// later, change this to an option
-	//	if(dataFile == NULL){
-	//		Fl::lock();
-	//		sprintf(buffer, "Invalid filename.\n");
-	//		gui->consoleBuf->insert(buffer);
-	//		Fl::unlock();
-	//		return NULL;
-	//	}
-	//}
-	
-	Fl::lock();
-	print_to_console("Reading...\n");
-	Fl::unlock();
-	
-	int i = 0;
-	int nEnd = gui->nEvents->value(); 
-	while ( i<nEnd ){
-//	for (int i = 0; i<gui->nEvents->value(); i++) {
-		usleep(20000);		// adjust this to achieve desired reading speed
-				
-		// check to see if the Stop button was pushed, if so then clean up 
-		// and stop this thread
-		if (stop_message){
-			// clean up code goes here then exit
-			Fl::lock();
-			sprintf(buffer, "Read Stopped.\n");
-			gui->consoleBuf->insert(buffer);
-			sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-			gui->consoleBuf->insert(buffer);
-			gui->stopReadingDataButton->deactivate();
-//			gui->stopReadingDataButton->value(0);
-			gui->startReadingDataButton->activate();
-			if (gui->writeFileBut->value() == 1){
-				fclose(dataFile);
-				gui->writeFileBut->activate();
-				
-			}
-			Fl::unlock();	
-            pthread_exit(NULL);
-		}
-
-		status = gui->usb->findSync();
-		if(status<1){
-			badSync++;
-			continue;
-		}
-
-		status = gui->usb->readFrame();
-		if(status<1){
-			badRead++;
-			continue;
-		}
-		
-		Fl::lock();
-		// print frame to XCode console (unless nEvents is large, then skip it to save time).
-		if(gui->nEvents->value() < 5)  gui->usb->printFrame();
-		// write to file if the write button is enabled
-		if (gui->writeFileBut->value() == 1)  gui->usb->writeFrame(dataFile, i);
-		gui->nEventsDone->value(i);
-		Fl::unlock();
-		Fl::awake();
-		
-		i++;
-	}
-	
-	Fl::lock();
-	sprintf(buffer, "Read finished.\n");
-	gui->consoleBuf->insert(buffer);
-	sprintf(buffer, "%d bad syncs, %d bad reads.\n", badSync, badRead);
-	gui->consoleBuf->insert(buffer);		
-	if (gui->writeFileBut->value() == 1){
-		fclose(dataFile);
-		gui->writeFileBut->value(0);
-	}
-	gui->stopReadingDataButton->deactivate();
-//	gui->stopReadingDataButton->value(0);
-	gui->startReadingDataButton->activate();
-	Fl::unlock();	
-
-	return 0;
-}
- */
 
 void Application::openSendParamsWindow(void)
 {
@@ -335,72 +237,6 @@ void Application::send_global_params(int option)
 	gui->usb->setGlobalConfig(option);
 	gui->consoleBuf->insert("Sending global Params to controller.\n");
 }
-
-void Application::start_auto_run(void)
-{
-	print_to_console("Can't autorun; disabled.\n");
-
-	/*
-	pthread_t thread;
-    struct sched_param param;
-    pthread_attr_t tattr;
-	
-	int *variable;
-	int ret;
-	
-	stop_message = 0;
-	
-	variable = (int *) malloc(sizeof(int));
-	*variable = 6;
-	
-	// define the custom priority for one of the threads
-    int newprio = -10;
-	param.sched_priority = newprio;
-	ret = pthread_attr_init(&tattr);
-	ret = pthread_attr_setschedparam (&tattr, &param);
-	
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	
-	ret = pthread_create(&thread, &tattr, auto_run_sequence, (void *) variable);
-	*/
-}
-
-void* Application::auto_run_sequence(void* variable)
-{
-	/*
-	for(int i=1; i<32; i++){
-		Fl::lock();
-		gui->nEventsDone->value(0);
-		gui->setHoldTimeWindow_holdTime->value(i);
-		Fl::unlock();
-		gui->app->send_global_params(0);
-		gui->app->send_global_params(0);
-		gui->writeFileBut->value(1);
-		gui->app->start_file();
-		gui->app->start_reading_data();
-		
-		while(1){
-
-			Fl::lock();
-			int nCtr  = gui->nEventsDone->value();
-			int nEvts = gui->nEvents->value();
-			Fl::unlock();
-
-			if(nCtr == (nEvts-1) ) break;
-			sleep(1);			
-		}
-		
-	}	
-	return 0;
-	*/	
-	return 0;
-}
-
-
-//void Application::break_acq(int data)
-//{
-//	gui->usb->breakAcq(data);
-//}
 
 void Application::save_settings(void)
 {
@@ -453,13 +289,20 @@ void Application::stop_reading_data(void)
 
 void Application::reset_read_counter(void)
 {
-	nreads = 0;
 	gui->nEventsDone->value(0);
+	
+	frame_display_count = 0;
+	frame_miss_count = 0;
+	bad_check_sum_count = 0;
+	frame_read_count = 0;
+	no_trigger_count = 0;
+	formatter_start_time = 0;
 }
 
 void Application::update_histogrambinsize(void)
 {
-	mainHistogram_binsize = gui->histogrambinsize_counter->value();
+	//mainHistogram_binsize = gui->histogrambinsize_counter->value();
+	gui->mainHistogramWindow->set_binsize(gui->histogrambinsize_counter->value());
 	gui->mainHistogramWindow->redraw();
 }
 
@@ -471,22 +314,34 @@ void Application::update_timebinsize(void)
 
 void Application::update_lightcurvexmax(void)
 {
-	gui->mainLightcurveWindow->xmax = gui->lightcurvexmax_counter->value();
+	gui->mainLightcurveWindow->set_xmax(gui->lightcurvexmax_counter->value());
 	gui->mainLightcurveWindow->redraw();
 }
 
 void Application::update_histogramxmax(void)
 {
-	gui->mainHistogramWindow->xmax = gui->histogramxmax_counter->value();
+	gui->mainHistogramWindow->set_xmax(gui->histogramxmax_counter->value());
 	gui->mainHistogramWindow->redraw();
 }
 
 void Application::set_lowthreshold(void)
 {
-	low_threshold = gui->mainImageMin_slider->value();
-	gui->histLow->value(low_threshold);
+	gui->mainHistogramWindow->set_lowthreshold(gui->mainImageMin_slider->value());
 	gui->mainHistogramWindow->redraw();
-	gui->histLow->redraw();
+}
+
+void Application::set_imagemax(void)
+{
+	gui->mainImageWindow->set_ymax(gui->mainImageMax_slider->value());
+	gui->detectorsImageWindow->set_ymax(gui->mainImageMax_slider->value());
+	
+	gui->mainImageWindow->redraw();
+	gui->detectorsImageWindow->redraw();
+}
+
+void Application::set_histogram_max(void)
+{
+	gui->mainHistogramWindow->set_ymax(gui->mainHistogram_ymax_slider->value());
 }
 
 void Application::set_energy_histogram(void)
@@ -507,9 +362,80 @@ void Application::set_channel_histogram(void)
 void Application::toggle_image_integrate(void)
 {
 	if (gui->mainImage_integrate_button->value() == 1){
-		pixel_half_life = 0;
+		//gui->prefs->set("pixel_half_life", pixel_half_life);
+		//pixel_half_life = 0;
+		//printf_to_console("pixel_half_life = %f\n", "", pixel_half_life);
+		gui->pixel_halflife_slider->value(0);
+		gui->mainImageWindow->redraw();
 	}
 	if (gui->mainImage_integrate_button->value() == 0){
-		gui->prefs->get("pixel_half_life", pixel_half_life,3.0);
+		//gui->prefs->get("pixel_half_life", pixel_half_life, 3.0);
+		//printf_to_console("pixel_half_life = %f\n", "", pixel_half_life);
+		gui->pixel_halflife_slider->value(1);
+		gui->mainImageWindow->redraw();
 	}
+}
+
+void Application::save_histogram_to_file(void)
+{
+	gui->mainHistogramWindow->save();
+}
+
+void Application::save_image_to_file(void)
+{
+	gui->detectorsImageWindow->save();
+}
+
+void Application::set_lightcurve_ymax(void)
+{
+	// update the max of the y range of the light curve
+	gui->mainLightcurveWindow->set_ymax(gui->mainLightcurve_ymaxslider->value());
+	gui->mainLightcurveWindow->redraw();
+}
+
+void Application::toggle_show_mask(void)
+{
+	// update whether to show the asic mask in the mainImage
+	gui->mainImageWindow->show_mask = gui->showmask_checkbox->value();
+}
+
+void Application::toggle_detector_display(void)
+{	
+	gui->mainHistogramWindow->update_detector_display(gui->detector0_checkbox->value(), 0);
+	gui->mainHistogramWindow->update_detector_display(gui->detector1_checkbox->value(), 1);
+	gui->mainHistogramWindow->update_detector_display(gui->detector2_checkbox->value(), 2);
+	gui->mainHistogramWindow->update_detector_display(gui->detector3_checkbox->value(), 3);
+	gui->mainHistogramWindow->update_detector_display(gui->detector4_checkbox->value(), 4);
+	gui->mainHistogramWindow->update_detector_display(gui->detector5_checkbox->value(), 5);
+	gui->mainHistogramWindow->update_detector_display(gui->detector6_checkbox->value(), 6);
+	
+	gui->mainHistogramWindow->redraw();
+	gui->mainImageWindow->redraw();
+	gui->mainLightcurveWindow->redraw();
+}
+
+void Application::testfunction(void)
+{
+	//gui->mainHistogramWindow->detector_display[0] = gui->detectorall_checkbox->value();
+	//for (int i = 0; i < 8; i++) {
+	//	cout << gui->mainHistogramWindow->detector_display[i] << endl;
+	//}
+	//cout << endl;
+		
+	gui->mainHistogramWindow->redraw();
+	gui->mainImageWindow->redraw();
+	gui->mainLightcurveWindow->redraw();
+}
+
+float Application::get_pixel_half_life(void){
+	return pixel_half_life;
+}
+
+void Application::set_pixel_half_life(float new_value){
+	pixel_half_life = new_value;
+}
+
+void Application::set_detector_to_display(int detector_number)
+{
+	gui->mainImageWindow->set_detector_to_display(detector_number);
 }

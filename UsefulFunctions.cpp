@@ -31,7 +31,8 @@ unsigned getbits(unsigned x, int p, int n)
 	// This function extracts n bits, starting at position p, from integer x.
 	// The most common use is n=1 to extract a single bit at position p.
 	// p=0 refers to the rightmost (LSB) bit.
-	// The full description is at http://www.java-samples.com/showtutorial.php?tutorialid=500
+	// The full description is at 
+	// http://www.java-samples.com/showtutorial.php?tutorialid=500
 	
 	return (x >> (p+1-n)) & ~(~0 << n);
 	
@@ -60,6 +61,9 @@ unsigned reversebits(unsigned x, int n)
 
 unsigned int median(unsigned int *a, int n)
 {
+	// find the median of an array of size n
+	//
+	//
 	float temp;
 	int i,j;
 	for(i=0;i<n;i++)
@@ -76,4 +80,18 @@ unsigned int median(unsigned int *a, int n)
 		return (a[n/2]+a[n/2-1])/2;
 	else
 		return a[n/2];
+}
+
+unsigned long maximumValue(unsigned long *array, int n, int min_index)
+{
+	// find the maximum value in an array of size n
+	// ignore elements below min_index
+	long max = array[min_index];       // start with max = first element
+	for(int i = min_index+1; i < n; i++)
+	{
+		if(array[i] > max){
+			max = array[i];}
+	}
+	
+	return max;
 }

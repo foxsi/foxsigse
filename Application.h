@@ -81,6 +81,7 @@ public:
 	static void printf_to_console(const char *string1, char *string2, int number);
 	static void print_to_console(const char *text);
 	float get_pixel_half_life(void);
+	void set_pixel_half_life(float new_value);
 	void reset_read_counter(void);
 	void set_lowthreshold(void);
 	void flush_histogram(void);
@@ -93,12 +94,35 @@ public:
 	void update_lightcurvexmax(void);
 	void update_histogramxmax(void);
 	void toggle_image_integrate(void);
-	
+	void save_histogram_to_file(void);
+	void save_image_to_file(void);
+	void set_lightcurve_ymax(void);
+	void set_gsesync_file(void);
+	void toggle_show_mask(void);
+	void toggle_detector_display(void);
 	int elapsed_time_sec;
+	void set_imagemax(void);
+	void set_histogram_max(void);
+	void testfunction(void);
+	void set_detector_to_display(int detector_number);
+	unsigned long long frame_display_count;
+	unsigned long long frame_miss_count;
+	unsigned long long bad_check_sum_count;
+	unsigned long long frame_read_count;
+	unsigned long long no_trigger_count;
+	unsigned long long formatter_start_time;
+	
+	int get_data_source(void);
+	void set_data_source(int value);
+	uint32_t frame_number;
+	
 private:
+	int data_source;
 	char filename[40];
+	float pixel_half_life;
 	static void *read_data(void *variable);		// Begin reading data from a data stream
 	static void *auto_run_sequence(void *variable);	// auto-run sequence of acquisitions with varying hold times
+	
 };
 
 #endif

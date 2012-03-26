@@ -11,19 +11,20 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Group.H>
 #include "mainImage.h"
-#include "subImage.h"
 #include <FL/Fl_Output.H>
-#include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Button.H>
-#include <FL/Fl_Value_Slider.H>
-#include <FL/Fl_Value_Output.H>
-#include "mainHistogram.h"
-#include <FL/Fl_Choice.H>
-#include <FL/Fl_Counter.H>
-#include "mainLightcurve.h"
-#include <FL/Fl_Value_Input.H>
-#include <FL/Fl_Text_Display.H>
+#include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Check_Button.H>
+#include <FL/Fl_Value_Output.H>
+#include <FL/Fl_Value_Slider.H>
+#include "detectorsImage.h"
+#include <FL/Fl_Choice.H>
+#include "mainHistogram.h"
+#include <FL/Fl_Counter.H>
+#include "detectorsHistogram.h"
+#include <FL/Fl_Value_Input.H>
+#include "mainLightcurve.h"
+#include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_File_Input.H>
 
@@ -55,45 +56,76 @@ private:
   static void cb_ACTEL(Fl_Menu_*, void*);
 public:
   mainImage *mainImageWindow;
-  subImage *subImageWindow;
   Fl_Output *pixelNum;
-  Fl_Output *pixelCounts;
-  Fl_Light_Button *subImageLockbut;
 private:
   void cb_Flush_i(Fl_Button*, void*);
   static void cb_Flush(Fl_Button*, void*);
-public:
-  Fl_Value_Slider *mainImageMin_slider;
-private:
-  void cb_mainImageMin_slider_i(Fl_Value_Slider*, void*);
-  static void cb_mainImageMin_slider(Fl_Value_Slider*, void*);
 public:
   Fl_Light_Button *mainImage_integrate_button;
 private:
   void cb_mainImage_integrate_button_i(Fl_Light_Button*, void*);
   static void cb_mainImage_integrate_button(Fl_Light_Button*, void*);
+  void cb_Save_i(Fl_Button*, void*);
+  static void cb_Save(Fl_Button*, void*);
 public:
-  Fl_Output *rateOutput0;
-  Fl_Output *rateOutput1;
-  Fl_Output *rateOutput2;
-  Fl_Output *rateOutput3;
-  Fl_Output *rateOutput4;
-  Fl_Output *rateOutput5;
-  Fl_Output *rateOutput6;
-  Fl_Output *rateOutput7;
+  Fl_Check_Button *showmask_checkbox;
+private:
+  void cb_showmask_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_showmask_checkbox(Fl_Check_Button*, void*);
+public:
+  Fl_Value_Output *pixelCounts;
+  Fl_Light_Button *Lockbut;
+  Fl_Value_Slider *mainImageMax_slider;
+private:
+  void cb_mainImageMax_slider_i(Fl_Value_Slider*, void*);
+  static void cb_mainImageMax_slider(Fl_Value_Slider*, void*);
+public:
+  detectorsImage *detectorsImageWindow;
+  Fl_Value_Slider *pixel_halflife_slider;
+  static Fl_Menu_Item menu_detector[];
+private:
+  void cb_X0_i(Fl_Menu_*, void*);
+  static void cb_X0(Fl_Menu_*, void*);
+  void cb_X1_i(Fl_Menu_*, void*);
+  static void cb_X1(Fl_Menu_*, void*);
+  void cb_X2_i(Fl_Menu_*, void*);
+  static void cb_X2(Fl_Menu_*, void*);
+  void cb_X3_i(Fl_Menu_*, void*);
+  static void cb_X3(Fl_Menu_*, void*);
+  void cb_X4_i(Fl_Menu_*, void*);
+  static void cb_X4(Fl_Menu_*, void*);
+  void cb_X5_i(Fl_Menu_*, void*);
+  static void cb_X5(Fl_Menu_*, void*);
+  void cb_X6_i(Fl_Menu_*, void*);
+  static void cb_X6(Fl_Menu_*, void*);
+public:
   Fl_Value_Output *shutterstateOutput;
-  Fl_Value_Output *tempOutput;
+  Fl_Value_Output *tempOutput2;
   Fl_Value_Output *HVOutput;
+  Fl_Value_Output *tempOutput1;
+  Fl_Value_Output *tempOutput3;
+  Fl_Value_Output *tempOutput;
+  Fl_Value_Output *tempOutput10;
+  Fl_Value_Output *tempOutput9;
+  Fl_Value_Output *tempOutput8;
+  Fl_Value_Output *tempOutput6;
+  Fl_Value_Output *tempOutput5;
+  Fl_Value_Output *tempOutput7;
+  Fl_Value_Output *tempOutput4;
+  Fl_Value_Output *tempOutput11;
+  Fl_Value_Output *VoltageOutput1;
+  Fl_Value_Output *VoltageOutput0;
+  Fl_Value_Output *VoltageOutput2;
+  Fl_Value_Output *VoltageOutput3;
+  Fl_Value_Output *CommandCntOutput;
+  Fl_Output *CommandOutput;
   mainHistogram *mainHistogramWindow;
-  Fl_Value_Output *mainHistogramYlabelmid;
-  Fl_Value_Output *mainHistogramYlabelmax;
   Fl_Choice *mainHistogram_choice;
   static Fl_Menu_Item menu_mainHistogram_choice[];
 private:
   void cb_Energy_i(Fl_Menu_*, void*);
   static void cb_Energy(Fl_Menu_*, void*);
 public:
-  Fl_Value_Output *histLow;
   Fl_Value_Output *histCounts;
   Fl_Value_Output *histEnergy;
 private:
@@ -109,7 +141,21 @@ public:
 private:
   void cb_histogramxmax_counter_i(Fl_Counter*, void*);
   static void cb_histogramxmax_counter(Fl_Counter*, void*);
+  void cb_Save1_i(Fl_Button*, void*);
+  static void cb_Save1(Fl_Button*, void*);
 public:
+  Fl_Value_Slider *mainImageMin_slider;
+private:
+  void cb_mainImageMin_slider_i(Fl_Value_Slider*, void*);
+  static void cb_mainImageMin_slider(Fl_Value_Slider*, void*);
+public:
+  Fl_Check_Button *minus_common_mode_checkbox;
+  Fl_Value_Slider *mainHistogram_ymax_slider;
+private:
+  void cb_mainHistogram_ymax_slider_i(Fl_Value_Slider*, void*);
+  static void cb_mainHistogram_ymax_slider(Fl_Value_Slider*, void*);
+public:
+  detectorsHistogram *detectorsHistogramWindow;
   Fl_Value_Output *frameTime;
   Fl_Value_Output *framenumOutput;
 private:
@@ -131,6 +177,29 @@ private:
   void cb_closeBut_i(Fl_Light_Button*, void*);
   static void cb_closeBut(Fl_Light_Button*, void*);
 public:
+  Fl_Value_Input *nEvents;
+  Fl_Light_Button *writeFileBut;
+private:
+  void cb_writeFileBut_i(Fl_Light_Button*, void*);
+  static void cb_writeFileBut(Fl_Light_Button*, void*);
+public:
+  Fl_Button *stopReadingDataButton;
+private:
+  void cb_stopReadingDataButton_i(Fl_Button*, void*);
+  static void cb_stopReadingDataButton(Fl_Button*, void*);
+public:
+  Fl_Value_Output *nEventsDone;
+  Fl_Value_Output *inttimeOutput;
+  Fl_Button *test_button;
+private:
+  void cb_test_button_i(Fl_Button*, void*);
+  static void cb_test_button(Fl_Button*, void*);
+public:
+  Fl_Value_Output *frame_missOutput;
+  Fl_Value_Output *frame_miss_countOutput;
+  Fl_Value_Output *bad_frameOutput;
+  Fl_Value_Output *no_triggerOutput;
+  Fl_Value_Output *int_timeOutput;
   mainLightcurve *mainLightcurveWindow;
 private:
   void cb_Flush2_i(Fl_Button*, void*);
@@ -147,49 +216,69 @@ private:
   void cb_lightcurvexmax_counter_i(Fl_Counter*, void*);
   static void cb_lightcurvexmax_counter(Fl_Counter*, void*);
 public:
-  Fl_Light_Button *glitchBut;
+  Fl_Value_Slider *mainLightcurve_ymaxslider;
+private:
+  void cb_mainLightcurve_ymaxslider_i(Fl_Value_Slider*, void*);
+  static void cb_mainLightcurve_ymaxslider(Fl_Value_Slider*, void*);
+public:
   Fl_Button *sendParamsBut;
 private:
   void cb_sendParamsBut_i(Fl_Button*, void*);
   static void cb_sendParamsBut(Fl_Button*, void*);
-public:
-  Fl_Value_Input *nEvents;
-  Fl_Light_Button *writeFileBut;
-private:
-  void cb_writeFileBut_i(Fl_Light_Button*, void*);
-  static void cb_writeFileBut(Fl_Light_Button*, void*);
-public:
-  Fl_Button *stopReadingDataButton;
-private:
-  void cb_stopReadingDataButton_i(Fl_Button*, void*);
-  static void cb_stopReadingDataButton(Fl_Button*, void*);
-public:
-  Fl_Text_Display *consoleBuf;
-private:
-  void cb_Clear_i(Fl_Button*, void*);
-  static void cb_Clear(Fl_Button*, void*);
-public:
-  Fl_Check_Button *printasicframe_button;
-  Fl_Button *setHoldBut;
-private:
-  void cb_setHoldBut_i(Fl_Button*, void*);
-  static void cb_setHoldBut(Fl_Button*, void*);
 public:
   Fl_Button *setTrigBut;
 private:
   void cb_setTrigBut_i(Fl_Button*, void*);
   static void cb_setTrigBut(Fl_Button*, void*);
 public:
-  Fl_Value_Output *nEventsDone;
+  Fl_Button *setHoldBut;
+private:
+  void cb_setHoldBut_i(Fl_Button*, void*);
+  static void cb_setHoldBut(Fl_Button*, void*);
+public:
+  Fl_Light_Button *glitchBut;
+  Fl_Text_Display *consoleBuf;
+private:
+  void cb_Clear_i(Fl_Button*, void*);
+  static void cb_Clear(Fl_Button*, void*);
+public:
+  Fl_Check_Button *printasicframe_button;
   Fl_Group *detector_choice;
+  Fl_Check_Button *detector0_checkbox;
+private:
+  void cb_detector0_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector0_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector1_checkbox;
+private:
+  void cb_detector1_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector1_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector2_checkbox;
+private:
+  void cb_detector2_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector2_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector3_checkbox;
+private:
+  void cb_detector3_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector3_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector4_checkbox;
+private:
+  void cb_detector4_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector4_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector5_checkbox;
+private:
+  void cb_detector5_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector5_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Check_Button *detector6_checkbox;
-  Fl_Check_Button *detector7_checkbox;
-  Fl_Value_Output *inttimeOutput;
+private:
+  void cb_detector6_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detector6_checkbox(Fl_Check_Button*, void*);
+public:
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:
@@ -222,11 +311,6 @@ public:
 private:
   void cb_setHoldTimeWindow_setBut_i(Fl_Button*, void*);
   static void cb_setHoldTimeWindow_setBut(Fl_Button*, void*);
-public:
-  Fl_Button *setHoldTimeWindow_autorunBut;
-private:
-  void cb_setHoldTimeWindow_autorunBut_i(Fl_Button*, void*);
-  static void cb_setHoldTimeWindow_autorunBut(Fl_Button*, void*);
   void cb_Close1_i(Fl_Button*, void*);
   static void cb_Close1(Fl_Button*, void*);
 public:
@@ -290,6 +374,12 @@ public:
   Fl_Value_Input *readdelay_value;
   Fl_Choice *DataSource_choice;
   static Fl_Menu_Item menu_DataSource_choice[];
+  Fl_Check_Button *newControlRegisters_check;
+private:
+  void cb_Change1_i(Fl_Button*, void*);
+  static void cb_Change1(Fl_Button*, void*);
+public:
+  Fl_File_Input *gsesyncfile_fileInput;
   void show();
   Application *app; 
   Foxsidata *data; 
