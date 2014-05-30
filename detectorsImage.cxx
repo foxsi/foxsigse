@@ -127,7 +127,7 @@ void detectorsImage::draw()
 		switch (detector_num) {
 			case 6:
 				center[0] = XSTRIPS; center[1] = YSTRIPS;
-				sprintf(optic_name, "X0");
+				sprintf(optic_name, "X6");
 				break;
 			case 1:
 				center[0] = XSTRIPS; center[1] = 2*YSTRIPS + detector_buffer[1];
@@ -151,7 +151,7 @@ void detectorsImage::draw()
 				break;
 			case 0:
 				center[0] = 0 - detector_buffer[0]; center[1] = 1.5*YSTRIPS + detector_buffer[1];
-				sprintf(optic_name, "X6");
+				sprintf(optic_name, "X0");
 				break;
 			default:
 				break;
