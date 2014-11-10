@@ -23,14 +23,14 @@ mainHistogram::mainHistogram(int x,int y,int w,int h,const char *l)
 	ymin = 0;
 	xmax = MAX_CHANNEL;
 	xmin = 0;
-	detector_display[0] = 1;
+	detector_display[0] = 0;
 	detector_display[1] = 0;
 	detector_display[2] = 0;
 	detector_display[3] = 0;
 	detector_display[4] = 0;
 	detector_display[5] = 0;
 	detector_display[6] = 0;
-	/* initialize random seed: */
+	detector_display[7] = 1;
 	
 	//initialize the histogram
 	for(int i=0; i < MAX_CHANNEL; i++)
@@ -109,18 +109,29 @@ void mainHistogram::draw()
 	glClearColor(0.0,0.0,0.0,0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	// draw the total histogram
-	glColor3f(1.0, 0.0, 0.0);
-	
-	glBegin(GL_LINES);
-	for(int i = 0; i < MAX_CHANNEL/binsize; i++)
+	if(detector_display[7] == 1)
 	{
-		glVertex2f(i, displayHistogramFunction[i]);
-		glVertex2f(i+1, displayHistogramFunction[i]);	
-		glVertex2f(i+0.5, displayHistogramFunction[i] - sqrt(displayHistogramFunction[i]));
-		glVertex2f(i+0.5, displayHistogramFunction[i] + sqrt(displayHistogramFunction[i]));
+		// draw the total histogram
+		glColor3f(1.0, 0.0, 0.0);
+		
+		// draw the points and error bars
+		glBegin(GL_LINES);
+		for(int i = 0; i < MAX_CHANNEL/binsize; i++)
+		{
+			glVertex2f(i, displayHistogramFunction[i]);
+			glVertex2f(i+1, displayHistogramFunction[i]);	
+			glVertex2f(i+0.5, displayHistogramFunction[i] - sqrt(displayHistogramFunction[i]));
+			glVertex2f(i+0.5, displayHistogramFunction[i] + sqrt(displayHistogramFunction[i]));
+		}
+		glEnd();
+		
+		// draw the connecting line
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(0,0);
+		for(int i = 0; i < MAX_CHANNEL/binsize; i++) { glVertex2f(i+0.5, displayHistogramFunction[i]); }
+		glVertex2f(MAX_CHANNEL/binsize - 0.5,0);
+		glEnd();
 	}
-	glEnd();
 	
 	//draw the detectors histogram
 	for (int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++)
@@ -135,6 +146,13 @@ void mainHistogram::draw()
 				//glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num] - 7*sqrt(displayHistogramDetectors[i][detector_num]));
 				//glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num] + 7*sqrt(displayHistogramDetectors[i][detector_num]));
 			}
+			glEnd();
+			
+			// draw the connecting line
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(0,0);
+			for(int i = 0; i < MAX_CHANNEL/binsize; i++) { glVertex2f(i+0.5, 7*displayHistogramDetectors[i][detector_num]); }
+			glVertex2f(MAX_CHANNEL/binsize,0);
 			glEnd();
 		}
 	}
@@ -196,7 +214,7 @@ int mainHistogram::handle(int eventType)
 
 void mainHistogram::update_detector_display(bool on, int detector_number)
 {
-	if ((detector_number >= 0) && (detector_number < NUM_DETECTORS)){
+	if ((detector_number >= 0) && (detector_number < NUM_DETECTORS+1)){
 		detector_display[detector_number] = on;
 	}
 }

@@ -26,6 +26,13 @@ void Gui::cb_Quit(Fl_Menu_* o, void* v) {
   ((Gui*)(o->parent()->user_data()))->cb_Quit_i(o,v);
 }
 
+void Gui::cb_readFile_i(Fl_Menu_*, void*) {
+  app->read_file();
+}
+void Gui::cb_readFile(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->user_data()))->cb_readFile_i(o,v);
+}
+
 void Gui::cb_Commanding_i(Fl_Menu_*, void*) {
   sendCommandsWindow->show();
 }
@@ -47,7 +54,7 @@ Fl_Menu_Item Gui::menu_menuBar[] = {
  {"Quit", 0x400071,  (Fl_Callback*)Gui::cb_Quit, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {"File", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
- {"Read Data file", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Read Formatter Save File", 0,  (Fl_Callback*)Gui::cb_readFile, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Read USB Stream", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Read Tele Stream", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Write Spec", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -102,63 +109,63 @@ void Gui::cb_mainImageMax_slider(Fl_Value_Slider* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_mainImageMax_slider_i(o,v);
 }
 
-void Gui::cb_X0_i(Fl_Menu_*, void*) {
+void Gui::cb_0_i(Fl_Menu_*, void*) {
   app->set_detector_to_display(0);
 }
-void Gui::cb_X0(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_X0_i(o,v);
+void Gui::cb_0(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_0_i(o,v);
 }
 
-void Gui::cb_X1_i(Fl_Menu_*, void*) {
+void Gui::cb_1_i(Fl_Menu_*, void*) {
   app->set_detector_to_display(1);
 }
-void Gui::cb_X1(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_X1_i(o,v);
+void Gui::cb_1(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_1_i(o,v);
 }
 
-void Gui::cb_X2_i(Fl_Menu_*, void*) {
+void Gui::cb_2_i(Fl_Menu_*, void*) {
   app->set_detector_to_display(2);
 }
-void Gui::cb_X2(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_X2_i(o,v);
+void Gui::cb_2(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_2_i(o,v);
 }
 
-void Gui::cb_X3_i(Fl_Menu_*, void*) {
+void Gui::cb_3_i(Fl_Menu_*, void*) {
   app->set_detector_to_display(3);
 }
-void Gui::cb_X3(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_X3_i(o,v);
+void Gui::cb_3(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_3_i(o,v);
 }
 
-void Gui::cb_X4_i(Fl_Menu_*, void*) {
+void Gui::cb_4_i(Fl_Menu_*, void*) {
   app->set_detector_to_display(4);
 }
-void Gui::cb_X4(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_X4_i(o,v);
+void Gui::cb_4(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_4_i(o,v);
 }
 
-void Gui::cb_X5_i(Fl_Menu_*, void*) {
+void Gui::cb_5_i(Fl_Menu_*, void*) {
   app->set_detector_to_display(5);
 }
-void Gui::cb_X5(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_X5_i(o,v);
+void Gui::cb_5(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_5_i(o,v);
 }
 
-void Gui::cb_X6_i(Fl_Menu_*, void*) {
+void Gui::cb_6_i(Fl_Menu_*, void*) {
   app->set_detector_to_display(6);
 }
-void Gui::cb_X6(Fl_Menu_* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_X6_i(o,v);
+void Gui::cb_6(Fl_Menu_* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_6_i(o,v);
 }
 
-Fl_Menu_Item Gui::menu_detector[] = {
- {"X0", 0,  (Fl_Callback*)Gui::cb_X0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"X1", 0,  (Fl_Callback*)Gui::cb_X1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"X2", 0,  (Fl_Callback*)Gui::cb_X2, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"X3", 0,  (Fl_Callback*)Gui::cb_X3, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"X4", 0,  (Fl_Callback*)Gui::cb_X4, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"X5", 0,  (Fl_Callback*)Gui::cb_X5, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"X6", 0,  (Fl_Callback*)Gui::cb_X6, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+Fl_Menu_Item Gui::menu_[] = {
+ {"0", 0,  (Fl_Callback*)Gui::cb_0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"1", 0,  (Fl_Callback*)Gui::cb_1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"2", 0,  (Fl_Callback*)Gui::cb_2, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"3", 0,  (Fl_Callback*)Gui::cb_3, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"4", 0,  (Fl_Callback*)Gui::cb_4, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"5", 0,  (Fl_Callback*)Gui::cb_5, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"6", 0,  (Fl_Callback*)Gui::cb_6, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0}
 };
 
@@ -267,18 +274,18 @@ void Gui::cb_test_button(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_test_button_i(o,v);
 }
 
+void Gui::cb_flush_i(Fl_Button*, void*) {
+  app->flush_all();
+}
+void Gui::cb_flush(Fl_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_flush_i(o,v);
+}
+
 void Gui::cb_Flush2_i(Fl_Button*, void*) {
   app->flush_timeseries();
 }
 void Gui::cb_Flush2(Fl_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_Flush2_i(o,v);
-}
-
-void Gui::cb_timebinsize_counter_i(Fl_Counter*, void*) {
-  app->update_timebinsize();
-}
-void Gui::cb_timebinsize_counter(Fl_Counter* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_timebinsize_counter_i(o,v);
 }
 
 void Gui::cb_lightcurvexmax_counter_i(Fl_Counter*, void*) {
@@ -293,27 +300,6 @@ void Gui::cb_mainLightcurve_ymaxslider_i(Fl_Value_Slider*, void*) {
 }
 void Gui::cb_mainLightcurve_ymaxslider(Fl_Value_Slider* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_mainLightcurve_ymaxslider_i(o,v);
-}
-
-void Gui::cb_sendParamsBut_i(Fl_Button*, void*) {
-  app->openSendParamsWindow();
-}
-void Gui::cb_sendParamsBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_sendParamsBut_i(o,v);
-}
-
-void Gui::cb_setTrigBut_i(Fl_Button*, void*) {
-  app->openSetTrigWindow();
-}
-void Gui::cb_setTrigBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_setTrigBut_i(o,v);
-}
-
-void Gui::cb_setHoldBut_i(Fl_Button*, void*) {
-  app->openSetHoldTimeWindow();
-}
-void Gui::cb_setHoldBut(Fl_Button* o, void* v) {
-  ((Gui*)(o->parent()->parent()->user_data()))->cb_setHoldBut_i(o,v);
 }
 
 void Gui::cb_Clear_i(Fl_Button*, void*) {
@@ -370,6 +356,13 @@ void Gui::cb_detector6_checkbox_i(Fl_Check_Button*, void*) {
 }
 void Gui::cb_detector6_checkbox(Fl_Check_Button* o, void* v) {
   ((Gui*)(o->parent()->parent()->user_data()))->cb_detector6_checkbox_i(o,v);
+}
+
+void Gui::cb_detectorAll_checkbox_i(Fl_Check_Button*, void*) {
+  app->toggle_detector_display();
+}
+void Gui::cb_detectorAll_checkbox(Fl_Check_Button* o, void* v) {
+  ((Gui*)(o->parent()->parent()->user_data()))->cb_detectorAll_checkbox_i(o,v);
 }
 
 void Gui::cb_sendParamsWindow_sendBut_i(Fl_Button*, void*) {
@@ -549,6 +542,7 @@ Fl_Menu_Item Gui::menu_DataSource_choice[] = {
  {"Simulate", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"ACTEL", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"Formatter", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Formatter File", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0}
 };
 
@@ -580,7 +574,7 @@ Gui::Gui() {
         mainImageWindow->align(Fl_Align(FL_ALIGN_CENTER));
         mainImageWindow->when(FL_WHEN_RELEASE);
       } // mainImage* mainImageWindow
-      { pixelNum = new Fl_Output(654, 109, 80, 25, "Pixel");
+      { pixelNum = new Fl_Output(660, 437, 80, 25, "Pixel");
       } // Fl_Output* pixelNum
       { Fl_Button* o = new Fl_Button(653, 168, 80, 25, "Flush");
         o->callback((Fl_Callback*)cb_Flush);
@@ -625,15 +619,17 @@ Gui::Gui() {
         pixel_halflife_slider->textsize(14);
         pixel_halflife_slider->align(Fl_Align(294));
       } // Fl_Value_Slider* pixel_halflife_slider
-      { Fl_Choice* o = new Fl_Choice(75, 615, 70, 20, "detector:");
+      { Fl_Choice* o = new Fl_Choice(75, 615, 70, 20, "#:");
         o->down_box(FL_BORDER_BOX);
-        o->menu(menu_detector);
+        o->menu(menu_);
       } // Fl_Choice* o
+      { arcminOffset = new Fl_Output(660, 465, 80, 25, "Arcmin");
+      } // Fl_Output* arcminOffset
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(1040, 65, 315, 170, "Telemetry Info");
       o->box(FL_THIN_UP_FRAME);
-      { shutterstateOutput = new Fl_Value_Output(1315, 73, 39, 22, "Shutter state");
+      { shutterstateOutput = new Fl_Value_Output(1314, 73, 39, 22, "Shutter state");
         shutterstateOutput->step(1);
       } // Fl_Value_Output* shutterstateOutput
       { tempOutput2 = new Fl_Value_Output(1076, 156, 40, 24, "FAct");
@@ -658,14 +654,14 @@ Gui::Gui() {
         tempOutput10->tooltip("Detector Plane (near 3)");
         tempOutput10->step(0.1);
       } // Fl_Value_Output* tempOutput10
-      { tempOutput9 = new Fl_Value_Output(1240, 130, 40, 24, "Det1");
-        tempOutput9->tooltip("Detector 1");
-        tempOutput9->step(0.1);
-      } // Fl_Value_Output* tempOutput9
-      { tempOutput8 = new Fl_Value_Output(1240, 100, 40, 24, "Det4");
-        tempOutput8->tooltip("Detector 5");
-        tempOutput8->step(0.1);
-      } // Fl_Value_Output* tempOutput8
+      { tempOutput7 = new Fl_Value_Output(1240, 130, 40, 24, "Det1");
+        tempOutput7->tooltip("Detector 1");
+        tempOutput7->step(0.1);
+      } // Fl_Value_Output* tempOutput7
+      { tempOutput11 = new Fl_Value_Output(1240, 100, 40, 24, "Det4");
+        tempOutput11->tooltip("Detector 5");
+        tempOutput11->step(0.1);
+      } // Fl_Value_Output* tempOutput11
       { tempOutput6 = new Fl_Value_Output(1153, 157, 40, 24, "Det6");
         tempOutput6->tooltip("Detector 6");
         tempOutput6->step(0.1);
@@ -674,31 +670,31 @@ Gui::Gui() {
         tempOutput5->tooltip("ACTEL board");
         tempOutput5->step(0.1);
       } // Fl_Value_Output* tempOutput5
-      { tempOutput7 = new Fl_Value_Output(1153, 183, 40, 22, "Det3");
-        tempOutput7->tooltip("Detector 3");
-        tempOutput7->step(0.1);
-      } // Fl_Value_Output* tempOutput7
+      { tempOutput9 = new Fl_Value_Output(1153, 183, 40, 22, "Det3");
+        tempOutput9->tooltip("Detector 3");
+        tempOutput9->step(0.1);
+      } // Fl_Value_Output* tempOutput9
       { tempOutput4 = new Fl_Value_Output(1152, 100, 40, 24, "AAct");
         tempOutput4->tooltip("ACTEL on ACTEL board");
         tempOutput4->step(0.1);
       } // Fl_Value_Output* tempOutput4
-      { tempOutput11 = new Fl_Value_Output(1240, 185, 40, 20, "Det0");
-        tempOutput11->tooltip("Detector 0");
-        tempOutput11->step(0.1);
-      } // Fl_Value_Output* tempOutput11
+      { tempOutput8 = new Fl_Value_Output(1240, 186, 40, 20, "Det0");
+        tempOutput8->tooltip("Detector 0");
+        tempOutput8->step(0.1);
+      } // Fl_Value_Output* tempOutput8
       { VoltageOutput1 = new Fl_Value_Output(1313, 129, 40, 24, "-5V");
-        VoltageOutput1->step(0.1);
+        VoltageOutput1->step(0.01);
       } // Fl_Value_Output* VoltageOutput1
       { VoltageOutput0 = new Fl_Value_Output(1313, 100, 40, 24, "5V");
-        VoltageOutput0->step(0.1);
+        VoltageOutput0->step(0.01);
       } // Fl_Value_Output* VoltageOutput0
       { VoltageOutput2 = new Fl_Value_Output(1313, 157, 40, 24, "1.5V");
-        VoltageOutput2->step(0.1);
+        VoltageOutput2->step(0.01);
       } // Fl_Value_Output* VoltageOutput2
       { VoltageOutput3 = new Fl_Value_Output(1313, 185, 40, 20, "3.3V");
-        VoltageOutput3->step(0.1);
+        VoltageOutput3->step(0.01);
       } // Fl_Value_Output* VoltageOutput3
-      { CommandCntOutput = new Fl_Value_Output(1155, 210, 40, 25, "CmdCnt");
+      { CommandCntOutput = new Fl_Value_Output(1153, 208, 40, 25, "CmdCnt");
       } // Fl_Value_Output* CommandCntOutput
       { CommandOutput = new Fl_Output(1240, 211, 115, 23, "Cmd:");
       } // Fl_Output* CommandOutput
@@ -746,7 +742,7 @@ Gui::Gui() {
       { Fl_Button* o = new Fl_Button(1215, 574, 54, 25, "Save");
         o->callback((Fl_Callback*)cb_Save1);
       } // Fl_Button* o
-      { mainImageMin_slider = new Fl_Value_Slider(790, 645, 30, 105, "min ADC");
+      { mainImageMin_slider = new Fl_Value_Slider(790, 645, 45, 105, "min ADC");
         mainImageMin_slider->minimum(1);
         mainImageMin_slider->maximum(1023);
         mainImageMin_slider->step(1);
@@ -758,7 +754,7 @@ Gui::Gui() {
       { minus_common_mode_checkbox = new Fl_Check_Button(1180, 735, 160, 15, "minus common mode");
         minus_common_mode_checkbox->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* minus_common_mode_checkbox
-      { mainHistogram_ymax_slider = new Fl_Value_Slider(790, 500, 30, 115, "max");
+      { mainHistogram_ymax_slider = new Fl_Value_Slider(790, 500, 45, 115, "max");
         mainHistogram_ymax_slider->maximum(20000);
         mainHistogram_ymax_slider->step(200);
         mainHistogram_ymax_slider->textsize(14);
@@ -813,18 +809,14 @@ Gui::Gui() {
         stopReadingDataButton->callback((Fl_Callback*)cb_stopReadingDataButton);
         stopReadingDataButton->deactivate();
       } // Fl_Button* stopReadingDataButton
-      { nEventsDone = new Fl_Value_Output(840, 186, 55, 24, "read counter:");
-      } // Fl_Value_Output* nEventsDone
       { inttimeOutput = new Fl_Value_Output(840, 216, 65, 24, "local time (s):");
       } // Fl_Value_Output* inttimeOutput
-      { test_button = new Fl_Button(863, 85, 60, 25, "test2");
+      { test_button = new Fl_Button(760, 185, 60, 25, "test2");
         test_button->callback((Fl_Callback*)cb_test_button);
       } // Fl_Button* test_button
       { frame_missOutput = new Fl_Value_Output(980, 116, 40, 24, "frame miss %:");
         frame_missOutput->step(1);
       } // Fl_Value_Output* frame_missOutput
-      { frame_miss_countOutput = new Fl_Value_Output(955, 216, 75, 24, "miss# ");
-      } // Fl_Value_Output* frame_miss_countOutput
       { bad_frameOutput = new Fl_Value_Output(980, 146, 40, 24, "bad frame %:");
         bad_frameOutput->step(1);
       } // Fl_Value_Output* bad_frameOutput
@@ -835,6 +827,9 @@ Gui::Gui() {
         int_timeOutput->maximum(1e+10);
         int_timeOutput->step(1);
       } // Fl_Value_Output* int_timeOutput
+      { Fl_Button* o = new Fl_Button(905, 85, 55, 25, "flush all");
+        o->callback((Fl_Callback*)cb_flush);
+      } // Fl_Button* o
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(765, 345, 585, 110, "LightCurve");
@@ -859,7 +854,6 @@ Gui::Gui() {
       { timebinsize_counter = new Fl_Counter(1150, 380, 120, 20, "bin size (s):");
         timebinsize_counter->minimum(0.1);
         timebinsize_counter->value(1);
-        timebinsize_counter->callback((Fl_Callback*)cb_timebinsize_counter);
         timebinsize_counter->align(Fl_Align(FL_ALIGN_RIGHT));
       } // Fl_Counter* timebinsize_counter
       { lightcurvexmax_counter = new Fl_Counter(1150, 405, 120, 20, "total sec:");
@@ -876,21 +870,9 @@ Gui::Gui() {
         mainLightcurve_ymaxslider->callback((Fl_Callback*)cb_mainLightcurve_ymaxslider);
         mainLightcurve_ymaxslider->align(Fl_Align(290));
       } // Fl_Value_Slider* mainLightcurve_ymaxslider
-      o->end();
-    } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(1115, 274, 236, 56, "ASIC");
-      o->box(FL_THIN_DOWN_FRAME);
-      { sendParamsBut = new Fl_Button(1120, 274, 100, 23, "Send Params");
-        sendParamsBut->callback((Fl_Callback*)cb_sendParamsBut);
-      } // Fl_Button* sendParamsBut
-      { setTrigBut = new Fl_Button(1225, 274, 125, 23, "Set Trigger Options");
-        setTrigBut->callback((Fl_Callback*)cb_setTrigBut);
-      } // Fl_Button* setTrigBut
-      { setHoldBut = new Fl_Button(1250, 303, 100, 22, "Set Hold Time");
-        setHoldBut->callback((Fl_Callback*)cb_setHoldBut);
-      } // Fl_Button* setHoldBut
-      { glitchBut = new Fl_Light_Button(1180, 302, 65, 23, "Glitch");
-      } // Fl_Light_Button* glitchBut
+      { totalctsOutput = new Fl_Value_Output(1230, 428, 115, 24, "Total Counts");
+        totalctsOutput->step(1);
+      } // Fl_Value_Output* totalctsOutput
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(300, 640, 465, 125, "Console");
@@ -905,7 +887,7 @@ Gui::Gui() {
       } // Fl_Check_Button* printasicframe_button
       o->end();
     } // Fl_Group* o
-    { detector_choice = new Fl_Group(780, 301, 215, 29, "X");
+    { detector_choice = new Fl_Group(780, 301, 260, 29, "#");
       detector_choice->box(FL_DOWN_BOX);
       detector_choice->align(Fl_Align(FL_ALIGN_LEFT));
       { detector0_checkbox = new Fl_Check_Button(785, 301, 35, 29, "0");
@@ -932,10 +914,15 @@ Gui::Gui() {
         detector5_checkbox->down_box(FL_DOWN_BOX);
         detector5_checkbox->callback((Fl_Callback*)cb_detector5_checkbox);
       } // Fl_Check_Button* detector5_checkbox
-      { detector6_checkbox = new Fl_Check_Button(965, 301, 30, 29, "6");
+      { detector6_checkbox = new Fl_Check_Button(965, 301, 65, 29, "6");
         detector6_checkbox->down_box(FL_DOWN_BOX);
         detector6_checkbox->callback((Fl_Callback*)cb_detector6_checkbox);
       } // Fl_Check_Button* detector6_checkbox
+      { detectorAll_checkbox = new Fl_Check_Button(995, 301, 45, 29, "All");
+        detectorAll_checkbox->down_box(FL_DOWN_BOX);
+        detectorAll_checkbox->value(1);
+        detectorAll_checkbox->callback((Fl_Callback*)cb_detectorAll_checkbox);
+      } // Fl_Check_Button* detectorAll_checkbox
       detector_choice->end();
     } // Fl_Group* detector_choice
     mainWindow->end();
@@ -1488,28 +1475,29 @@ Gui::Gui() {
     AboutWindow->user_data((void*)(this));
     { Fl_Box* o = new Fl_Box(140, 9, 80, 16, "FOXSI Ground Station Software");
       o->labelfont(1);
+      o->labelsize(18);
     } // Fl_Box* o
-    { new Fl_Box(140, 29, 80, 16, "Written by");
+    { new Fl_Box(140, 31, 80, 16, "Written by");
     } // Fl_Box* o
-    { new Fl_Box(140, 49, 80, 16, "Steven Christe, Lindsay Glesener, Stephen McBride");
+    { new Fl_Box(140, 51, 80, 16, "Steven Christe, Lindsay Glesener, Stephen McBride");
     } // Fl_Box* o
-    { new Fl_Box(140, 69, 80, 16, "2011");
+    { new Fl_Box(140, 71, 80, 16, "Last Updated: 2012-Oct-29");
     } // Fl_Box* o
     AboutWindow->end();
   } // Fl_Double_Window* AboutWindow
-  { PreferenceWindow = new Fl_Double_Window(454, 220, "Preferences");
+  { PreferenceWindow = new Fl_Double_Window(434, 219, "Preferences");
     PreferenceWindow->user_data((void*)(this));
-    { pixelhalflife_value = new Fl_Value_Input(295, 46, 70, 24, "pixel half life (s)");
+    { pixelhalflife_value = new Fl_Value_Input(345, 46, 70, 24, "pixel half life (s)");
       pixelhalflife_value->value(5);
     } // Fl_Value_Input* pixelhalflife_value
     { fileTypeChoice = new Fl_Choice(70, 45, 75, 25, "File type:");
       fileTypeChoice->down_box(FL_BORDER_BOX);
       fileTypeChoice->menu(menu_fileTypeChoice);
     } // Fl_Choice* fileTypeChoice
-    { Fl_Button* o = new Fl_Button(310, 186, 63, 20, "OK");
+    { Fl_Button* o = new Fl_Button(285, 185, 63, 20, "OK");
       o->callback((Fl_Callback*)cb_OK);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(380, 186, 63, 20, "Cancel");
+    { Fl_Button* o = new Fl_Button(355, 185, 63, 20, "Cancel");
       o->callback((Fl_Callback*)cb_Cancel);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(340, 15, 75, 25, "Change");
@@ -1517,10 +1505,10 @@ Gui::Gui() {
     } // Fl_Button* o
     { datafilesavedir_fileInput = new Fl_File_Input(70, 6, 260, 34, "save dir:");
     } // Fl_File_Input* datafilesavedir_fileInput
-    { readdelay_value = new Fl_Value_Input(295, 71, 70, 24, "read delay (us)");
+    { readdelay_value = new Fl_Value_Input(345, 71, 70, 24, "read delay (us)");
       readdelay_value->value(10000);
     } // Fl_Value_Input* readdelay_value
-    { DataSource_choice = new Fl_Choice(95, 80, 95, 25, "Data Source:");
+    { DataSource_choice = new Fl_Choice(95, 80, 135, 25, "Data Source:");
       DataSource_choice->down_box(FL_BORDER_BOX);
       DataSource_choice->menu(menu_DataSource_choice);
     } // Fl_Choice* DataSource_choice

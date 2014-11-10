@@ -44,6 +44,10 @@ private:
 public:
   static Fl_Menu_Item *fileMenu;
   static Fl_Menu_Item *readFile;
+private:
+  void cb_readFile_i(Fl_Menu_*, void*);
+  static void cb_readFile(Fl_Menu_*, void*);
+public:
   static Fl_Menu_Item *readUSBStream;
   static Fl_Menu_Item *readTeleStream;
   static Fl_Menu_Item *WritePicScreen;
@@ -82,23 +86,24 @@ private:
 public:
   detectorsImage *detectorsImageWindow;
   Fl_Value_Slider *pixel_halflife_slider;
-  static Fl_Menu_Item menu_detector[];
+  static Fl_Menu_Item menu_[];
 private:
-  void cb_X0_i(Fl_Menu_*, void*);
-  static void cb_X0(Fl_Menu_*, void*);
-  void cb_X1_i(Fl_Menu_*, void*);
-  static void cb_X1(Fl_Menu_*, void*);
-  void cb_X2_i(Fl_Menu_*, void*);
-  static void cb_X2(Fl_Menu_*, void*);
-  void cb_X3_i(Fl_Menu_*, void*);
-  static void cb_X3(Fl_Menu_*, void*);
-  void cb_X4_i(Fl_Menu_*, void*);
-  static void cb_X4(Fl_Menu_*, void*);
-  void cb_X5_i(Fl_Menu_*, void*);
-  static void cb_X5(Fl_Menu_*, void*);
-  void cb_X6_i(Fl_Menu_*, void*);
-  static void cb_X6(Fl_Menu_*, void*);
+  void cb_0_i(Fl_Menu_*, void*);
+  static void cb_0(Fl_Menu_*, void*);
+  void cb_1_i(Fl_Menu_*, void*);
+  static void cb_1(Fl_Menu_*, void*);
+  void cb_2_i(Fl_Menu_*, void*);
+  static void cb_2(Fl_Menu_*, void*);
+  void cb_3_i(Fl_Menu_*, void*);
+  static void cb_3(Fl_Menu_*, void*);
+  void cb_4_i(Fl_Menu_*, void*);
+  static void cb_4(Fl_Menu_*, void*);
+  void cb_5_i(Fl_Menu_*, void*);
+  static void cb_5(Fl_Menu_*, void*);
+  void cb_6_i(Fl_Menu_*, void*);
+  static void cb_6(Fl_Menu_*, void*);
 public:
+  Fl_Output *arcminOffset;
   Fl_Value_Output *shutterstateOutput;
   Fl_Value_Output *tempOutput2;
   Fl_Value_Output *HVOutput;
@@ -106,13 +111,13 @@ public:
   Fl_Value_Output *tempOutput3;
   Fl_Value_Output *tempOutput;
   Fl_Value_Output *tempOutput10;
-  Fl_Value_Output *tempOutput9;
-  Fl_Value_Output *tempOutput8;
+  Fl_Value_Output *tempOutput7;
+  Fl_Value_Output *tempOutput11;
   Fl_Value_Output *tempOutput6;
   Fl_Value_Output *tempOutput5;
-  Fl_Value_Output *tempOutput7;
+  Fl_Value_Output *tempOutput9;
   Fl_Value_Output *tempOutput4;
-  Fl_Value_Output *tempOutput11;
+  Fl_Value_Output *tempOutput8;
   Fl_Value_Output *VoltageOutput1;
   Fl_Value_Output *VoltageOutput0;
   Fl_Value_Output *VoltageOutput2;
@@ -188,7 +193,6 @@ private:
   void cb_stopReadingDataButton_i(Fl_Button*, void*);
   static void cb_stopReadingDataButton(Fl_Button*, void*);
 public:
-  Fl_Value_Output *nEventsDone;
   Fl_Value_Output *inttimeOutput;
   Fl_Button *test_button;
 private:
@@ -196,10 +200,13 @@ private:
   static void cb_test_button(Fl_Button*, void*);
 public:
   Fl_Value_Output *frame_missOutput;
-  Fl_Value_Output *frame_miss_countOutput;
   Fl_Value_Output *bad_frameOutput;
   Fl_Value_Output *no_triggerOutput;
   Fl_Value_Output *int_timeOutput;
+private:
+  void cb_flush_i(Fl_Button*, void*);
+  static void cb_flush(Fl_Button*, void*);
+public:
   mainLightcurve *mainLightcurveWindow;
 private:
   void cb_Flush2_i(Fl_Button*, void*);
@@ -207,10 +214,6 @@ private:
 public:
   Fl_Value_Output *ctsOutput;
   Fl_Counter *timebinsize_counter;
-private:
-  void cb_timebinsize_counter_i(Fl_Counter*, void*);
-  static void cb_timebinsize_counter(Fl_Counter*, void*);
-public:
   Fl_Counter *lightcurvexmax_counter;
 private:
   void cb_lightcurvexmax_counter_i(Fl_Counter*, void*);
@@ -221,22 +224,7 @@ private:
   void cb_mainLightcurve_ymaxslider_i(Fl_Value_Slider*, void*);
   static void cb_mainLightcurve_ymaxslider(Fl_Value_Slider*, void*);
 public:
-  Fl_Button *sendParamsBut;
-private:
-  void cb_sendParamsBut_i(Fl_Button*, void*);
-  static void cb_sendParamsBut(Fl_Button*, void*);
-public:
-  Fl_Button *setTrigBut;
-private:
-  void cb_setTrigBut_i(Fl_Button*, void*);
-  static void cb_setTrigBut(Fl_Button*, void*);
-public:
-  Fl_Button *setHoldBut;
-private:
-  void cb_setHoldBut_i(Fl_Button*, void*);
-  static void cb_setHoldBut(Fl_Button*, void*);
-public:
-  Fl_Light_Button *glitchBut;
+  Fl_Value_Output *totalctsOutput;
   Fl_Text_Display *consoleBuf;
 private:
   void cb_Clear_i(Fl_Button*, void*);
@@ -278,6 +266,11 @@ public:
 private:
   void cb_detector6_checkbox_i(Fl_Check_Button*, void*);
   static void cb_detector6_checkbox(Fl_Check_Button*, void*);
+public:
+  Fl_Check_Button *detectorAll_checkbox;
+private:
+  void cb_detectorAll_checkbox_i(Fl_Check_Button*, void*);
+  static void cb_detectorAll_checkbox(Fl_Check_Button*, void*);
 public:
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;

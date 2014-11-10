@@ -31,6 +31,7 @@
 #define XSTRIPS 128
 #define YSTRIPS 128
 #define MAX_CHANNEL 1024
+#define NUM_DETECTORS 7
 
 // Note that an unsigned short int is 2 bytes
 // for formatter
@@ -47,6 +48,7 @@ extern Gui *gui;
 
 char dataFilename[MAXPATH];
 FILE *dataFile;
+FILE *formatterFile;
 
 okCFrontPanel *dev;
 
@@ -63,9 +65,6 @@ unsigned short int buffer[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int buffer0[FRAME_SIZE_IN_SHORTINTS];
 unsigned short int framecount;
 
-extern unsigned int current_timebin;
-extern unsigned int CountcurveFunction[MAX_CHANNEL];
-
 int *taskids[NUM_THREADS];
 int fout;
 pthread_mutex_t mymutex;
@@ -74,6 +73,8 @@ pthread_mutex_t timebinmutex;
 extern char *data_file_save_dir;
 extern char *formatter_configuration_file;
 extern int file_type;
+extern char *formatter_playback_file;
+extern char read_filename[40];
 
 void data_initialize(void)
 {
@@ -151,7 +152,47 @@ void data_initialize(void)
 			gui->app->print_to_console("Done initializing.\n");
 		}
 	}
+    
+    if (data_source == 3)
+	{
+		int init_state = 1;
+		//char formatter_playback_filename[] = "/Users/foxsi/Desktop/translation_data/data_121025_0022_det0_translateX.dat";
+		gui->app->print_to_console("Initializing data file connection.\n");
+        
+        formatterFile = fopen("/Users/foxsi/Desktop/data_launch_121102/data_launch_121102_114631.dat", "r");
+        printf("%s\n", read_filename);
+		
+        if (formatterFile == NULL){
+            gui->app->printf_to_console("Cannot open file %s.\n", read_filename, NULL);
+            gui->app->print_to_console("File stream could not be initialized.\n");
+			gui->app->print_to_console("Initialization Failed!\n");
+			init_state = 0;
+        }
+        else {
+            gui->app->printf_to_console("Opened file %s.\n", read_filename, NULL);
+            init_state = 1;
+        }
+        		
+		if (init_state == 1){
+			gui->startReadingDataButton->activate();
+			
+			//gui->closeBut->activate();
+			//gui->detector_choice->activate();
+			gui->app->flush_image();
+			gui->app->flush_histogram();
+			gui->app->flush_timeseries();
+			gui->shutterstateOutput->value(0);
+			gui->app->print_to_console("Done initializing.\n");
+		}
+	}
 
+}
+
+void data_close(void){
+	
+	if (data_source == 3) {
+		fclose(formatterFile);
+	}
 }
 
 void* data_watch_buffer(void* p)
@@ -214,42 +255,18 @@ void* data_countrate(void *p)
 	unsigned int i = 1;
 	while(1)
 	{
+		float binsize = 0;
 		int microseconds;
-		microseconds = gui->mainLightcurveWindow->binsize[0]*1000000.0;
+
+		binsize = gui->timebinsize_counter->value();		
+		microseconds = binsize*1000000.0;
 		
 		// System activity may lengthen the sleep by an indeterminate amount.
 		// therefore this is not the best way to measure count rate
 		// quick and dirty
 		usleep(microseconds);
 		
-		pthread_mutex_lock(&timebinmutex);
-		
-		CountcurveFunction[0] = current_timebin;
-		for(int detector_num = 1; detector_num < (NUM_DETECTORS+1); detector_num++)
-		{
-			gui->mainLightcurveWindow->CountcurveDetectors[0][detector_num] = gui->mainLightcurveWindow->current_timebin_detectors[detector_num];
-		}
-		
-		for(int j = MAX_CHANNEL-1; j > 0; j--){ 
-			CountcurveFunction[j] = CountcurveFunction[j-1];
-			gui->mainLightcurveWindow->binsize[j] = gui->mainLightcurveWindow->binsize[j-1];
-		}
-		
-		for(int detector_num = 1; detector_num < (NUM_DETECTORS+1); detector_num++)
-		{
-			gui->mainLightcurveWindow->CountcurveDetectors[0][detector_num];
-
-			for(int j = MAX_CHANNEL-1; j > 0; j--){ 
-				gui->mainLightcurveWindow->CountcurveDetectors[0][j] = gui->mainLightcurveWindow->CountcurveDetectors[0][j-1];
-			}
-			
-		}
-		
-		current_timebin = 0;
-		for(int detector_num = 1; detector_num < (NUM_DETECTORS+1); detector_num++)
-			{gui->mainLightcurveWindow->current_timebin_detectors[detector_num] = 0;}
-		
-		pthread_mutex_unlock(&timebinmutex);
+		gui->mainLightcurveWindow->reset(binsize);
 		
 		if (stop_message == 1){
 			pthread_exit(NULL);}		
@@ -328,14 +345,26 @@ void* data_read_data(void *p)
 			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer);
 			// set the read status based on how len returned 
 			if (len == 2048){ 
-				read_status = 1;
-				gui->app->frame_read_count++;
-				//printf("read okay\n");
+                    read_status = 1;
+                    gui->app->frame_read_count++;
 			} else {
-				printf("bad read!\n");
+                    printf("bad read!\n");
 			}
 
 		}
+        
+        if (data_source == 3) {
+            // read data from file, read 4 frames at a time
+            len = fread((unsigned char *) buffer, 2048, 1, formatterFile);
+            //printf("%d\n", len);
+            // set the read status based on how len returned
+			if (len == 1){
+                read_status = 1;
+                gui->app->frame_read_count++;
+			} else {
+                printf("bad read!\n");
+			}
+        }
 				
 		if (read_status == 1) {
 	
@@ -383,7 +412,7 @@ void* data_read_data(void *p)
 
 			
 			if(nreads > maxreads-1){
-				gui->nEventsDone->value(0);
+				//gui->nEventsDone->value(0);
 				nreads = 0;
 			}
 
@@ -614,16 +643,13 @@ void data_update_display(unsigned short int *frame)
 	unsigned int asic1n_data[64] = {0};
 	unsigned int asic2p_data[64] = {0};
 	unsigned int asic3p_data[64] = {0};
-	
-	int num_hits = 0;
-	int num_hits_detectors[NUM_DETECTORS] = {0};
-	
-	gui->nEventsDone->value(nreads); 
+		
+	//gui->nEventsDone->value(nreads); 
 	gui->inttimeOutput->value(gui->app->elapsed_time_sec);
 	
 	if (data_source == 0) {
 		// Parse simulated data
-
+		int num_hits;
 		unsigned high_voltage_status;
 		unsigned high_voltage;
 
@@ -641,7 +667,6 @@ void data_update_display(unsigned short int *frame)
 		{
 			int z, x, y;
 			// simulate up to 5 hits, only the first one goes to image, all others go to mask
-			num_hits = arc4random() % 5;
 			
 			for(int i = 0; i < num_hits; i++)
 			{
@@ -652,6 +677,7 @@ void data_update_display(unsigned short int *frame)
 				if (i == 0) { 
 					gui->mainHistogramWindow->add_count(z, detector_num); 
 					gui->detectorsImageWindow->add_count_to_image(x, y, detector_num);
+					gui->mainLightcurveWindow->add_count(detector_num);
 				} else {
 					gui->detectorsImageWindow->add_count_to_mask(x, y, detector_num);
 				}
@@ -659,13 +685,13 @@ void data_update_display(unsigned short int *frame)
 		}
 		
 		gui->frame_missOutput->value((float) 100 * gui->app->frame_miss_count/gui->app->frame_read_count);
-		pthread_mutex_lock( &timebinmutex);
-		current_timebin += num_hits;
-		for(int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++)
-		{
-			gui->mainLightcurveWindow->current_timebin_detectors[detector_num] += num_hits;
-		}
-		pthread_mutex_unlock(&timebinmutex);
+		//pthread_mutex_lock( &timebinmutex);
+		//current_timebin += num_hits;
+		//for(int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++)
+		//{
+		//	gui->mainLightcurveWindow->current_timebin_detectors[detector_num] += num_hits;
+		//}
+		//pthread_mutex_unlock(&timebinmutex);
 	}
 	
 	if (data_source == 1){
@@ -782,7 +808,7 @@ void data_update_display(unsigned short int *frame)
 			{
 				if (xstrips[i] > 0){ gui->mainHistogramWindow->add_count(xstrips[i], 0); }
 				if (xstrips[i] >= gui->mainHistogramWindow->get_lowthreshold()){
-					num_hits++;
+					//num_hits++;
 					for(int j = 0; j < YSTRIPS; j++)
 					{
 						if (j < YSTRIPS){
@@ -799,13 +825,13 @@ void data_update_display(unsigned short int *frame)
 			for(int i = 0; i < XSTRIPS; i++){printf("%u\t", ystrips[i]);}
 			printf("\n");
 			
-			pthread_mutex_lock(&timebinmutex);
-			current_timebin += num_hits;
-			pthread_mutex_unlock(&timebinmutex);
+			//pthread_mutex_lock(&timebinmutex);
+			//current_timebin += num_hits;
+			//pthread_mutex_unlock(&timebinmutex);
 		}
 	}
 	
-	if (data_source == 2) {
+	if ((data_source == 2) || (data_source == 3)) {
 		// parse and display the data from the USB/Formatter connection
 		// 
 		// Notes
@@ -841,10 +867,10 @@ void data_update_display(unsigned short int *frame)
 			//printf("f628: %x\n", buffer[index++]);
 			if (buffer[index] == 0xf628) {
 				read_status = 1;
-				printf("-----Frame Start------\n");
-				printf("frame number = %u\n", frame_num);				
-				printf("eb90: %x\n", buffer[index+255]);
-				for(int blah = 0; blah < 16; blah++){printf("%i-%04hX: %i\n", blah, buffer[blah], buffer[blah]);}
+				//printf("-----Frame Start------\n");
+				//printf("frame number = %u\n", frame_num);				
+				//printf("eb90: %x\n", buffer[index+255]);
+				//for(int blah = 0; blah < 16; blah++){printf("%i-%04hX: %i\n", blah, buffer[blah], buffer[blah]);}
 
 				// check the checksum
 				for( int word_number = 0; word_number < 256; word_number++ ){read_status ^= buffer[word_number];}
@@ -863,7 +889,7 @@ void data_update_display(unsigned short int *frame)
 					index++;
 					time |= (unsigned long long) buffer[index];
 					time /= 10e6;
-					if (gui->app->formatter_start_time = 0){ gui->app->formatter_start_time = time; }
+					if (gui->app->formatter_start_time == 0){ gui->app->formatter_start_time = time; }
 					index++;
 					
 					//index++;
@@ -895,7 +921,8 @@ void data_update_display(unsigned short int *frame)
 							temperature_monitors[8] = buffer[index++];
 							break;
 						default:
-							printf("housekeeping 0: %u\n", buffer[index++]);
+							//printf("housekeeping 0: %u\n", buffer[index++]);
+							index++;
 							break;
 					}
 
@@ -925,7 +952,8 @@ void data_update_display(unsigned short int *frame)
 							temperature_monitors[9] = buffer[index++];
 							break;
 						default:
-							printf("Housekeeping 1: %u\n", buffer[index++]);
+							//printf("Housekeeping 1: %u\n", buffer[index++]);
+							index++;
 							break;
 					}
 					
@@ -957,7 +985,8 @@ void data_update_display(unsigned short int *frame)
 							temperature_monitors[10] = buffer[index++];
 							break;
 						default:
-							printf("Housekeeping 2: %u\n", buffer[index++]);
+							//printf("Housekeeping 2: %u\n", buffer[index++]);
+							index++;
 							break;
 					}
 					
@@ -985,7 +1014,8 @@ void data_update_display(unsigned short int *frame)
 							temperature_monitors[11] = buffer[index++];
 							break;
 						default:
-							printf("Housekeeping 3: %u\n", buffer[index++]);
+							//printf("Housekeeping 3: %u\n", buffer[index++]);
+							index++;
 							break;
 					}
 					
@@ -998,8 +1028,8 @@ void data_update_display(unsigned short int *frame)
 					//printf("Status 6: %x\n", buffer[index]);
 					index++;
 					
-					for(int detector_num = 0; detector_num < 7; detector_num++){
-						unsigned short int common_mode[2] = {0};
+					for(int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++){
+						unsigned short int common_mode = 0;
 						
 						unsigned short int ymask[128] = {0};
 						unsigned short int xmask[128] = {0};
@@ -1015,6 +1045,12 @@ void data_update_display(unsigned short int *frame)
 						// check to see if detector data exists
 						bool detector_data_exists;
 						detector_data_exists = !((buffer[index] == buffer[index+1]) && (buffer[index+2] == buffer[index+3]) && (buffer[index+4] == buffer[index+5]) && (buffer[index+6] && buffer[index+7]));
+						
+						unsigned short int max_pdata, max_ndata, max_pstrip_number, max_nstrip_number;
+						max_ndata = 0;
+						max_pdata = 0;
+						max_pstrip_number = 0;
+						max_nstrip_number = 0;
 						
 						if ( detector_data_exists ) {
 							
@@ -1065,7 +1101,7 @@ void data_update_display(unsigned short int *frame)
 								// 6 bits - strip number
 								// 12 bits - strip data
 								// 4th strip is the common mode and takes up entire 16 bits
-								unsigned short int strip_data[3] = {0};
+								unsigned short int strip_data = 0;
 								unsigned short int h[4] = {buffer[index+1], buffer[index+2], buffer[index+3], buffer[index+4]};
 								for(int strip_num = 0; strip_num < 4; strip_num++)
 								{
@@ -1076,54 +1112,82 @@ void data_update_display(unsigned short int *frame)
 									if ((buffer[index] != 0xFFFF) && (buffer[index] != 0)){
 										// only keep the middle strip which is the max
 										if (strip_num == 1) {							
-											strip_data[strip_num] = buffer[index] & 0x3FF;
+											strip_data = buffer[index] & 0x3FF;
 											strip_number = (buffer[index] >> 10) & 0x3F;
 											
 											// n side asic
-											if (asic_number == 0) {ystrips[strip_number] = strip_data[strip_num];}
-											if (asic_number == 1) {ystrips[strip_number + 63] = strip_data[strip_num];}
+											//if (asic_number == 0) {ystrips[strip_number] = strip_data[strip_num];}
+											//if (asic_number == 1) {ystrips[strip_number + 63] = strip_data[strip_num];}
 											// p side asic
-											if (asic_number == 2) {xstrips[63 - strip_number] = strip_data[strip_num];}
-											if (asic_number == 3) {xstrips[127 - strip_number] = strip_data[strip_num];}
+											//if (asic_number == 2) {xstrips[63 - strip_number] = strip_data[strip_num];}
+											//if (asic_number == 3) {xstrips[127 - strip_number] = strip_data[strip_num];}
+										
+											if ((asic_number == 2) || (asic_number == 3)) {
+												if (max_pdata < strip_data) {
+													max_pdata = strip_data;
+													if (asic_number == 2) {max_nstrip_number = 63 - strip_number;}
+													if (asic_number == 3) {max_nstrip_number = 127 - strip_number;}
+												}
+											}
+											if ((asic_number == 0) || (asic_number == 1)) {
+												if (max_ndata < strip_data) {
+													max_ndata = strip_data;
+													if (asic_number == 0) {max_pstrip_number = strip_number;}
+													if (asic_number == 1) {max_pstrip_number = strip_number+63;}
+												}
+											}
+											
 											
 										} 
 										
-										if (strip_num == 3) {
-											if (asic_number == 2) {common_mode[0] = buffer[index];}
-											if (asic_number == 3) {common_mode[1] = buffer[index];}
-										}
+										if (strip_num == 3) {common_mode = buffer[index];}
+											//if (asic_number == 2) {common_mode[0] = buffer[index];}
+											//if (asic_number == 3) {common_mode[1] = buffer[index];}
+										
 										//printf("common mode: %u\n", common_mode);
 									}
 								}
 							}
 							
-							for(int i = 0; i < XSTRIPS; i++)
-							{
-								int bin = 0;
-								if (xstrips[i] != 0) {
-									if (gui->minus_common_mode_checkbox->value() == 1) {bin = xstrips[i] - common_mode[i % 64];}
-									else {
-										bin = xstrips[i];
-									}
-									gui->mainHistogramWindow->add_count(bin, detector_num);
+							// now add it to the image
+							if (max_pdata > gui->mainHistogramWindow->get_lowthreshold()) {
+								gui->detectorsImageWindow->add_count_to_image(max_pstrip_number, max_nstrip_number, detector_num);
+								gui->mainLightcurveWindow->add_count(detector_num);
+								if (gui->minus_common_mode_checkbox->value() == 1) {
+									gui->mainHistogramWindow->add_count(max_pdata - common_mode, detector_num);}
+								else {
+									gui->mainHistogramWindow->add_count(max_pdata, detector_num);
 								}
-								if (bin > gui->mainHistogramWindow->get_lowthreshold()) {
-									num_hits++;
-									//num_hits_detectors[detector_num]++;
-									
-									for(int j = 0; j < YSTRIPS; j++)
-									{
-										if (xmask[i] * ymask[j] != 0) {
-											gui->detectorsImageWindow->add_count_to_mask(i, j, detector_num);
-										}
-										//detImagemask[i][j] = xmask[i]*ymask[j];
-										if (xstrips[i] * ystrips[j] != 0){
-											gui->detectorsImageWindow->add_count_to_image(i, j, detector_num);
-										}
-									}
-								}
+
+								
 							}
-							index++;
+							
+							/* for(int i = 0; i < XSTRIPS; i++)
+														{
+															int bin = 0;
+															if (xstrips[i] != 0) {
+																if (gui->minus_common_mode_checkbox->value() == 1) {bin = xstrips[i] - common_mode[i % 64];}
+																else {
+																	bin = xstrips[i];
+																}
+																gui->mainHistogramWindow->add_count(bin, detector_num);
+															}
+															if (bin > gui->mainHistogramWindow->get_lowthreshold()) {
+																gui->mainLightcurveWindow->add_count(detector_num);
+																
+																for(int j = 0; j < YSTRIPS; j++)
+																{
+																	//if (xmask[i] * ymask[j] != 0) {
+																		//gui->detectorsImageWindow->add_count_to_mask(i, j, detector_num);
+																	//}
+																	//detImagemask[i][j] = xmask[i]*ymask[j];
+																	//if (xstrips[i] * ystrips[j] != 0){
+																	//	gui->detectorsImageWindow->add_count_to_image(i, j, detector_num);
+																	//}
+																}
+															}
+														}
+							 */							index++;
 						} else {
 							//printf("No detector %d data found\n", detector_num);
 							gui->app->no_trigger_count++;
@@ -1146,14 +1210,14 @@ void data_update_display(unsigned short int *frame)
 					gui->CommandOutput->value(text_buffer);
 					
 					gui->frameTime->value(time);
-					gui->int_timeOutput->value(time - (gui->app->formatter_start_time));
+					//gui->int_timeOutput->value(time - (gui->app->formatter_start_time));
 					
 					gui->HVOutput->value(high_voltage);										
 					//printf("voltage: %i status: %i", voltage, HVvoltage_status);
 					if (high_voltage_status == 1) {gui->HVOutput->textcolor(FL_RED);}
 					if (high_voltage_status == 2) {gui->HVOutput->textcolor(FL_BLUE);}
 					if (high_voltage_status == 4) {gui->HVOutput->textcolor(FL_BLACK); gui->HVOutput->redraw();}
-					gui->nEventsDone->value(gui->app->frame_display_count); 
+					//gui->nEventsDone->value(gui->app->frame_display_count); 
 					gui->framenumOutput->value(frameNumber);
 					if (attenuator_actuating == 1) {gui->shutterstateOutput->value(1);}
 					Fl::unlock();
@@ -1171,25 +1235,107 @@ void data_update_display(unsigned short int *frame)
 		//parsing for four frames (the whole data drop), now update
 				
 		Fl::lock();
-		gui->tempOutput->value(temperature_convert_ref(temperature_monitors[0]));
-		gui->tempOutput1->value(temperature_convert_ysi44031(temperature_monitors[1]));
-		gui->tempOutput2->value(temperature_convert_ysi44031(temperature_monitors[2]));
-		gui->tempOutput3->value(temperature_convert_ysi44031(temperature_monitors[3]));
-		gui->tempOutput4->value(temperature_convert_ysi44031(temperature_monitors[4]));
-		gui->tempOutput5->value(temperature_convert_ysi44031(temperature_monitors[5]));
-		gui->tempOutput6->value(temperature_convert_ysi44031(temperature_monitors[6]));
-		gui->tempOutput7->value(temperature_convert_ysi44031(temperature_monitors[7]));
-		gui->tempOutput8->value(temperature_convert_ysi44031(temperature_monitors[8]));
-		gui->tempOutput9->value(temperature_convert_ysi44031(temperature_monitors[9]));
-		gui->tempOutput10->value(temperature_convert_ysi44031(temperature_monitors[10]));
-		gui->tempOutput11->value(temperature_convert_ysi44031(temperature_monitors[11]));
-		gui->frame_miss_countOutput->value(gui->app->frame_miss_count);
 		
-		// order is 5V, -5V, 1.5V, 3.3V		
-		gui->VoltageOutput0->value(voltage_convert_5v(voltage_monitors[0]));
-		gui->VoltageOutput1->value(voltage_convert_m5v(voltage_monitors[1]));		
-		gui->VoltageOutput2->value(voltage_convert_15v(voltage_monitors[2]));
-		gui->VoltageOutput3->value(voltage_convert_33v(voltage_monitors[3]));
+		// display the temperature sensors ------------------------------------------------------------------------
+		
+		float temp = 0.0;
+		Fl_Color bkg_color;
+		
+		
+		for(int temp_sensor_num = 0; temp_sensor_num < gui->app->number_of_temperature_sensors; temp_sensor_num++)
+		{
+			bkg_color = FL_BACKGROUND_COLOR;
+			if (temp_sensor_num == 0) {
+				temp = temperature_convert_ref(temperature_monitors[temp_sensor_num]);
+			} else {
+				temp = temperature_convert_ysi44031(temperature_monitors[temp_sensor_num]);
+			}
+
+			if ((temp < gui->app->temperature_limits_low[temp_sensor_num]) || (temp > gui->app->temperature_limits_hi[temp_sensor_num])){
+				bkg_color = FL_RED;
+			}
+			
+			switch (temp_sensor_num) {
+				case 0:
+					gui->tempOutput->value(temp);
+					gui->tempOutput->color(bkg_color);
+					break;
+				case 1:
+					gui->tempOutput1->value(temp);
+					gui->tempOutput1->color(bkg_color);
+					break;
+				case 2:
+					gui->tempOutput2->value(temp);
+					gui->tempOutput2->color(bkg_color);
+					break;
+				case 3:
+					gui->tempOutput3->value(temp);
+					gui->tempOutput3->color(bkg_color);
+					break;
+				case 4:
+					gui->tempOutput4->value(temp);
+					gui->tempOutput4->color(bkg_color);
+					break;
+				case 5:
+					gui->tempOutput5->value(temp);
+					gui->tempOutput5->color(bkg_color);
+					break;
+				case 6:
+					gui->tempOutput6->value(temp);
+					gui->tempOutput6->color(bkg_color);
+					break;
+				case 7:
+					gui->tempOutput7->value(temp);
+					gui->tempOutput7->color(bkg_color);
+					break;
+				case 8:
+					gui->tempOutput8->value(temp);
+					gui->tempOutput8->color(bkg_color);
+					break;
+				case 9:
+					gui->tempOutput9->value(temp);
+					gui->tempOutput9->color(bkg_color);
+					break;
+				case 10:
+					gui->tempOutput10->value(temp);
+					gui->tempOutput10->color(bkg_color);
+					break;
+				case 11:
+					gui->tempOutput11->value(temp);
+					gui->tempOutput11->color(bkg_color);
+					break;
+				default:
+					break;
+			}
+			
+		}
+		// ------------------------------------------------------------------------
+
+		// voltage sensors
+		// order is 5V, -5V, 1.5V, 3.3V
+		float volts;
+		
+		volts = voltage_convert_5v(voltage_monitors[0]);
+		if ((volts > 5*1.05) || (volts < 5*0.95)) { bkg_color = FL_RED;} else { bkg_color = FL_BACKGROUND_COLOR; }
+		gui->VoltageOutput0->value(volts);
+		gui->VoltageOutput0->color(bkg_color);
+		
+		volts = voltage_convert_m5v(voltage_monitors[1]);
+		if ((-volts > 5*1.05) || (-volts < 5*0.95)) { bkg_color = FL_RED;} else { bkg_color = FL_BACKGROUND_COLOR; }
+		gui->VoltageOutput1->value(volts);
+		gui->VoltageOutput1->color(bkg_color);
+		
+		volts = voltage_convert_15v(voltage_monitors[2]);
+		if ((volts > 1.5*1.05) || (volts < 1.55*0.95)) { bkg_color = FL_RED;} else { bkg_color = FL_BACKGROUND_COLOR; }
+		gui->VoltageOutput2->value(volts);
+		gui->VoltageOutput2->color(bkg_color);
+		
+		volts = voltage_convert_33v(voltage_monitors[3]);
+		if ((volts > 3.3*1.05) || (volts < 3.3*0.95)) { bkg_color = FL_RED;} else { bkg_color = FL_BACKGROUND_COLOR; }
+		gui->VoltageOutput3->value(volts);
+		gui->VoltageOutput3->color(bkg_color);
+		
+		//gui->frame_miss_countOutput->value(gui->app->frame_miss_count);
 		
 		gui->frame_missOutput->value((float) 100 * gui->app->frame_display_count/(gui->app->frame_display_count+gui->app->frame_miss_count));
 		gui->bad_frameOutput->value((float) 100 * gui->app->bad_check_sum_count/gui->app->frame_display_count);
@@ -1197,17 +1343,13 @@ void data_update_display(unsigned short int *frame)
 		
 		Fl::unlock();
 		
-		pthread_mutex_lock( &timebinmutex);
-		current_timebin += num_hits;
-		for(int detector_number = 0; detector_number < NUM_DETECTORS; detector_number++)
-		{
-			gui->mainLightcurveWindow->current_timebin_detectors[detector_number] += num_hits_detectors[detector_number];
-		}
-		pthread_mutex_unlock(&timebinmutex);
-		
-		
+		//pthread_mutex_lock( &timebinmutex);
+		//for(int detector_number = 0; detector_number < NUM_DETECTORS; detector_number++)
+		//{
+		//	gui->mainLightcurveWindow->add_counts(num_hits_detectors[detector_number], detector_number);
+		//}
+		//pthread_mutex_unlock(&timebinmutex);
 	}
-
 }
 
 void data_set_datafilename(void)

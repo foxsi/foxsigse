@@ -22,19 +22,24 @@ class mainLightcurve : public Fl_Gl_Window {
 public:
 	mainLightcurve(int x,int y,int w,int h,const char *l=0);
 	void draw();
-	float binsize[MAX_CHANNEL];
-	float CountRatecurveFunction[MAX_CHANNEL];
-	int CountcurveDetectors[MAX_CHANNEL][NUM_DETECTORS+1];
-	float CountRatecurveDetectors[MAX_CHANNEL][NUM_DETECTORS+1];	
-	unsigned int current_timebin_detectors[NUM_DETECTORS+1];
 	void set_xmax(int newxmax);
 	void set_ymax(int newymax);
+	void add_count(int detector_number);
+	void reset(float binsize);
+	void flush(int detector_number);
 private:
+	float binsize[MAX_CHANNEL];
+	unsigned int current_timebin;
+	long long total_counts;
+	unsigned int current_timebin_detectors[NUM_DETECTORS];
+	unsigned int CountcurveFunction[MAX_CHANNEL];
+	float CountRatecurveFunction[MAX_CHANNEL];
+	unsigned int CountcurveDetectors[MAX_CHANNEL][NUM_DETECTORS];
+	float CountRatecurveDetectors[MAX_CHANNEL][NUM_DETECTORS];
 	int xmax;
 	int xmin;
 	int ymin;
 	int ymax;
-
 };
 
 #endif

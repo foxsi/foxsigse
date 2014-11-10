@@ -12,7 +12,7 @@
 
 float temperature_convert_ref(unsigned short int value)
 {
-	return (( value - 917.28) * 0.30525) + 25.;
+	return value*0.30517 - 255;
 }
 
 float voltage_convert_5v(unsigned short int value)

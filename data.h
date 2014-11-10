@@ -29,6 +29,7 @@ void data_update_display(unsigned short int *frame);
 void data_frame_print_to_file(unsigned short int *frame);
 void data_set_datafilename(void);
 void data_initialize(void);
+void data_close(void);
 okCFrontPanel *data_initialize_formatter_FPGA(void);
 
 #endif

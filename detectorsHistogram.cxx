@@ -72,13 +72,13 @@ void detectorsHistogram::draw()
 		
 		switch (detector_num) {
 			case 0:
-				sprintf(optic_name, "X6");
+				sprintf(optic_name, "6");
 				break;
 			case 6:
-				sprintf(optic_name, "X0");
+				sprintf(optic_name, "0");
 				break;
 			default:
-				sprintf(optic_name, "X%d", detector_num);
+				sprintf(optic_name, "%d", detector_num);
 				break;
 		}
 		
@@ -99,6 +99,15 @@ void detectorsHistogram::draw()
 			glVertex2f(i + xmax/binsize*detector_num + detector_num + 0.5, y - sqrt(y));
 			glEnd();
 		}
+		
+		// draw the connecting line
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(0.5 + xmax/binsize*detector_num + detector_num, 0);
+		for(int i = 0; i < MAX_CHANNEL/binsize; i++) { 
+			long y = gui->mainHistogramWindow->get_detectorDisplayHistogram(i, detector_num);
+			glVertex2f(i + 0.5 + xmax/binsize*detector_num + detector_num, y); }
+		glVertex2f(MAX_CHANNEL/binsize + 0.5 + xmax/binsize*detector_num + detector_num, 0);
+		glEnd();
 	}
 			
 	glPopMatrix();

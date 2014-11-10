@@ -62,13 +62,17 @@ detectorsImage::detectorsImage(int x,int y,int w,int h,const char *l)
 	
 	detector_buffer[0] = detector_buffer[1] = 35;
 	border_buffer = 25;
-	detector_angle[6] = 0; 
-	detector_angle[1] = -7.5;
-	detector_angle[2] = -15;
-	detector_angle[3] = -22.5;
-	detector_angle[4] = -30;
-	detector_angle[5] = -37.5;
-	detector_angle[0] = -45.5;
+	detector_angle[6] = -60; 
+	// detector_angle[1] = -7.5;
+	detector_angle[1] = -7.5+90.0;
+	detector_angle[2] = -67.5;
+	detector_angle[3] = -75;
+	detector_angle[4] = -87.5+180;
+	detector_angle[5] = 90;
+	detector_angle[0] = 82.5;
+	
+	// rotate by 90 CW to correct based on lead images
+	//for (int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++) {detector_angle[detector_num] += 90;}
 }
 
 // the drawing method: draws the histFunc into the window
@@ -114,12 +118,10 @@ void detectorsImage::draw()
    	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_DEPTH_TEST);
    	glPushMatrix();
-   	glLoadIdentity();
    	glClearColor(0.0,0.0,0.0,0.0);
    	glClear(GL_COLOR_BUFFER_BIT);  
 	
 	
-	//draw a box around the detectors
 	for (int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++) {
 		char optic_name[50];
 		int center[] = {0,0};
@@ -127,31 +129,31 @@ void detectorsImage::draw()
 		switch (detector_num) {
 			case 6:
 				center[0] = XSTRIPS; center[1] = YSTRIPS;
-				sprintf(optic_name, "D6");
+				sprintf(optic_name, "6");
 				break;
 			case 1:
 				center[0] = XSTRIPS; center[1] = 2*YSTRIPS + detector_buffer[1];
-				sprintf(optic_name, "D%i", detector_num);
+				sprintf(optic_name, "%i", detector_num);
 				break;
 			case 2:
 				center[0] = 2*XSTRIPS + detector_buffer[0]; center[1] = 1.5*YSTRIPS + detector_buffer[1];
-				sprintf(optic_name, "D%i", detector_num);
+				sprintf(optic_name, "%i", detector_num);
 				break;
 			case 3:
 				center[0] = 2*XSTRIPS + detector_buffer[0]; center[1] = 0.5*YSTRIPS - detector_buffer[1];
-				sprintf(optic_name, "D%i", detector_num);
+				sprintf(optic_name, "%i", detector_num);
 				break;
 			case 4:
 				center[0] = XSTRIPS; center[1] = 0.0 - detector_buffer[1];
-				sprintf(optic_name, "D%i", detector_num);
+				sprintf(optic_name, "%i", detector_num);
 				break;
 			case 5:
 				center[0] = 0 - detector_buffer[0]; center[1] = 0.5*YSTRIPS - detector_buffer[1];
-				sprintf(optic_name, "D%i", detector_num);
+				sprintf(optic_name, "%i", detector_num);
 				break;
 			case 0:
 				center[0] = 0 - detector_buffer[0]; center[1] = 1.5*YSTRIPS + detector_buffer[1];
-				sprintf(optic_name, "D0");
+				sprintf(optic_name, "0");
 				break;
 			default:
 				break;
@@ -160,11 +162,16 @@ void detectorsImage::draw()
 		center[1] = center[1] + 0.5*YSTRIPS + border_buffer;
 		
 		glLoadIdentity();
-		glTranslatef(center[0] + detector_buffer[0],center[1] + detector_buffer[1], 0.0f);  
-		glRotatef(detector_angle[detector_num],0.0f,0.0f,1.0f);
+		glTranslatef(center[0] + detector_buffer[0],center[1] + detector_buffer[1], 0.0f); 
+
+		// rotate by 90 CW and flip to correct image based on lead images
+		glRotatef(detector_angle[detector_num]+90,0.0f,0.0f,1.0f);
+		// glScaled(1, 1, 1);
+		glScaled(-1, -1, 1);
 		
 		// draw the border around the detector
 		glColor3f(1, 1, 1);
+		
 		glBegin(GL_LINE_LOOP);
 		glVertex2f(- 0.5*XSTRIPS, - 0.5*XSTRIPS); 
 		glVertex2f(XSTRIPS - 0.5*XSTRIPS, - 0.5*XSTRIPS); 
@@ -172,17 +179,20 @@ void detectorsImage::draw()
 		glVertex2f(- 0.5*XSTRIPS, YSTRIPS - 0.5*XSTRIPS);
 		glEnd();
 		
+		// draw colored line for p-side
 		glColor3f(0, 0, 1);
 		glBegin(GL_LINES);
 		glVertex2f(- 0.5*XSTRIPS, - 0.5*XSTRIPS); 
 		glVertex2f(XSTRIPS - 0.5*XSTRIPS, - 0.5*XSTRIPS);
 		glEnd();
 		
+		// draw colored line for n-side
 		glColor3f(1, 0, 0);
 		glBegin(GL_LINES);
 		glVertex2f(- 0.5*XSTRIPS, - 0.5*XSTRIPS); 
 		glVertex2f(- 0.5*XSTRIPS, YSTRIPS - 0.5*XSTRIPS);
 		glEnd();
+		
 		
 		current_time = clock();
 		
@@ -211,11 +221,47 @@ void detectorsImage::draw()
 		}
 		
 		glColor3f(0.0, 1.0, 0.0);
-		text_output(0, 0.55*XSTRIPS, optic_name);
+		text_output(0.5*YSTRIPS, 0.50*XSTRIPS, optic_name);
+	
+		// draw inner border for center of FOV
+		glColor3f(0.0, 0.5, 0.0);
+		glLineStipple(1, 0x3F07);
+		glEnable(GL_LINE_STIPPLE);
+		
+		// border at 3 arcmin
+		float border_factor = 3.0/16.5*0.5;
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(- border_factor*XSTRIPS, - border_factor*XSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS + 2*border_factor*XSTRIPS, - border_factor*YSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS + 2*border_factor*XSTRIPS,  - border_factor*YSTRIPS + 2*border_factor*YSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS, - border_factor*YSTRIPS + 2*border_factor*YSTRIPS);
+		glEnd();
+		
+		// border at 3 arcmin
+		border_factor = 6.0/16.5*0.5;
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(- border_factor*XSTRIPS, - border_factor*XSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS + 2*border_factor*XSTRIPS, - border_factor*YSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS + 2*border_factor*XSTRIPS,  - border_factor*YSTRIPS + 2*border_factor*YSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS, - border_factor*YSTRIPS + 2*border_factor*YSTRIPS);
+		glEnd();
+		
+		// border at 3 arcmin
+		border_factor = 9.0/16.5*0.5;
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(- border_factor*XSTRIPS, - border_factor*XSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS + 2*border_factor*XSTRIPS, - border_factor*YSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS + 2*border_factor*XSTRIPS,  - border_factor*YSTRIPS + 2*border_factor*YSTRIPS); 
+		glVertex2f(- border_factor*XSTRIPS, - border_factor*YSTRIPS + 2*border_factor*YSTRIPS);
+		glEnd();
+		
+		glDisable(GL_LINE_STIPPLE);
+		
 		
 	}
 	
 	//flush_mask(7);
+	
 	
 	glPopMatrix();
 	glFinish();

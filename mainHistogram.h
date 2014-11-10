@@ -53,7 +53,7 @@ private:
 	float FLHistcursorX[2];
 	float FLHistcursorY[2];
 	int mouseHistPixel;
-	int detector_display[NUM_DETECTORS];
+	int detector_display[NUM_DETECTORS+1];
 	int binsize;
 	int xmax;
 	unsigned short int low_threshold;

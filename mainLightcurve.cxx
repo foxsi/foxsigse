@@ -2,12 +2,14 @@
 #include "mainLightcurve.h"
 #include "gui.h"
 #include "math.h"
+#include "threads.h"
 
 extern Gui *gui;
 #define MAX_CHANNEL 1024
+#define NUM_DETECTORS 7
 
-unsigned int current_timebin = 0;
-extern unsigned int CountcurveFunction[MAX_CHANNEL];
+extern pthread_mutex_t timebinmutex;
+
 
 // the constructor method
 mainLightcurve::mainLightcurve(int x,int y,int w,int h,const char *l)
@@ -18,20 +20,22 @@ mainLightcurve::mainLightcurve(int x,int y,int w,int h,const char *l)
 	xmax = 20;
 	xmin = 0;
 
+	current_timebin_detectors[0] = 0;
 	current_timebin_detectors[1] = 0;
 	current_timebin_detectors[2] = 0;
 	current_timebin_detectors[3] = 0;
 	current_timebin_detectors[4] = 0;
 	current_timebin_detectors[5] = 0;
 	current_timebin_detectors[6] = 0;
-	current_timebin_detectors[7] = 0;
-
-	for(int i=0; i < MAX_CHANNEL; i++)
+	current_timebin = 0;
+	total_counts = 0;
+	
+	for(int i = 0; i < MAX_CHANNEL; i++)
 	{
 		CountcurveFunction[i] = i;
 		binsize[i] = 1;
 		CountRatecurveFunction[i] = i;
-		for (int detector_num = 0; detector_num < (NUM_DETECTORS+1); detector_num++) {
+		for (int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++) {
 			CountRatecurveDetectors[i][detector_num] = i;
 		}
 	}
@@ -76,10 +80,11 @@ void mainLightcurve::draw()
    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//draw the graph
-	
 	glBegin(GL_LINES);
 	glColor3f(1.0, 0.0, 0.0);
 	k = 0;
+	
+	
 	for (float x = 0; x < xmax; x+=binsize[k])
 	{
 		CountRatecurveFunction[k] = CountcurveFunction[k]/binsize[k];
@@ -119,6 +124,7 @@ void mainLightcurve::draw()
 	
 	// update the display of the current count rate
 	gui->ctsOutput->value(CountcurveFunction[0]/binsize[0]);
+	gui->totalctsOutput->value(total_counts);
 }
 
 void mainLightcurve::set_xmax(int newxmax){
@@ -127,4 +133,63 @@ void mainLightcurve::set_xmax(int newxmax){
 
 void mainLightcurve::set_ymax(int newymax){
 	ymax = newymax;
+}
+
+void mainLightcurve::flush(int detector_number)
+{
+	if( (detector_number < NUM_DETECTORS) && (detector_number >= 0) ){
+		for(int i = 0; i < MAX_CHANNEL; i++){
+			CountRatecurveDetectors[i][detector_number] = 0;}}
+	if (detector_number == 7) {
+		for (int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++) {
+			for(int i = 0; i < MAX_CHANNEL; i++){
+				CountcurveFunction[i] = 0;
+				CountRatecurveDetectors[i][detector_num] = 0;
+			}
+		}
+	}
+	total_counts = 0;
+	redraw();
+}
+
+void mainLightcurve::add_count(int detector_number)
+{
+	if( (detector_number < NUM_DETECTORS) && (detector_number >= 0) ){
+		pthread_mutex_trylock(&timebinmutex);
+		current_timebin_detectors[detector_number]++;
+		current_timebin++;
+		total_counts++;
+		pthread_mutex_unlock(&timebinmutex);
+	}
+}
+
+void mainLightcurve::reset(float current_binsize)
+{
+	// save the info into the arrays
+	CountcurveFunction[0] = current_timebin;
+	binsize[0] = current_binsize;
+	
+	for(int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++)
+	{
+		CountcurveDetectors[0][detector_num] = current_timebin_detectors[detector_num];
+	}
+	
+	// now shift everything back one
+	for(int j = MAX_CHANNEL-1; j > 0; j--){ 
+		CountcurveFunction[j] = CountcurveFunction[j-1];
+		binsize[j] = binsize[j-1];
+	}
+	
+	for(int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++)
+	{
+		for(int j = MAX_CHANNEL-1; j > 0; j--){ CountcurveDetectors[j][detector_num] = CountcurveDetectors[j-1][detector_num];}
+	}
+	
+	pthread_mutex_lock(&timebinmutex);
+	// now reset all values to zero to start accumulating next time bin
+	for(int detector_num = 0; detector_num < NUM_DETECTORS; detector_num++)
+		{ current_timebin_detectors[detector_num] = 0; }
+	current_timebin = 0;
+	pthread_mutex_unlock(&timebinmutex);
+	
 }

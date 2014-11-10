@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 45;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -19,7 +19,6 @@
 		86E4A44D138C2B900004DBB3 /* mainHistogram.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A441138C2B900004DBB3 /* mainHistogram.cxx */; };
 		86E4A44E138C2B900004DBB3 /* mainImage.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A443138C2B900004DBB3 /* mainImage.cxx */; };
 		86E4A44F138C2B900004DBB3 /* mainLightcurve.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A445138C2B900004DBB3 /* mainLightcurve.cxx */; };
-		86E4A450138C2B900004DBB3 /* subImage.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A447138C2B900004DBB3 /* subImage.cxx */; };
 		86E4A451138C2B900004DBB3 /* UsefulFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A449138C2B900004DBB3 /* UsefulFunctions.cpp */; };
 		86E4A453138C2BA40004DBB3 /* gui.fl in Sources */ = {isa = PBXBuildFile; fileRef = 86E4A452138C2BA40004DBB3 /* gui.fl */; };
 		86E4A499138C2DCC0004DBB3 /* icons.icns in Resources */ = {isa = PBXBuildFile; fileRef = 86E4A498138C2DCC0004DBB3 /* icons.icns */; };
@@ -77,8 +76,6 @@
 		86E4A444138C2B900004DBB3 /* mainImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mainImage.h; sourceTree = "<group>"; };
 		86E4A445138C2B900004DBB3 /* mainLightcurve.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainLightcurve.cxx; sourceTree = "<group>"; };
 		86E4A446138C2B900004DBB3 /* mainLightcurve.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mainLightcurve.h; sourceTree = "<group>"; };
-		86E4A447138C2B900004DBB3 /* subImage.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = subImage.cxx; sourceTree = "<group>"; };
-		86E4A448138C2B900004DBB3 /* subImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = subImage.h; sourceTree = "<group>"; };
 		86E4A449138C2B900004DBB3 /* UsefulFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UsefulFunctions.cpp; sourceTree = "<group>"; };
 		86E4A44A138C2B900004DBB3 /* UsefulFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UsefulFunctions.h; sourceTree = "<group>"; };
 		86E4A452138C2BA40004DBB3 /* gui.fl */ = {isa = PBXFileReference; explicitFileType = sourcecode.fluid; fileEncoding = 4; path = gui.fl; sourceTree = "<group>"; };
@@ -195,8 +192,6 @@
 				86E4A445138C2B900004DBB3 /* mainLightcurve.cxx */,
 				86E4A446138C2B900004DBB3 /* mainLightcurve.h */,
 				86739EAA138C7B0600D6C498 /* WinTypes.h */,
-				86E4A447138C2B900004DBB3 /* subImage.cxx */,
-				86E4A448138C2B900004DBB3 /* subImage.h */,
 				AD84A8FC148B264400A65724 /* data.h */,
 				AD84A8FB148B264400A65724 /* data.cpp */,
 				86E4A44A138C2B900004DBB3 /* UsefulFunctions.h */,
@@ -267,11 +262,8 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
-			attributes = {
-				LastUpgradeCheck = 0430;
-			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "FOXSI_GSE" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 3.1";
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -312,7 +304,6 @@
 				86E4A44D138C2B900004DBB3 /* mainHistogram.cxx in Sources */,
 				86E4A44E138C2B900004DBB3 /* mainImage.cxx in Sources */,
 				86E4A44F138C2B900004DBB3 /* mainLightcurve.cxx in Sources */,
-				86E4A450138C2B900004DBB3 /* subImage.cxx in Sources */,
 				86E4A451138C2B900004DBB3 /* UsefulFunctions.cpp in Sources */,
 				86E4A453138C2BA40004DBB3 /* gui.fl in Sources */,
 				86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */,
@@ -346,6 +337,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -364,7 +356,7 @@
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = FOXSI_GSE;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.5;
 				STRINGS_FILE_OUTPUT_ENCODING = "UTF-8";
 				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
 			};
@@ -393,7 +385,7 @@
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = FOXSI_GSE;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.5;
 				STRINGS_FILE_OUTPUT_ENCODING = "UTF-8";
 				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
 			};
@@ -411,7 +403,8 @@
 				LIBRARY_SEARCH_PATHS = "";
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "";
-				SDKROOT = macosx;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -423,7 +416,8 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				SDKROOT = macosx;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
 			};
 			name = Release;
 		};

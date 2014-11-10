@@ -22,8 +22,6 @@
 
 extern Gui *gui;
 
-unsigned int CountcurveFunction[MAX_CHANNEL];
-
 extern int stop_message;
 extern FILE *dataFile;
 extern int fout;
@@ -36,10 +34,12 @@ extern char dataFileDir[MAXPATH];
 int file_type;
 char *data_file_save_dir;
 int read_delay;
-int data_source;	// 0 means simulation, 1 means ASIC, 2 means Formatter
+int data_source;	// 0 means simulation, 1 means ASIC, 2 means Formatter, 3 means Formatter playback file
 int mainImage_minimum;
 int newFPGA_register;
 char *formatter_configuration_file;
+char *formatter_playback_file;
+char read_filename[100];
 
 //extern int mainHistogram_binsize;
 
@@ -53,6 +53,52 @@ Application::Application()
 	bad_check_sum_count = 0;
 	no_trigger_count = 0;
 	formatter_start_time = 0;
+	number_of_temperature_sensors = 12;
+	
+	char *formatter_playback_file;
+	
+	// temperature limits for the temperature sensors
+	// if these limits are exceeded the display background turns red
+	// power board
+	temperature_limits_low[0] = -5.0;
+	temperature_limits_hi[0] = 40;
+	// actel on formatter board
+	temperature_limits_low[1] = -5.0;
+	temperature_limits_hi[1] = 35;
+	// clock on formatter board
+	temperature_limits_low[2] = -5.0;
+	temperature_limits_hi[2] = 50;
+	// actel on actel board
+	temperature_limits_low[3] = 0.0;
+	temperature_limits_hi[3] = 50;
+	// actel board
+	temperature_limits_low[4] = -5.0;
+	temperature_limits_hi[4] = 35;
+	// detector 6
+	temperature_limits_low[5] = -5.0;
+	temperature_limits_hi[5] = 35;
+	// detector 3
+	temperature_limits_low[6] = -40.0;
+	temperature_limits_hi[6] = 35;
+	// detector 4
+	temperature_limits_low[7] = -40.0;
+	temperature_limits_hi[7] = 35;
+	// detector 1
+	temperature_limits_low[8] = -40.0;
+	temperature_limits_hi[8] = 35;
+	// focal plane (near det 3)
+	temperature_limits_low[9] = -40.0;
+	temperature_limits_hi[9] = 35;
+	// detector 0
+	temperature_limits_low[10] = -40.0;
+	temperature_limits_hi[10] = 35;
+	
+	temperature_limits_low[11] = -40.0;
+	temperature_limits_hi[11] = 35;
+
+	// the voltages should read to within 5% of their nominal values
+	// if not display background turns red
+	voltage_tolerance = 0.05;
 }
 
 int Application::get_data_source(void){
@@ -60,7 +106,7 @@ int Application::get_data_source(void){
 }
 
 void Application::set_data_source(int value){
-	if ((data_source == 0) || (data_source == 1) || (data_source == 2)){
+	if ((data_source == 0) || (data_source == 1) || (data_source == 2) || (data_source == 3)){
 		data_source = value;
 	}
 }
@@ -73,12 +119,7 @@ void Application::flush_histogram(void)
 
 void Application::flush_timeseries(void)
 {	
-	// Zero the time series
-	for(int i = 0;i < MAX_CHANNEL; i++)
-	{
-		CountcurveFunction[i] = 0;
-	}
-	gui->mainLightcurveWindow->redraw();
+	gui->mainLightcurveWindow->flush(7);
 }
 
 void Application::flush_image(void)
@@ -138,7 +179,7 @@ void Application::set_gsesync_file(void)
 	char *temp = fl_file_chooser("Pick gsesync", "", 0);
 	strcpy(formatter_configuration_file, temp);
 	gui->gsesyncfile_fileInput->value(formatter_configuration_file);
-	printf_to_console("Output directory set to %s.\n", formatter_configuration_file, NULL);	
+	printf_to_console("Formatter config file set to %s.\n", formatter_configuration_file, NULL);	
 }
 					
 void Application::start_file()
@@ -152,17 +193,15 @@ void Application::write_header(FILE *file)
 }
 
 // the method that gets executed when the readFile callback is called
-void Application::readFile()
+void Application::read_file()
 {
 	// launch file browser
 	char *file = fl_file_chooser("Pick a file from this list:", "*.*", "");
-	if(file == NULL)
-		return;
+	if(file == NULL){ return; }
 	
-	cout << "Loading File:" << file << endl;
-
 	//store image name
-	//strcpy(filename,file);
+	strcpy(read_filename,file);
+	printf_to_console("Opening file %s for reading.\n", read_filename, NULL);	
 	flush_image();
 	flush_histogram();
 	
@@ -177,6 +216,14 @@ void Application::initialize(void)
 	gui->closeBut->activate();
 }
 
+void Application::flush_all(void)
+{
+	flush_image();
+	flush_histogram();
+	flush_timeseries();
+	reset_read_counter();
+}
+
 void Application::close_data(void)
 {
 	// Close a connection to a data stream
@@ -184,6 +231,7 @@ void Application::close_data(void)
 	gui->initializeBut->activate();
 	gui->closeBut->deactivate();
 	gui->startReadingDataButton->deactivate();
+	data_close();
 }
 
 void Application::start_reading_data(void)
@@ -289,7 +337,7 @@ void Application::stop_reading_data(void)
 
 void Application::reset_read_counter(void)
 {
-	gui->nEventsDone->value(0);
+	//gui->nEventsDone->value(0);
 	
 	frame_display_count = 0;
 	frame_miss_count = 0;
@@ -304,12 +352,6 @@ void Application::update_histogrambinsize(void)
 	//mainHistogram_binsize = gui->histogrambinsize_counter->value();
 	gui->mainHistogramWindow->set_binsize(gui->histogrambinsize_counter->value());
 	gui->mainHistogramWindow->redraw();
-}
-
-void Application::update_timebinsize(void)
-{
-	// mainHistogram_binsize = gui->binsize_counter->value();
-	gui->mainLightcurveWindow->binsize[0] = gui->timebinsize_counter->value();
 }
 
 void Application::update_lightcurvexmax(void)
@@ -408,6 +450,8 @@ void Application::toggle_detector_display(void)
 	gui->mainHistogramWindow->update_detector_display(gui->detector4_checkbox->value(), 4);
 	gui->mainHistogramWindow->update_detector_display(gui->detector5_checkbox->value(), 5);
 	gui->mainHistogramWindow->update_detector_display(gui->detector6_checkbox->value(), 6);
+	gui->mainHistogramWindow->update_detector_display(gui->detectorAll_checkbox->value(), 7);
+	
 	
 	gui->mainHistogramWindow->redraw();
 	gui->mainImageWindow->redraw();

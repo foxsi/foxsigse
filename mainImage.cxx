@@ -21,6 +21,7 @@
 #define	XBORDER 5
 #define YBORDER 5
 #define ZOOMNUM 5
+#define NUM_DETECTORS 7
 
 //todo
 //need to auto scale the image, add scalling types (auto, set/linear, logarithmic)
@@ -124,6 +125,13 @@ void mainImage::draw()
 	glVertex2f(XBORDER+XSTRIPS, YBORDER+YSTRIPS); glVertex2f(XBORDER, YBORDER+YSTRIPS);
 	glEnd();
 	
+	//draw a border around the detector
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINES);
+	glVertex2f(XBORDER, YBORDER); glVertex2f(XBORDER+XSTRIPS, YBORDER); 
+	glVertex2f(XBORDER+XSTRIPS, YBORDER+YSTRIPS); glVertex2f(XBORDER, YBORDER+YSTRIPS);
+	glEnd();
+	
 	// draw a cross under the cursor selection
 	if(gui->Lockbut->value() == 0)
 	{
@@ -173,9 +181,22 @@ void mainImage::draw()
 		Fl::lock();
 		gui->pixelCounts->value(gui->detectorsImageWindow->get_image(chosenPixel[0], chosenPixel[1], detector_to_display));
 		Fl::unlock();
-		
 	}
 
+	// draw vertical line at center of detector
+	glColor3f(0, 0.5, 0);
+	glBegin(GL_LINES);
+	glVertex2f(XSTRIPS/2.0 + XBORDER + 0.5, YBORDER);
+	glVertex2f(XSTRIPS/2.0 + XBORDER + 0.5, YSTRIPS + YBORDER);	glEnd();
+	glEnd();
+	
+	// draw vertical line at center of detector
+	glColor3f(0, 0.5, 0);
+	glBegin(GL_LINES);
+	glVertex2f(XBORDER, YSTRIPS/2.0 + YBORDER + 0.5);
+	glVertex2f(XSTRIPS + XBORDER, YSTRIPS/2.0 + YBORDER + 0.5);
+	glEnd();	
+	
 	glPopMatrix();	
 }
 
@@ -211,6 +232,16 @@ int mainImage::handle(int eventType)
 		gui->pixelCounts->value(gui->detectorsImageWindow->get_image(mousePixel[0], mousePixel[1], detector_to_display));
 		sprintf( text, "%d,%d", mousePixel[0], mousePixel[1]);
 		gui->pixelNum->value(text);
+		
+		gui->pixelCounts->value(gui->detectorsImageWindow->get_image(mousePixel[0], mousePixel[1], detector_to_display));
+		float arcminX;
+		float arcminY;
+		arcminX = (mousePixel[0] - XSTRIPS/2) * 7.7/60.0;
+		arcminY = (mousePixel[1] - YSTRIPS/2) * 7.7/60.0;
+		sprintf( text, "%d,%d", mousePixel[0], mousePixel[1]);
+		gui->pixelNum->value(text);
+		sprintf( text, "%2.1f,%2.1f", arcminX, arcminY);
+		gui->arcminOffset->value(text);
 	}
 	Fl::unlock();
 	redraw();

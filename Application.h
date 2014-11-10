@@ -66,6 +66,7 @@ public:
 	// open the data file for saving data
 	// executed when someone clicks on "Write to File" Button
 	void start_file(void);	
+	void read_file(void);
 	void write_header(FILE *file);
 	//void set_datafile_dir(void);
 	
@@ -98,8 +99,10 @@ public:
 	void save_image_to_file(void);
 	void set_lightcurve_ymax(void);
 	void set_gsesync_file(void);
+	void set_formatter_playback_file(void);
 	void toggle_show_mask(void);
 	void toggle_detector_display(void);
+	void flush_all(void);
 	int elapsed_time_sec;
 	void set_imagemax(void);
 	void set_histogram_max(void);
@@ -116,13 +119,16 @@ public:
 	void set_data_source(int value);
 	uint32_t frame_number;
 	
+	float temperature_limits_low[13];
+	float temperature_limits_hi[13];
+	float voltage_tolerance;
+	int number_of_temperature_sensors;
+		
 private:
 	int data_source;
 	char filename[40];
 	float pixel_half_life;
-	static void *read_data(void *variable);		// Begin reading data from a data stream
-	static void *auto_run_sequence(void *variable);	// auto-run sequence of acquisitions with varying hold times
 	
-};
+	};
 
 #endif
