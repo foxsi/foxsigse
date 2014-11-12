@@ -163,7 +163,7 @@ void detectorsImage::draw()
 		
 		glLoadIdentity();
 		glTranslatef(center[0] + detector_buffer[0],center[1] + detector_buffer[1], 0.0f); 
-
+		glScaled(1, -1, 0);
 		// rotate by 90 CW and flip to correct image based on lead images
 		glRotatef(detector_angle[detector_num]+90,0.0f,0.0f,1.0f);
 		// glScaled(1, 1, 1);

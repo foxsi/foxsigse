@@ -74,7 +74,7 @@ extern char *data_file_save_dir;
 extern char *formatter_configuration_file;
 extern int file_type;
 extern char *formatter_playback_file;
-extern char read_filename[40];
+extern char read_filename[100];
 
 void data_initialize(void)
 {
