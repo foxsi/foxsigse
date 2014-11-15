@@ -116,6 +116,7 @@ public:
 	unsigned long long formatter_start_time;
 	
 	int get_data_source(void);
+	char *get_datafilename(void);
 	void set_data_source(int value);
 	uint32_t frame_number;
 	
@@ -128,7 +129,8 @@ private:
 	int data_source;
 	char filename[40];
 	float pixel_half_life;
-	
+	char read_filename[200];
+
 	};
 
 #endif

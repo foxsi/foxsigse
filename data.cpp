@@ -74,7 +74,7 @@ extern char *data_file_save_dir;
 extern char *formatter_configuration_file;
 extern int file_type;
 extern char *formatter_playback_file;
-extern char read_filename[100];
+extern char read_filename[200];
 
 void data_initialize(void)
 {
@@ -159,17 +159,21 @@ void data_initialize(void)
 		//char formatter_playback_filename[] = "/Users/foxsi/Desktop/translation_data/data_121025_0022_det0_translateX.dat";
 		gui->app->print_to_console("Initializing data file connection.\n");
         
-        formatterFile = fopen("/Users/foxsi/Desktop/data_launch_121102/data_launch_121102_114631.dat", "r");
-        printf("%s\n", read_filename);
-		
+        formatterFile = fopen("/Users/foxsi/Desktop/2014alignmentA/data_141109_211141.dat", "r");
+		//formatterFile = fopen("/Users/foxsi/Desktop/data_launch_121102/data_launch_121102_114631.dat", "r");
+
+		//strcpy(read_filename,"/Users/foxsi/Desktop/data_launch_121102/data_launch_121102_114631.dat");
+		//formatterFile = fopen(gui->app->get_datafilename(), "r");
+        printf("%s\n", gui->app->get_datafilename());
+		//strcpy(read_filename,"");
         if (formatterFile == NULL){
-            gui->app->printf_to_console("Cannot open file %s.\n", read_filename, NULL);
+            gui->app->printf_to_console("Cannot open file %s.\n", gui->app->get_datafilename(), NULL);
             gui->app->print_to_console("File stream could not be initialized.\n");
 			gui->app->print_to_console("Initialization Failed!\n");
 			init_state = 0;
         }
         else {
-            gui->app->printf_to_console("Opened file %s.\n", read_filename, NULL);
+            gui->app->printf_to_console("Opened file %s.\n", gui->app->get_datafilename(), NULL);
             init_state = 1;
         }
         		
@@ -345,10 +349,10 @@ void* data_read_data(void *p)
 			len = dev->ReadFromBlockPipeOut(0xA0,1024,2048,(unsigned char *) buffer);
 			// set the read status based on how len returned 
 			if (len == 2048){ 
-                    read_status = 1;
-                    gui->app->frame_read_count++;
+				read_status = 1;
+				gui->app->frame_read_count++;
 			} else {
-                    printf("bad read!\n");
+				printf("bad read!\n");
 			}
 
 		}
@@ -356,6 +360,8 @@ void* data_read_data(void *p)
         if (data_source == 3) {
             // read data from file, read 4 frames at a time
             len = fread((unsigned char *) buffer, 2048, 1, formatterFile);
+			// skip 10 frames
+			fseek(formatterFile, 204800/4, SEEK_CUR);
             //printf("%d\n", len);
             // set the read status based on how len returned
 			if (len == 1){

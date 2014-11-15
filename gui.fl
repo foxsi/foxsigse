@@ -7,12 +7,12 @@ class Gui {open
   Function {Gui()} {open
   } {
     Fl_Window mainWindow {
-      label {FOXSI GSE} open
-      xywh {410 44 1361 937} type Double color 19
+      label {FOXSI GSE} open selected
+      xywh {410 44 1361 937} type Double color 19 hide
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
-      code3 {\#include "usbd2xx.h"} visible
+      code3 {\#include "usbd2xx.h"}
     } {
       Fl_Menu_Bar menuBar {
         label menuBar open
@@ -85,7 +85,7 @@ exit(1);}
       }
       Fl_Group {} {
         label Image open
-        xywh {10 53 740 872}
+        xywh {10 45 740 880}
       } {
         Fl_Box mainImageWindow {
           label Image
@@ -181,93 +181,93 @@ exit(1);}
           }
         }
         Fl_Output arcminOffset {
-          label Arcmin selected
+          label Arcmin
           xywh {660 465 80 25}
         }
       }
       Fl_Group {} {
         label {Telemetry Info} open
-        xywh {1040 65 315 170} box THIN_UP_FRAME
+        xywh {1040 120 315 170} box THIN_UP_FRAME
       } {
         Fl_Value_Output shutterstateOutput {
           label {Shutter state}
-          xywh {1314 73 39 22} step 1
+          xywh {1314 128 39 22} step 1
         }
         Fl_Value_Output tempOutput2 {
           label FAct
-          tooltip {ACTEL on formatter board} xywh {1076 156 40 24} step 0.1
+          tooltip {ACTEL on formatter board} xywh {1076 211 40 24} step 0.1
         }
         Fl_Value_Output HVOutput {
           label HV
-          xywh {1077 72 40 24} step 1
+          xywh {1077 127 40 24} step 1
         }
         Fl_Value_Output tempOutput1 {
           label Pwr
-          tooltip {power board} xywh {1076 128 40 24} step 0.1
+          tooltip {power board} xywh {1076 183 40 24} step 0.1
         }
         Fl_Value_Output tempOutput3 {
           label FClk
-          tooltip {Clock on formatter board} xywh {1076 182 40 23} step 0.1
+          tooltip {Clock on formatter board} xywh {1076 237 40 23} step 0.1
         }
         Fl_Value_Output tempOutput {
           label Tref
-          xywh {1077 101 40 24} step 0.1
+          xywh {1077 156 40 24} step 0.1
         }
         Fl_Value_Output tempOutput10 {
           label DPlan
-          tooltip {Detector Plane (near 3)} xywh {1240 160 40 24} step 0.1
+          tooltip {Detector Plane (near 3)} xywh {1240 215 40 24} step 0.1
         }
         Fl_Value_Output tempOutput7 {
           label Det1
-          tooltip {Detector 1} xywh {1240 130 40 24} step 0.1
+          tooltip {Detector 1} xywh {1240 185 40 24} step 0.1
         }
         Fl_Value_Output tempOutput11 {
           label Det4
-          tooltip {Detector 5} xywh {1240 100 40 24} step 0.1
+          tooltip {Detector 5} xywh {1240 155 40 24} step 0.1
         }
         Fl_Value_Output tempOutput6 {
           label Det6
-          tooltip {Detector 6} xywh {1153 157 40 24} step 0.1
+          tooltip {Detector 6} xywh {1153 212 40 24} step 0.1
         }
         Fl_Value_Output tempOutput5 {
           label ABrd
-          tooltip {ACTEL board} xywh {1152 130 40 24} step 0.1
+          tooltip {ACTEL board} xywh {1152 185 40 24} step 0.1
         }
         Fl_Value_Output tempOutput9 {
           label Det3
-          tooltip {Detector 3} xywh {1153 183 40 22} step 0.1
+          tooltip {Detector 3} xywh {1153 238 40 22} step 0.1
         }
         Fl_Value_Output tempOutput4 {
           label AAct
-          tooltip {ACTEL on ACTEL board} xywh {1152 100 40 24} step 0.1
+          tooltip {ACTEL on ACTEL board} xywh {1152 155 40 24} step 0.1
         }
         Fl_Value_Output tempOutput8 {
           label Det0
-          tooltip {Detector 0} xywh {1240 186 40 20} step 0.1
+          tooltip {Detector 0} xywh {1240 241 40 20} step 0.1
         }
         Fl_Value_Output VoltageOutput1 {
           label {-5V}
-          xywh {1313 129 40 24} step 0.01
+          xywh {1313 184 40 24} step 0.01
         }
         Fl_Value_Output VoltageOutput0 {
           label 5V
-          xywh {1313 100 40 24} step 0.01
+          xywh {1313 155 40 24} step 0.01
         }
         Fl_Value_Output VoltageOutput2 {
           label {1.5V}
-          xywh {1313 157 40 24} step 0.01
+          xywh {1313 212 40 24} step 0.01
         }
         Fl_Value_Output VoltageOutput3 {
           label {3.3V}
-          xywh {1313 185 40 20} step 0.01
+          xywh {1313 240 40 20} step 0.01
         }
         Fl_Value_Output CommandCntOutput {
           label CmdCnt
-          xywh {1153 208 40 25}
+          xywh {1153 263 40 25}
         }
         Fl_Output CommandOutput {
           label {Cmd:}
-          xywh {1240 211 115 23}
+          xywh {1240 266 115 23}
         }
       }
       Fl_Group {} {
@@ -345,80 +345,80 @@ exit(1);}
       }
       Fl_Group {} {
         label Control open
-        xywh {745 55 290 215} box DOWN_FRAME
+        xywh {745 75 290 215} box DOWN_FRAME
       } {
         Fl_Value_Output frameTime {
           label {frame time}
-          xywh {820 243 75 23} maximum 1e+07 step 1
+          xywh {820 263 75 23} maximum 1e+07 step 1
         }
         Fl_Value_Output framenumOutput {
           label {Frame \#:}
-          xywh {807 116 75 24} maximum 1e+09 step 1
+          xywh {807 136 75 24} maximum 1e+09 step 1
         }
         Fl_Button {} {
           label reset
           callback {app->reset_read_counter();}
-          xywh {970 85 55 25}
+          xywh {970 105 55 25}
         }
         Fl_Light_Button initializeBut {
           label Initialize
           callback {app->initialize()}
-          xywh {753 58 70 25} box THIN_UP_BOX
+          xywh {753 78 70 25} box THIN_UP_BOX
         }
         Fl_Button startReadingDataButton {
           label Start
           callback {app->read_preferences();
 app->start_reading_data();}
-          xywh {826 58 60 25} deactivate
+          xywh {826 78 60 25} deactivate
         }
         Fl_Light_Button closeBut {
           label Close
           callback {app->close_data()}
-          xywh {945 58 80 25} deactivate
+          xywh {945 78 80 25} deactivate
         }
         Fl_Value_Input nEvents {
           label events
-          xywh {807 146 40 24}
+          xywh {807 166 40 24}
         }
         Fl_Light_Button writeFileBut {
           label {Write to file}
           callback {app->start_file()}
-          xywh {753 85 95 25}
+          xywh {753 105 95 25}
         }
         Fl_Button stopReadingDataButton {
           label Stop
           callback {app->stop_reading_data();}
-          xywh {891 58 50 25} labelcolor 1 deactivate
+          xywh {891 78 50 25} labelcolor 1 deactivate
         }
         Fl_Value_Output inttimeOutput {
           label {local time (s):}
-          xywh {840 216 65 24}
+          xywh {840 236 65 24}
         }
         Fl_Button test_button {
           label test2
           callback {app->testfunction();}
-          xywh {760 185 60 25}
+          xywh {760 205 60 25}
         }
         Fl_Value_Output frame_missOutput {
           label {frame miss %:}
-          xywh {980 116 40 24} step 1
+          xywh {980 136 40 24} step 1
         }
         Fl_Value_Output bad_frameOutput {
           label {bad frame %:}
-          xywh {980 146 40 24} step 1
+          xywh {980 166 40 24} step 1
         }
         Fl_Value_Output no_triggerOutput {
           label {no trig %:}
-          xywh {980 176 40 24} step 1
+          xywh {980 196 40 24} step 1
         }
         Fl_Value_Output int_timeOutput {
           label {int time (s)}
-          xywh {965 243 65 23} maximum 1e+10 step 1
+          xywh {965 263 65 23} maximum 1e+10 step 1
         }
         Fl_Button {} {
           label {flush all}
           callback {app->flush_all();}
-          xywh {905 85 55 25}
+          xywh {905 105 55 25}
         }
       }
       Fl_Group {} {
@@ -520,6 +520,10 @@ app->start_reading_data();}
           callback {app->toggle_detector_display();}
           xywh {995 301 45 29} down_box DOWN_BOX value 1
         }
+      }
+      Fl_Output versionDisplay {
+        label {version:}
+        xywh {70 30 155 24}
       }
     }
     Fl_Window sendParamsWindow {

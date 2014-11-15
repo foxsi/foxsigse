@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <sched.h>
 #include <FL/Fl_File_Chooser.H>
+#include <FL/Fl_Native_File_Chooser.H>
 
 #include <sys/time.h>
 #include <time.h>
@@ -39,7 +40,9 @@ int mainImage_minimum;
 int newFPGA_register;
 char *formatter_configuration_file;
 char *formatter_playback_file;
-char read_filename[100];
+char read_filename[200];
+
+Fl_File_Chooser *chooser = NULL;
 
 //extern int mainHistogram_binsize;
 
@@ -56,7 +59,6 @@ Application::Application()
 	number_of_temperature_sensors = 12;
 	
 	char *formatter_playback_file;
-	
 	// temperature limits for the temperature sensors
 	// if these limits are exceeded the display background turns red
 	// power board
@@ -109,6 +111,10 @@ void Application::set_data_source(int value){
 	if ((data_source == 0) || (data_source == 1) || (data_source == 2) || (data_source == 3)){
 		data_source = value;
 	}
+}
+
+char *Application::get_datafilename(void){
+	return read_filename;
 }
 
 void Application::flush_histogram(void)
@@ -196,14 +202,29 @@ void Application::write_header(FILE *file)
 void Application::read_file()
 {
 	// launch file browser
-	char *file = fl_file_chooser("Pick a file from this list:", "*.*", "");
-	if(file == NULL){ return; }
+	if (!chooser) {
+		chooser = new Fl_File_Chooser("", "", Fl_File_Chooser::SINGLE, "");
+	}
+	chooser->show();
+	while (chooser->shown()) {
+		Fl::wait();
+	}
+	if (chooser->value() == NULL) {
+		return;
+	} else {
+		strncpy(read_filename, chooser->value(), 200);
+	}
+
+	char *file = NULL;
+	//char *file = fl_file_chooser("Title", "*.dat", NULL);
+	//if(file == NULL){ return; }
 	
 	//store image name
-	strcpy(read_filename,file);
-	printf_to_console("Opening file %s for reading.\n", read_filename, NULL);	
-	flush_image();
-	flush_histogram();
+	//strncpy(read_filename,"/Users/foxsi/Desktop/data_launch_121102/data_launch_121102_114631.dat", 200);
+	//strncpy(read_filename, file, 200);
+	printf_to_console("Found file %s.\n", read_filename, NULL);	
+	//flush_image();
+	//flush_histogram();
 	
 	//gui->data->readDatafile(file);
 }

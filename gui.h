@@ -272,6 +272,7 @@ private:
   void cb_detectorAll_checkbox_i(Fl_Check_Button*, void*);
   static void cb_detectorAll_checkbox(Fl_Check_Button*, void*);
 public:
+  Fl_Output *versionDisplay;
   Fl_Double_Window *sendParamsWindow;
   Fl_Button *sendParamsWindow_sendBut;
 private:

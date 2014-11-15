@@ -925,6 +925,8 @@ Gui::Gui() {
       } // Fl_Check_Button* detectorAll_checkbox
       detector_choice->end();
     } // Fl_Group* detector_choice
+    { versionDisplay = new Fl_Output(70, 29, 140, 24, "version:");
+    } // Fl_Output* versionDisplay
     mainWindow->end();
   } // Fl_Double_Window* mainWindow
   { sendParamsWindow = new Fl_Double_Window(1053, 524, "Send Parameters");
@@ -1526,20 +1528,20 @@ Gui::Gui() {
   data=new Foxsidata();
   usb=new USB_d2xx();
   buff=new Fl_Text_Buffer();
-  consoleBuf->buffer(buff);
+consoleBuf->buffer(buff);
   prefs=new Fl_Preferences(Fl_Preferences::USER, "sdc", "FOXSI GSE");
   // initialization
-  timebinsize_counter->step(0.1, 1);
-  lightcurvexmax_counter->step(5, 10);
-  histogramxmax_counter->step(5, 50);
-  histogrambinsize_counter->step(1,5);
+timebinsize_counter->step(0.1, 1);
+lightcurvexmax_counter->step(5, 10);
+histogramxmax_counter->step(5, 50);
+histogrambinsize_counter->step(1,5);
 }
 
 void Gui::show() {
   mainWindow->show();
-  mainHistogramWindow->show();
-  mainImageWindow->show();
-  mainLightcurveWindow->show();
-  detectorsImageWindow->show();
-  detectorsHistogramWindow->show();
+mainHistogramWindow->show();
+mainImageWindow->show();
+mainLightcurveWindow->show();
+detectorsImageWindow->show();
+detectorsHistogramWindow->show();
 }
