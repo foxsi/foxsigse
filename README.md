@@ -3,6 +3,8 @@ FOXSI GSE
 
 The FOXSI GSE is the main ground station software for the FOXSI sounding rocket mission.
 
+![](https://raw.githubusercontent.com/ehsteve/foxsigse/master/Resources/screenshot.png)
+
 Installation
 ------------
 
