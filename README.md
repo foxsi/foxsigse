@@ -24,7 +24,7 @@ Getting Help
 
 For more information or to ask questions about FOXSI, check out:
 
- * [FOXSI Home page](http://schriste.wordpress.com/foxsi/)
+ * [FOXSI Home page](http://foxsi.ssl.berkeley.edu)
 
 Contributing
 ------------
