@@ -129,31 +129,31 @@ void detectorsImage::draw()
 		switch (detector_num) {
 			case 6:
 				center[0] = XSTRIPS; center[1] = YSTRIPS;
-				sprintf(optic_name, "6");
+				sprintf(optic_name, "+D6");
 				break;
 			case 1:
 				center[0] = XSTRIPS; center[1] = 2*YSTRIPS + detector_buffer[1];
-				sprintf(optic_name, "%i", detector_num);
+				sprintf(optic_name, "D%i", detector_num);
 				break;
 			case 2:
 				center[0] = 2*XSTRIPS + detector_buffer[0]; center[1] = 1.5*YSTRIPS + detector_buffer[1];
-				sprintf(optic_name, "%i", detector_num);
+				sprintf(optic_name, "+D%i (CdTe)", detector_num);
 				break;
 			case 3:
 				center[0] = 2*XSTRIPS + detector_buffer[0]; center[1] = 0.5*YSTRIPS - detector_buffer[1];
-				sprintf(optic_name, "%i", detector_num);
+				sprintf(optic_name, "D%i (CdTe)", detector_num);
 				break;
 			case 4:
 				center[0] = XSTRIPS; center[1] = 0.0 - detector_buffer[1];
-				sprintf(optic_name, "%i", detector_num);
+				sprintf(optic_name, "D%i", detector_num);
 				break;
 			case 5:
 				center[0] = 0 - detector_buffer[0]; center[1] = 0.5*YSTRIPS - detector_buffer[1];
-				sprintf(optic_name, "%i", detector_num);
+				sprintf(optic_name, "D%i", detector_num);
 				break;
 			case 0:
 				center[0] = 0 - detector_buffer[0]; center[1] = 1.5*YSTRIPS + detector_buffer[1];
-				sprintf(optic_name, "0");
+				sprintf(optic_name, "D0");
 				break;
 			default:
 				break;
@@ -162,7 +162,10 @@ void detectorsImage::draw()
 		center[1] = center[1] + 0.5*YSTRIPS + border_buffer;
 		
 		glLoadIdentity();
-		glTranslatef(center[0] + detector_buffer[0],center[1] + detector_buffer[1], 0.0f); 
+		glTranslatef(center[0] + detector_buffer[0],center[1] + detector_buffer[1], 0.0f);
+		text_output(-0.5*XSTRIPS, -0.68*YSTRIPS, optic_name);
+
+		
 		glScaled(1, -1, 0);
 		// rotate by 90 CW and flip to correct image based on lead images
 		glRotatef(detector_angle[detector_num]+90,0.0f,0.0f,1.0f);
@@ -221,7 +224,7 @@ void detectorsImage::draw()
 		}
 		
 		glColor3f(0.0, 1.0, 0.0);
-		text_output(0.5*YSTRIPS, 0.50*XSTRIPS, optic_name);
+		//text_output(0.65*YSTRIPS, 0.50*XSTRIPS, optic_name);
 	
 		// draw inner border for center of FOV
 		glColor3f(0.0, 0.5, 0.0);
