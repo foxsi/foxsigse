@@ -37,5 +37,6 @@ unsigned int median(unsigned int *array, int n);
 // ignore elements below min_index
 unsigned long maximumValue(unsigned long *array, int n, int min_index);
 
+void get_version(char *text);
 
 #endif

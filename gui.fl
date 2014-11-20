@@ -7,12 +7,12 @@ class Gui {open
   Function {Gui()} {open
   } {
     Fl_Window mainWindow {
-      label {FOXSI GSE} open selected
-      xywh {410 44 1361 937} type Double color 19 hide
+      label {FOXSI GSE} open
+      xywh {410 44 1361 937} type Double color 19
       code0 {\#include "Application.h"}
       code1 {\#include <stdlib.h>}
       code2 {\#include "Foxsidata.h"}
-      code3 {\#include "usbd2xx.h"}
+      code3 {\#include "usbd2xx.h"} visible
     } {
       Fl_Menu_Bar menuBar {
         label menuBar open
@@ -522,8 +522,8 @@ app->start_reading_data();}
         }
       }
       Fl_Output versionDisplay {
-        label {version:}
-        xywh {70 30 155 24}
+        label {version:} selected
+        xywh {1120 30 235 24}
       }
     }
     Fl_Window sendParamsWindow {
@@ -1488,7 +1488,10 @@ consoleBuf->buffer(buff);} {}
 timebinsize_counter->step(0.1, 1);
 lightcurvexmax_counter->step(5, 10);
 histogramxmax_counter->step(5, 50);
-histogrambinsize_counter->step(1,5);} {}
+histogrambinsize_counter->step(1,5);
+char version[100];
+get_version(version);
+versionDisplay->value(version);} {}
   }
   Function {show()} {open
   } {

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1108E1E214FC5BD300D2D7A6 /* detectorsHistogram.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1108E1E014FC5BD300D2D7A6 /* detectorsHistogram.cxx */; };
 		1152DD2214FB321E0067CA7B /* detectorsImage.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1152DD2014FB321E0067CA7B /* detectorsImage.cxx */; };
+		119F48231A1D74E600FB4001 /* version.txt in Resources */ = {isa = PBXBuildFile; fileRef = 119F48221A1D74E600FB4001 /* version.txt */; };
 		11C6938F150AFE060029C046 /* GSE Bug List.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 11C6938E150AFE060029C046 /* GSE Bug List.rtf */; };
 		8627E5271497E4EF00593007 /* okFrontPanelDLL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8627E5261497E4EF00593007 /* okFrontPanelDLL.cpp */; };
 		86739DDA138C708900D6C498 /* usbd2xx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86739DD8138C708900D6C498 /* usbd2xx.cpp */; };
@@ -57,6 +58,7 @@
 		1108E1E114FC5BD300D2D7A6 /* detectorsHistogram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = detectorsHistogram.h; sourceTree = "<group>"; };
 		1152DD2014FB321E0067CA7B /* detectorsImage.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = detectorsImage.cxx; sourceTree = "<group>"; };
 		1152DD2114FB321E0067CA7B /* detectorsImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = detectorsImage.h; sourceTree = "<group>"; };
+		119F48221A1D74E600FB4001 /* version.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = version.txt; sourceTree = "<group>"; };
 		11C6938E150AFE060029C046 /* GSE Bug List.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = "GSE Bug List.rtf"; sourceTree = "<group>"; };
 		8627E5251497E4EF00593007 /* okFrontPanelDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = okFrontPanelDLL.h; sourceTree = "<group>"; };
 		8627E5261497E4EF00593007 /* okFrontPanelDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = okFrontPanelDLL.cpp; sourceTree = "<group>"; };
@@ -153,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				8D1107310486CEB800E47090 /* FOXSI_GSE-Info.plist */,
+				119F48221A1D74E600FB4001 /* version.txt */,
 				86E4A498138C2DCC0004DBB3 /* icons.icns */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 			);
@@ -288,6 +291,7 @@
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				86E4A499138C2DCC0004DBB3 /* icons.icns in Resources */,
 				11C6938F150AFE060029C046 /* GSE Bug List.rtf in Resources */,
+				119F48231A1D74E600FB4001 /* version.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

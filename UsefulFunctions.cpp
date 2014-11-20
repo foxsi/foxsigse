@@ -95,3 +95,17 @@ unsigned long maximumValue(unsigned long *array, int n, int min_index)
 	
 	return max;
 }
+
+void get_version(char *text){
+	FILE *pfile;
+	pfile = fopen("/Users/foxsi/Desktop/FOXSI-GSE-latest/version.txt", "r");
+	if (pfile == NULL) {
+		printf("Error opening file");
+	} else {
+		if (fgets(text, 100, pfile) != NULL) {
+			puts(text);
+			printf("%s", text);
+		}
+		fclose(pfile);
+	}
+}
